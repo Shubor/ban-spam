@@ -4,7 +4,11 @@ import string
 
 path = 'lingspam-mini600'
 
+# Select only top N words
+N = 200
+
 stop_words = []
+
 subj_corpus = {}
 body_corpus = {}
 
@@ -44,4 +48,3 @@ for file in os.listdir(path):
 
 print sorted(subj_corpus.items(), key=lambda item: item[1], reverse=True)
 print sorted(body_corpus.items(), key=lambda item: item[1], reverse=True)
-
