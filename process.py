@@ -1,6 +1,7 @@
 import os
 import gzip
-import string
+from string import punctuation
+from collections import Counter
 
 path = 'lingspam-mini600'
 
@@ -9,17 +10,14 @@ N = 200
 
 stop_words = []
 
-subj_corpus = {}
-body_corpus = {}
+subj_corpus = Counter()
+body_corpus = Counter()
 
 # Remove irrelevant words
 # 	Returns 1 if irrevelant, otherwise 0
-def filter(word):
-	# Remove if standalone punctuation, special symbols and strings of numbers
-	if (word in string.punctuation) or (word in string.digits):
-		return 1
-	# Remove if word is in list of stop words
-	elif word in stop_words:
+def clean(word):
+	# Remove if punctuation, special symbols, number or word is in stop words
+	if word in punctuation or word.isdigit() or word in stop_words:
 		return 1
 	else:
 		return 0
@@ -35,16 +33,16 @@ for file in os.listdir(path):
 		for line in f:
 			for word in line.split():
 				# Check if word is to be kept
-				if not filter(word):
+				if not clean(word):
 					# Line contains subject
 					if (line.startswith('Subject:')) and (word != 'Subject:'):
 						# Increment or initialise item
-						subj_corpus[word] = subj_corpus.get(word, 0) + 1
+						subj_corpus[word] += 1
 					# Line contains body
 					else:
-						body_corpus[word] = body_corpus.get(word, 0) + 1
+						body_corpus[word] += 1
 	finally:
 		f.close()
 
-print sorted(subj_corpus.items(), key=lambda item: item[1], reverse=True)
-print sorted(body_corpus.items(), key=lambda item: item[1], reverse=True)
+print subj_corpus.most_common(N)
+print body_corpus.most_common(N)
