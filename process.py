@@ -2,10 +2,7 @@ import os
 import re
 import csv
 import gzip
-<<<<<<< HEAD
 import math
-=======
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
 from string import digits, punctuation
 from collections import Counter
 
@@ -14,6 +11,12 @@ path = 'lingspam-mini600'
 # Select only top N words
 N = 200
 
+# List of subject and body counters for each file
+# 	Stores top N terms in a counter, value=freq in file
+c_subj = []
+c_body = []
+
+# Stores document frequency score for each word
 subj_corpus = Counter()
 body_corpus = Counter()
 
@@ -32,92 +35,73 @@ def clean(word):
 # Calculates td-idf of term in Counter of doc, freq_in_doc
 # 	Returns positive float, 0 if not in the doc
 def TFIDF(term, freq_in_doc):
-	return freq_in_doc[term] * ( math.log(len(body_corpus)) - math.log(body_corpus[term]) )
+	return freq_in_doc[term]*(math.log(len(body_corpus)) - math.log(body_corpus[term]))
 
+# Normalise the tf-idf weights using the cosine normalisation
 def CosineNorm(term, freq_in_doc):
 	denominator = 0
-
 	for word in freq_in_doc:
-		denominator += pow( TFIDF(word,freq_in_doc),2 )
-
+		denominator += pow(TFIDF(word,freq_in_doc), 2)
 	return TFIDF(term,freq_in_doc)/math.sqrt(denominator)
-		
 
 # Read in stop words from file
 stop_words = []
 with open('english.stop', 'rU') as stop_file:
 	stop_words = [line.rstrip('\n') for line in stop_file]
 
-# List of subject and body counters for each file (stores top N terms in a counter, value=freq in file)
-c_body = []
-c_subj = []
-
 # Append words to either subject or body list
-curr_file_words = []
+# curr_file_words = []
 for file in os.listdir(path):
 	f = gzip.open(os.path.join(path, file), 'rb')
-	
+
 	# Counter data structure to store DF of each word in current file
 	curr_body_corpus = Counter()
 	curr_subj_corpus = Counter()
-	
+
 	try:
 		for line in f:
 			# Replace punctuation with space
 			l = re.sub('[%s]' % re.escape(punctuation), ' ', line)
-<<<<<<< HEAD
-			
+
 			# Subject corpus
 			if line.startswith('Subject:'):
 				for word in l.split():
 					if not clean(word):
-						curr_subj_corpus[word] += 1
+						if word != 'Subject':
+							curr_subj_corpus[word] += 1
 
 			# Body corpus
-			else:			
+			else:
 				for word in l.split():
 					if not clean(word):
 						curr_body_corpus[word] += 1
-		
+
 		# Update number of documents with term word i.e. #Tr(t_k)
 		for word in curr_body_corpus:
-			body_corpus[word]+=1
+			body_corpus[word] += 1
 		for word in curr_subj_corpus:
-			subj_corpus[word]+=1
-		
-		# Counter of ALL ther terms of the document
+			subj_corpus[word] += 1
+
+		# Counter of ALL the terms of the document
 		c_body.append(curr_body_corpus)
 		c_subj.append(curr_subj_corpus)
 
-=======
-			for word in l.split():
-				# Check if word is to be kept
-				if not clean(word) and word not in curr_file_words:
-					curr_file_words.append(word)
-					# Line contains subject
-					if line.startswith('Subject:'):
-						if word != 'Subject':
-							subj_corpus[word] += 1
-					# Line contains body
-					else:
-						body_corpus[word] += 1
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
+
 	finally:
 		f.close()
 
-<<<<<<< HEAD
 for terms in c_body:	# terms is Counter (curr_body_corpus) of each file
 	for term in terms.most_common(N):
 		if terms.most_common(N)[0][1] > 1:
-			print term[0],CosineNorm(term[0],terms),TFIDF(term[0],terms)
+			print(term[0], CosineNorm(term[0], terms), TFIDF(term[0],terms))
 	print "<---------------------------->"
 
-=======
-print(subj_corpus.most_common(N))
-print(body_corpus.most_common(N))
+# print(subj_corpus.most_common(N))
+# print(body_corpus.most_common(N))
 
-# Apply tf-idf weighting to selected N terms
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
 
-# Normalise using cosine normalisation
-# Save data in csv format
+
+
+
+
+
