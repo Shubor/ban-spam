@@ -9,12 +9,13 @@ path = 'lingspam-mini600'
 N = 200
 
 stop_words = []
+curr_file_words = []
 
 subj_corpus = Counter()
 body_corpus = Counter()
 
-# Remove irrelevant words
-# 	Returns 1 if irrevelant, otherwise 0
+# Check if word is not irrelevant
+# 	Returns 0 if irrevelant, otherwise 1
 def clean(word):
 	# Remove if punctuation, special symbols, number or word is in stop words
 	if word in punctuation or word.isdigit() or word in stop_words:
@@ -33,16 +34,18 @@ for file in os.listdir(path):
 		for line in f:
 			for word in line.split():
 				# Check if word is to be kept
-				if not clean(word):
+				if not clean(word) and word not in curr_file_words:
+					curr_file_words.append(word)
 					# Line contains subject
-					if (line.startswith('Subject:')) and (word != 'Subject:'):
-						# Increment or initialise item
-						subj_corpus[word] += 1
+					if line.startswith('Subject:'):
+						if word != 'Subject:':
+							subj_corpus[word] += 1
 					# Line contains body
 					else:
 						body_corpus[word] += 1
 	finally:
 		f.close()
+		curr_file_words[:] = []
 
 print subj_corpus.most_common(N)
 print body_corpus.most_common(N)
