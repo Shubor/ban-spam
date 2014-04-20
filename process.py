@@ -2,10 +2,7 @@ import os
 import re
 import csv
 import gzip
-<<<<<<< HEAD
 import math
-=======
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
 from string import digits, punctuation
 from collections import Counter
 
@@ -53,7 +50,6 @@ c_body = []
 c_subj = []
 
 # Append words to either subject or body list
-curr_file_words = []
 for file in os.listdir(path):
 	f = gzip.open(os.path.join(path, file), 'rb')
 	
@@ -65,7 +61,6 @@ for file in os.listdir(path):
 		for line in f:
 			# Replace punctuation with space
 			l = re.sub('[%s]' % re.escape(punctuation), ' ', line)
-<<<<<<< HEAD
 			
 			# Subject corpus
 			if line.startswith('Subject:'):
@@ -89,35 +84,24 @@ for file in os.listdir(path):
 		c_body.append(curr_body_corpus)
 		c_subj.append(curr_subj_corpus)
 
-=======
-			for word in l.split():
-				# Check if word is to be kept
-				if not clean(word) and word not in curr_file_words:
-					curr_file_words.append(word)
-					# Line contains subject
-					if line.startswith('Subject:'):
-						if word != 'Subject':
-							subj_corpus[word] += 1
-					# Line contains body
-					else:
-						body_corpus[word] += 1
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
 	finally:
 		f.close()
 
-<<<<<<< HEAD
-for terms in c_body:	# terms is Counter (curr_body_corpus) of each file
+
+f=open("body.csv","w+")
+for x in range(1,N+1):
+	f.write("f{x},".format(x=x))
+f.write("\n")
+
+for terms in c_body:	# terms is Counter (curr_body_corpus) of each file	
+	s=''	
 	for term in terms.most_common(N):
-		if terms.most_common(N)[0][1] > 1:
-			print term[0],CosineNorm(term[0],terms),TFIDF(term[0],terms)
-	print "<---------------------------->"
+			s+="{Norm},".format(Norm=CosineNorm(term[0],terms))
+	f.write(s)
+	f.write("\n")		
 
-=======
-print(subj_corpus.most_common(N))
-print(body_corpus.most_common(N))
+f.close()
 
-# Apply tf-idf weighting to selected N terms
->>>>>>> e41c8ceeca2e2c06b7042a40567be165dc094772
 
 # Normalise using cosine normalisation
 # Save data in csv format
