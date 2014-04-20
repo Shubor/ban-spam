@@ -12,11 +12,14 @@ path = 'lingspam-mini600'
 N = 200
 
 # List of subject and body counters for each file
-# 	Stores top N terms in a counter, value=freq in file
-c_subj = []
-c_body = []
+# Stores top N terms in a counter, value=freq in file
+c_subj_legit = []
+c_subj_spam  = []
+c_body_legit = []
+c_body_spam  = []
 
-# Stores document frequency score for each word
+# Stores document frequency score for each word 
+# (the number of documents in which the term occurs)
 subj_corpus = Counter()
 body_corpus = Counter()
 
@@ -32,25 +35,17 @@ def clean(word):
 	else:
 		return 0
 
-# Calculates td-idf of term in Counter of doc, freq_in_doc
-# 	Returns positive float, 0 if not in the doc
-def TFIDF(term, freq_in_doc):
-	return freq_in_doc[term]*(math.log(len(body_corpus)) - math.log(body_corpus[term]))
-
-# Normalise the tf-idf weights using the cosine normalisation
-def CosineNorm(term, freq_in_doc):
-	denominator = 0
-	for word in freq_in_doc:
-		denominator += pow(TFIDF(word,freq_in_doc), 2)
-	return TFIDF(term,freq_in_doc)/math.sqrt(denominator)
-
 # Read in stop words from file
 stop_words = []
 with open('english.stop', 'rU') as stop_file:
 	stop_words = [line.rstrip('\n') for line in stop_file]
 
+# Total number of files, |T|, in the document set
+num_files = 0
+
 # Append words to either subject or body list
 for file in os.listdir(path):
+	num_files += 1
 	f = gzip.open(os.path.join(path, file), 'rb')
 
 	# Counter data structure to store DF of each word in current file
@@ -81,28 +76,179 @@ for file in os.listdir(path):
 			subj_corpus[word] += 1
 
 		# Counter of ALL the terms of the document
-		c_body.append(curr_body_corpus)
-		c_subj.append(curr_subj_corpus)
+		if "spmsg" in file:
+			c_body_spam.append(curr_body_corpus)
+			c_subj_spam.append(curr_subj_corpus)
+		else:
+			c_body_legit.append(curr_body_corpus)
+			c_subj_legit.append(curr_subj_corpus)
+		
 
 	finally:
 		f.close()
 
+#===[Equation Variables]===# 
+# |T|
+T = num_files
+
+# log(|T|)
+logT = math.log(num_files)
+
+# log(#T(tk)) - body
+logTk_body = {}
+for tk in body_corpus:	# ALL terms
+	logTk_body[tk] = math.log(body_corpus[tk])
+
+# log(#T(tk)) - subject
+logTk_subj = {}
+for tk in subj_corpus:	# ALL terms
+	logTk_subj[tk] = math.log(subj_corpus[tk])
+
+#===[Equation Functions]===#
+
+# TD-IDF: 
+	# Calculates td-idf of term tk in document dj
+	# Returns positive float if tk in dj; 0 otherwise
+def TFIDF(term, n_term_in_doc, logTk):
+	return n_term_in_doc[term]*(logT - logTk[term])
+
+#Cosine Norm:
+	# Calculates cosine norm fo term tk in document dj
+	# Return 0 if tk not in dj; value in [0,1] otherwise 
+def CosineNorm(term, n_term_in_doc, corpus, logTk):
+	denominator = 0
+	for word in n_term_in_doc:
+		denominator += pow(TFIDF(word, n_term_in_doc, logTk), 2)	
+	if denominator == 0: #
+		return 0
+	else:
+		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
+
+#======[2D-array of cosine norm]======# 
+w_body_legit= []
+w_body_spam = []
+
+for document in c_body_legit:
+	row = []
+	for term in body_corpus.most_common(N):
+			row.append( CosineNorm( term[0], document, body_corpus, logTk_body ))
+	w_body_legit.append(row)
+
+for document in c_body_spam:
+	row = []
+	for term in body_corpus.most_common(N):
+			row.append( CosineNorm( term[0], document, body_corpus, logTk_body ))
+	w_body_spam.append(row)
+
+w_subj_legit= []
+w_subj_spam = []
+
+for document in c_subj_legit:
+	row = []
+	for term in subj_corpus.most_common(N):
+			row.append( CosineNorm( term[0], document, subj_corpus, logTk_subj ))
+	w_subj_legit.append(row)	
+
+for document in c_subj_spam:
+	row = []
+	for term in subj_corpus.most_common(N):
+			row.append( CosineNorm( term[0], document, subj_corpus, logTk_subj ))
+	w_subj_spam.append(row)
+
+#====[Output 2D-array as CSV]====#
+import csv
+
+with open("body1.csv","wb") as f:
+	writer = csv.writer(f)
+	
+	print w_body_legit
+	# write non-spam
+	writer.writerows(w_body_legit)		
+
+	# write spam
+	writer.writerows(w_body_spam)
+
+with open("subject1.csv","wb") as f:
+	writer = csv.writer(f)
+	
+	# write non-spam
+	writer.writerows(w_subj_legit)		
+
+	# write spam
+	writer.writerows(w_subj_spam)
+
+#====[Probability Functions]====#
+
+
+
+
+
+f=open("body.csv","w+")
 
 f=open("body.csv","w+")
 for x in range(1,N+1):
 	f.write("f{x},".format(x=x))
+f.write("class")
 f.write("\n")
 
-for terms in c_body:	# terms is Counter (curr_body_corpus) of each file	
-	s=''	
-	for term in terms.most_common(N):
-			s+="{Norm},".format(Norm=CosineNorm(term[0],terms))
+# For each document calculate CosNorm for top200 terms (from set of documents)
+for doc in c_body_legit:	# Counter containing DF of each term in document
+	s=''
+	for term in body_corpus.most_common(N):
+		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,body_corpus))
 	f.write(s)
-	f.write("\n")		
+	f.write("non-spam")
+	f.write("\n")
+
+# For each document calculate CosNorm for top200 terms (from set of documents)
+for doc in c_body_spam:	# Counter containing DF of each term in document
+	s=''
+	for term in body_corpus.most_common(N):
+		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,body_corpus))
+	f.write(s)
+	f.write("spam")
+	f.write("\n")
 
 f.close()
 
-# print(subj_corpus.most_common(N))
-# print(body_corpus.most_common(N))
+
+f=open("subject.csv","w+")
+for x in range(1,N+1):
+	f.write("f{x},".format(x=x))
+f.write("class")
+f.write("\n")
+
+# For each document calculate CosNorm for top200 terms (from set of documents)
+for doc in c_subj_legit:	# Counter containing DF of each term in document
+	s=''
+	for term in subj_corpus.most_common(N):		
+		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,subj_corpus))
+	f.write(s)
+	f.write("non-spam")
+	f.write("\n")
+
+# For each document calculate CosNorm for top200 terms (from set of documents)
+for doc in c_subj_spam:	# Counter containing DF of each term in document
+	s=''
+	for term in subj_corpus.most_common(N):
+		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,subj_corpus))
+	f.write(s)
+	f.write("spam")
+	f.write("\n")
+
+f.close()
+
+f=open("body_corpus.txt","w+")
+f.write(str(body_corpus.most_common(N)))
+f.close()
+
+f=open("subj_corpus.txt","w+")
+f.write(str(subj_corpus.most_common(N)))
+f.close()
+
+
+
+
+
 
 
