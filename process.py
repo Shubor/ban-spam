@@ -57,6 +57,17 @@ def CosineNorm(term, n_term_in_doc, corpus, logTk):
 	else:
 		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
 
+#
+def write_file(writer, cosine_norms, file_class):
+	if file_class == "spam":
+		for item in cosine_norms:
+			item.append("spam")
+			writer.writerow(item)
+	else:
+		for item in cosine_norms:
+			item.append("non-spam")
+			writer.writerow(item)
+
 # Read in stop words from file
 stop_words = []
 with open('english.stop', 'rU') as stop_file:
@@ -108,9 +119,6 @@ for file in os.listdir(path):
 		f.close()
 
 #===[Equation Variables]===#
-# |T|
-T = num_files
-
 # log(|T|)
 logT = math.log(num_files)
 
@@ -156,17 +164,6 @@ for document in c_subj_spam:
 		row.append( CosineNorm( term[0], document, subj_corpus, logTk_subj ))
 	w_subj_spam.append(row)
 
-
-def writeFile(writer, cosine_norms, file_class):
-	if file_class == "spam":
-		for item in cosine_norms:
-			item.append("spam")
-			writer.writerow(item)
-	else:
-		for item in cosine_norms:
-			item.append("non-spam")
-			writer.writerow(item)
-
 #====[Output 2D-array as CSV]====#
 header = [ "f" + str(x) for x in range(1, N+1) ]
 header.append("class")
@@ -176,19 +173,8 @@ with open("body.csv", "wb") as f:
 	writer = csv.writer(f)
 	writer.writerow(header)
 
-	writeFile(writer, w_body_legit, "nonspam")
-	writeFile(writer, w_body_spam, "spam")
-
-	# writer = csv.writer(f)
-
-	# writer.writerow(header)
-
-	# for item in w_body_legit: # Write non-spam
-	# 	item.append("non-spam")
-	# 	writer.writerow(item)
-	# for item in w_body_spam:  # Write spam
-	# 	item.append("spam")
-	# 	writer.writerow(item)
+	write_file(writer, w_body_legit, "nonspam")
+	write_file(writer, w_body_spam, "spam")
 
 	f.close()
 
@@ -197,89 +183,10 @@ with open("subject.csv", "wb") as f:
 	writer = csv.writer(f)
 	writer.writerow(header)
 
-	writeFile(writer, w_subj_legit, "nonspam")
-	writeFile(writer, w_subj_spam, "spam")
-
-	# writer = csv.writer(f)
-
-	# writer.writerow(header)
-
-	# for item in w_subj_legit: # Write non-spam
-	# 	item.append("non-spam")
-	# 	writer.writerow(item)
-	# for item in w_subj_spam:  # Write spam
-	# 	item.append("spam")
-	# 	writer.writerow(item)
+	write_file(writer, w_subj_legit, "nonspam")
+	write_file(writer, w_subj_spam, "spam")
 
 	f.close()
-
-
-#====[Probability Functions]====#
-
-# f = open("body.csv","w+")
-
-# for x in range(1, N+1):
-# 	f.write("f{x},".format(x=x))
-# f.write("class")
-# f.write("\n")
-
-# # For each document calculate CosNorm for top200 terms (from set of documents)
-# for doc in c_body_legit:	# Counter containing DF of each term in document
-# 	s=''
-# 	for term in body_corpus.most_common(N):
-# 		s += "{Norm},".format(Norm=CosineNorm(term[0],doc,body_corpus))
-# 	f.write(s)
-# 	f.write("non-spam")
-# 	f.write("\n")
-
-# # For each document calculate CosNorm for top200 terms (from set of documents)
-# for doc in c_body_spam:	# Counter containing DF of each term in document
-# 	s=''
-# 	for term in body_corpus.most_common(N):
-# 		s += "{Norm},".format(Norm=CosineNorm(term[0],doc,body_corpus))
-# 	f.write(s)
-# 	f.write("spam")
-# 	f.write("\n")
-
-# f.close()
-
-
-# f = open("subject.csv","w+")
-
-# for x in range(1, N+1):
-# 	f.write("f{x},".format(x=x))
-# f.write("class")
-# f.write("\n")
-
-# # For each document calculate CosNorm for top200 terms (from set of documents)
-# for doc in c_subj_legit:	# Counter containing DF of each term in document
-# 	s=''
-# 	for term in subj_corpus.most_common(N):
-# 		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,subj_corpus))
-# 	f.write(s)
-# 	f.write("non-spam")
-# 	f.write("\n")
-
-# # For each document calculate CosNorm for top200 terms (from set of documents)
-# for doc in c_subj_spam:	# Counter containing DF of each term in document
-# 	s=''
-# 	for term in subj_corpus.most_common(N):
-# 		s+="{Norm},".format(Norm=CosineNorm(term[0],doc,subj_corpus))
-# 	f.write(s)
-# 	f.write("spam")
-# 	f.write("\n")
-
-# f.close()
-
-# f=open("body_corpus.txt","w+")
-# f.write(str(body_corpus.most_common(N)))
-# f.close()
-
-# f=open("subj_corpus.txt","w+")
-# f.write(str(subj_corpus.most_common(N)))
-# f.close()
-
-
 
 
 
