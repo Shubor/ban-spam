@@ -57,7 +57,8 @@ def CosineNorm(term, n_term_in_doc, corpus, logTk):
 	else:
 		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
 
-#
+# Write to file:
+# 	Writes cosine norms to csv file, adding class of file to end of each row
 def write_file(writer, cosine_norms, file_class):
 	if file_class == "spam":
 		for item in cosine_norms:
