@@ -4,7 +4,7 @@ import csv
 import gzip
 import math
 from string import digits, punctuation
-from collections import Counter
+from collections import Counter, defaultdict
 
 path = 'lingspam-mini600'
 
@@ -39,22 +39,14 @@ def clean(word):
 	else:
 		return 0
 
-# Write to file:
-# 	Writes cosine norms to csv file, adding class of file to end of each row
-def write_file(writer, cosine_norms, file_class):
-	if file_class == "spam":
-		for item in cosine_norms:
-			item.append("spam")
-			writer.writerow(item)
-	else:
-		for item in cosine_norms:
-			item.append("non-spam")
-			writer.writerow(item)
-
 # Read in stop words from file
 stop_words = []
 with open('english.stop', 'rU') as stop_file:
 	stop_words = [line.rstrip('\n') for line in stop_file]
+
+#############################################################################
+# Read in emails and compute document frequency scores                      #
+#############################################################################
 
 # Append words to either subject or body list
 for file in os.listdir(path):
@@ -76,7 +68,6 @@ for file in os.listdir(path):
 					if not clean(word):
 						if word != 'Subject':
 							curr_subj_corpus[word] += 1
-
 			# Body corpus
 			else:
 				for word in l.split():
@@ -97,39 +88,37 @@ for file in os.listdir(path):
 			c_body_legit.append(curr_body_corpus)
 			c_subj_legit.append(curr_subj_corpus)
 
-
 	finally:
 		f.close()
 
-#===[Equation Variables]===#
+#############################################################################
+# Feature weighting with tf-idf, then cosine normalisation of top 200 words #
+#############################################################################
+
 # |T|
 T = num_files
 
 # log(|T|)
 logT = math.log(T)
 
-# log(#T(tk)) - body
+# log(#T(tk)) of body and subject
 logTk_body = {}
+logTk_subj = {}
 for tk in body_corpus:	# ALL terms
 	logTk_body[tk] = math.log(body_corpus[tk])
-
-# log(#T(tk)) - subject
-logTk_subj = {}
 for tk in subj_corpus:	# ALL terms
 	logTk_subj[tk] = math.log(subj_corpus[tk])
 
-#===[Equation Functions]===#
-
 # TD-IDF:
-	#	Calculates td-idf of term tk in document dj
-	#	Returns positive float if tk in dj; 0 otherwise
+#	Calculates td-idf of term tk in document dj
+#	Returns positive float if tk in dj; 0 otherwise
 def TFIDF(term, n_term_in_doc, logTk):
 	return n_term_in_doc[term]*(logT - logTk[term])
 
 # Cosine Norm:
-	#	Calculates cosine norm for term tk in document dj
-	#	Return 0 if tk not in dj; value in [0,1] otherwise
-def CosineNorm(term, n_term_in_doc, corpus, logTk):
+#	Calculates cosine norm for term tk in document dj
+#	Return 0 if tk not in dj; value in [0,1] otherwise
+def cosine_norm(term, n_term_in_doc, corpus, logTk):
 	denominator = 0
 	for word in n_term_in_doc:
 		denominator += pow(TFIDF(word, n_term_in_doc, logTk), 2)
@@ -138,101 +127,98 @@ def CosineNorm(term, n_term_in_doc, corpus, logTk):
 	else:
 		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
 
-#======[2D-array of cosine norm]======#
 w_body_legit= []
 w_body_spam = []
+w_subj_legit= []
+w_subj_spam = []
 
+# Calculate cosine norms
 for document in c_body_legit:
 	row = []
 	for term in body_corpus.most_common(N):
-		row.append( CosineNorm( term[0], document, body_corpus, logTk_body ))
+		row.append( cosine_norm( term[0], document, body_corpus, logTk_body ))
 	w_body_legit.append(row)
 
 for document in c_body_spam:
 	row = []
 	for term in body_corpus.most_common(N):
-		row.append( CosineNorm( term[0], document, body_corpus, logTk_body ))
+		row.append( cosine_norm( term[0], document, body_corpus, logTk_body ))
 	w_body_spam.append(row)
-
-w_subj_legit= []
-w_subj_spam = []
 
 for document in c_subj_legit:
 	row = []
 	for term in subj_corpus.most_common(N):
-		row.append( CosineNorm( term[0], document, subj_corpus, logTk_subj ))
+		row.append( cosine_norm( term[0], document, subj_corpus, logTk_subj ))
 	w_subj_legit.append(row)
 
 for document in c_subj_spam:
 	row = []
 	for term in subj_corpus.most_common(N):
-		row.append( CosineNorm( term[0], document, subj_corpus, logTk_subj ))
+		row.append( cosine_norm( term[0], document, subj_corpus, logTk_subj ))
 	w_subj_spam.append(row)
 
-#====[Output 2D-array as CSV]====#
+#############################################################################
+# Outputs normalised tf-idf weights into csv files                          #
+#############################################################################
+
 header = [ "f" + str(x) for x in range(1, N+1) ]
 header.append("class")
 
 with open("body.csv", "wb") as f:
-
 	writer = csv.writer(f)
 	writer.writerow(header)
-
 	writer.writerows( [row+["nonspam"] for row in w_body_legit] )
 	writer.writerows( [row+["spam"] for row in w_body_spam] )
-
 	f.close()
 
 with open("subject.csv", "wb") as f:
-
 	writer = csv.writer(f)
 	writer.writerow(header)
-
 	writer.writerows( [row+["nonspam"] for row in w_subj_legit] )
 	writer.writerows( [row+["spam"] for row in w_subj_spam] )
-
 	f.close()
 
-#=====[Probability Functions]=====#
-import math
+# #############################################################################
+# # Calculate Naive Bayes, assuming normal distribution                       #
+# #############################################################################
 
-# mean is the average value, E[X] := sum_values / count_values 
-mean_body_legit = []
-mean_body_spam = []
+# #=====[Probability Functions]=====#
+# mean_body_legit = []
+# mean_body_spam  = []
+# mean_subj_legit = []
+# mean_subj_spam  = []
 
-mean_subj_legit = []
-mean_subj_spam = []
+# # Mean:
+# #	Mean is the average of given values
+# #	E[X] := sum_values / count_values
+# def mean(column):
+# 	return math.fsum([row for row in column]) / len(column)
 
-def mean( column ):
-	return math.fsum([row for row in column]) / len(column)	
+# for n in range(N):
+# 	# Calculate mean of column fn which are legit
+# 	mean_body_legit.append( mean([row[n] for row in c_body_legit] ))
+# 	mean_body_spam.append(  mean([row[n] for row in c_body_spam]  ))
 
-for n in range(N):
-	# Calculate mean of column fn which are legit
-	mean_body_legit.append( mean([row[n] for row in c_body_legit]))
-	mean_body_spam.append(  mean([row[n] for row in c_body_spam] ))
+# 	mean_subj_legit.append( mean([row[n] for row in c_subj_legit] ))
+# 	mean_subj_spam.append(  mean([row[n] for row in c_subj_spam]  ))
 
-	mean_subj_legit.append( mean([row[n] for row in c_subj_legit]))
-	mean_subj_spam.append(  mean([row[n] for row in c_subj_spam] ))
+# stdev_body_legit = []
+# stdev_body_spam  = []
+# stdev_subj_legit = []
+# stdev_subj_spam  = []
 
-# standard deviation of X is Sqrt( E[X^2] - (E[X])^2 )
-stdev_body_legit = []
-stdev_body_spam = []
+# # Standard deviation:
+# #	SD of X => Sqrt( E[X^2] - (E[X])^2 )
+# def standard_dev(column):
+# 	u = mean(column)
+# 	return math.sqrt( math.fsum([pow(x-u, 2) for x in column]) / (len(column)-1) )
 
-stdev_subj_legit = []
-stdev_subj_spam = []
-
-def standard_dev( column ):
-	u = mean(column) 
-	return math.sqrt( math.fsum([pow(x-u,2) for x in column]) / (len(column)-1) )
-
-for n in range(N):
-	# Calculate mean of column fn which are legit
-	stdev_body_legit.append( standard_dev( [row[n] for row in w_body_legit] ))
-	stdev_body_spam.append(  standard_dev( [row[n] for row in w_body_spam ] ))
-	stdev_subj_legit.append( standard_dev( [row[n] for row in w_subj_legit] ))
-	stdev_subj_spam.append(  standard_dev( [row[n] for row in w_subj_spam ] ))
-
-
+# for n in range(N):
+# 	# Calculate mean of column fn which are legit
+# 	stdev_body_legit.append( standard_dev( [row[n] for row in w_body_legit] ))
+# 	stdev_body_spam.append(  standard_dev( [row[n] for row in w_body_spam ] ))
+# 	stdev_subj_legit.append( standard_dev( [row[n] for row in w_subj_legit] ))
+# 	stdev_subj_spam.append(  standard_dev( [row[n] for row in w_subj_spam ] ))
 
 
 
