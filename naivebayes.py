@@ -1,8 +1,6 @@
 import csv
 
-#############################################################################
-# Read in csv files                                                         #
-#############################################################################
+#======|| Read in csv files ||======#
 
 w_body_legit, w_body_spam = [], []
 w_subj_legit, w_subj_spam = [], []
@@ -28,21 +26,25 @@ def read_csv(file_name, legit, spam):
 read_csv("body.csv", w_body_legit, w_body_spam)
 read_csv("subject.csv", w_subj_legit, w_subj_spam)
 
+
 #############################################################################
 # Calculate Naive Bayes, assuming normal distribution                       #
 #############################################################################
 
+import math
+
+#======|| Calculate Mean ||======#
+
 mean_body_legit, mean_body_spam = [], []
 mean_subj_legit, mean_subj_spam = [], []
 
-# Mean:
-#	Mean is the average of given values
-#	E[X] := sum_values / count_values
+# mean: calculates the average value of a set
+# returns: float
 def mean(column):
 	return math.fsum([row for row in column]) / len(column)
 
+# calculate the mean of column fn
 for n in range(N):
-	# Calculate mean of column fn which are legit
 	mean_body_legit.append( mean([row[n] for row in w_body_legit] ))
 	mean_body_spam.append(  mean([row[n] for row in w_body_spam]  ))
 
@@ -52,23 +54,38 @@ for n in range(N):
 sd_body_legit, sd_body_spam = [], []
 sd_subj_legit, sd_subj_spam = [], []
 
-# Standard deviation:
-#	SD of X => Sqrt( E[X^2] - (E[X])^2 )
+#======|| Calculate Standard Deviation ||======#
+
+# standard_dev: calculates the standard deviation of a set
+# returns: float
 def standard_dev(column):
 	u = mean(column)
 	return math.sqrt( math.fsum([pow(x-u, 2) for x in column]) / (len(column)-1) )
 
+# calculate the standard deviation of column fn
 for n in range(N):
-	# Calculate mean of column fn which are legit
 	stdev_body_legit.append( standard_dev( [row[n] for row in w_body_legit] ))
 	stdev_body_spam.append(  standard_dev( [row[n] for row in w_body_spam ] ))
 	stdev_subj_legit.append( standard_dev( [row[n] for row in w_subj_legit] ))
 	stdev_subj_spam.append(  standard_dev( [row[n] for row in w_subj_spam ] ))
 
-# Probability density function:
-#	Given by mean and standard deviation for a normal distribution
-def prob_density(mean, std_dev):
-	x = math.e / (std_dev * math.sqrt(2*math.pi))
-	power = -( math.pow((mean-std_dev), 2) / (2 * math.pow(std_dev, 2)) )
-	return = math.pow(x, power)
+#======|| Probability Denisty Function ||======#
+
+# Probability density function: calculates probability of x assuming normal distribution
+# Return: float
+def prob_density( x, u, s ):
+	coefficient = pow(s*math.sqrt(2*math.pi),-1)	
+	exponent = (-1) * pow(x-u, 2) / (2 * pow(s,2))
+	return coefficient * math.expm1( exponent )
+
+#=========|| Naive Bayes ||=========#
+# f(x=x1 | spam ) > f(x=x1 | nonspam)?
+
+# Given: a vector of cosine normed tdidf values of top200 document set terms  
+#
+# Find:	document frequency of top200 terms
+#	vector of cosine normed tdidf values of top200 document set terms
+# Method: apply naive bayes using above vector for spam and nonspam
+#	  choose "nonspam" for ties
+# Return: "spam" or "nonspam"
 
