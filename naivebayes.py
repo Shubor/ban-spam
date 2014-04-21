@@ -81,6 +81,7 @@ def prob_density(x, u, s):
 	exponent = (-1) * pow(x-u, 2) / (2 * pow(s, 2))
 	return coefficient * math.expm1( exponent )
 
+
 #=========|| Naive Bayes ||=========#
 # f(x=x1 | spam ) > f(x=x1 | nonspam)?
 
@@ -91,4 +92,13 @@ def prob_density(x, u, s):
 # Method: apply naive bayes using above vector for spam and nonspam
 #	  choose "nonspam" for ties
 # Return: "spam" or "nonspam"
+
+#=========|| 10-fold stratified cross validation ||=========#
+# Cross validation
+#	Split data into 10 subsets
+#	Classifier built 10 times
+#		Each time the testing is on 1 segment, and training on remaining 9
+#	Average accuracies of each run to calc overall accuracy
+# Repeat 10 times
+
 
