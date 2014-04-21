@@ -39,24 +39,6 @@ def clean(word):
 	else:
 		return 0
 
-# TD-IDF:
-#	Calculates td-idf of term tk in document dj
-#	Returns positive float if tk in dj; 0 otherwise
-def TFIDF(term, n_term_in_doc, logTk):
-	return n_term_in_doc[term]*(logT - logTk[term])
-
-# Cosine Norm:
-#	Calculates cosine norm for term tk in document dj
-#	Return 0 if tk not in dj; value in [0,1] otherwise
-def CosineNorm(term, n_term_in_doc, corpus, logTk):
-	denominator = 0
-	for word in n_term_in_doc:
-		denominator += pow(TFIDF(word, n_term_in_doc, logTk), 2)
-	if denominator == 0:
-		return 0
-	else:
-		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
-
 # Write to file:
 # 	Writes cosine norms to csv file, adding class of file to end of each row
 def write_file(writer, cosine_norms, file_class):
@@ -120,8 +102,11 @@ for file in os.listdir(path):
 		f.close()
 
 #===[Equation Variables]===#
+# |T|
+T = num_files
+
 # log(|T|)
-logT = math.log(num_files)
+logT = math.log(T)
 
 # log(#T(tk)) - body
 logTk_body = {}
@@ -132,7 +117,26 @@ for tk in body_corpus:	# ALL terms
 logTk_subj = {}
 for tk in subj_corpus:	# ALL terms
 	logTk_subj[tk] = math.log(subj_corpus[tk])
+
 #===[Equation Functions]===#
+
+# TD-IDF:
+	#	Calculates td-idf of term tk in document dj
+	#	Returns positive float if tk in dj; 0 otherwise
+def TFIDF(term, n_term_in_doc, logTk):
+	return n_term_in_doc[term]*(logT - logTk[term])
+
+# Cosine Norm:
+	#	Calculates cosine norm for term tk in document dj
+	#	Return 0 if tk not in dj; value in [0,1] otherwise
+def CosineNorm(term, n_term_in_doc, corpus, logTk):
+	denominator = 0
+	for word in n_term_in_doc:
+		denominator += pow(TFIDF(word, n_term_in_doc, logTk), 2)
+	if denominator == 0:
+		return 0
+	else:
+		return TFIDF(term, n_term_in_doc, logTk)/math.sqrt(denominator)
 
 #======[2D-array of cosine norm]======#
 w_body_legit= []
@@ -174,8 +178,8 @@ with open("body.csv", "wb") as f:
 	writer = csv.writer(f)
 	writer.writerow(header)
 
-	write_file(writer, w_body_legit, "nonspam")
-	write_file(writer, w_body_spam, "spam")
+	writer.writerows( [row+["nonspam"] for row in w_body_legit] )
+	writer.writerows( [row+["spam"] for row in w_body_spam] )
 
 	f.close()
 
@@ -184,10 +188,54 @@ with open("subject.csv", "wb") as f:
 	writer = csv.writer(f)
 	writer.writerow(header)
 
-	write_file(writer, w_subj_legit, "nonspam")
-	write_file(writer, w_subj_spam, "spam")
+	writer.writerows( [row+["nonspam"] for row in w_subj_legit] )
+	writer.writerows( [row+["spam"] for row in w_subj_spam] )
 
 	f.close()
+
+#=====[Probability Functions]=====#
+import math
+
+# mean is the average value, E[X] := sum_values / count_values 
+mean_body_legit = []
+mean_body_spam = []
+
+mean_subj_legit = []
+mean_subj_spam = []
+
+def mean( column ):
+	return math.fsum([row for row in column]) / len(column)	
+
+for n in range(N):
+	# Calculate mean of column fn which are legit
+	mean_body_legit.append( mean([row[n] for row in c_body_legit]))
+	mean_body_spam.append(  mean([row[n] for row in c_body_spam] ))
+
+	mean_subj_legit.append( mean([row[n] for row in c_subj_legit]))
+	mean_subj_spam.append(  mean([row[n] for row in c_subj_spam] ))
+
+# standard deviation of X is Sqrt( E[X^2] - (E[X])^2 )
+stdev_body_legit = []
+stdev_body_spam = []
+
+stdev_subj_legit = []
+stdev_subj_spam = []
+
+def standard_dev( column ):
+	u = mean(column) 
+	return math.sqrt( math.fsum([pow(x-u,2) for x in column]) / (len(column)-1) )
+
+for n in range(N):
+	# Calculate mean of column fn which are legit
+	stdev_body_legit.append( standard_dev( [row[n] for row in w_body_legit] ))
+	stdev_body_spam.append(  standard_dev( [row[n] for row in w_body_spam ] ))
+	stdev_subj_legit.append( standard_dev( [row[n] for row in w_subj_legit] ))
+	stdev_subj_spam.append(  standard_dev( [row[n] for row in w_subj_spam ] ))
+
+
+
+
+
 
 
 
