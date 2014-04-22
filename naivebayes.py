@@ -49,7 +49,7 @@ def mean( column ):
 # Standard dev:
 #	Calculates the standard deviation of a set
 # 	returns: float
-def standard_dev( column ):
+def std_dev( column ):
 
 	u = mean(column)
 	return math.sqrt( math.fsum( [ ((float(x) - u) ** 2) for x in column] ) / ( len(column) - 1 ) )
@@ -64,8 +64,10 @@ def prob_density( x, u, s ):
 
 	if s == 0:
 		return 0.0
+
 	coefficient = math.e / ( s * math.sqrt( 2 * math.pi ) )
-	exponent = -( (x - u) ** 2) / (2 * (s ** 2))
+	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
+
 	return coefficient ** exponent
 
 #=========|| Naive Bayes ||=========#
@@ -79,9 +81,9 @@ def prob_density( x, u, s ):
 
 # Split:
 #	Split data into even chunks
-def split( data, fold ):
+def split( data ):
 
-	n = len( data ) / float( fold )
+	n = len( data ) / float( FOLD )
 	out = []
 	last = 0.0
 	while last < len( data ):
@@ -98,12 +100,12 @@ def train( train_legit, train_spam ):
 
 	# Calculate mean and standard deviation of column fn
 	for n in range( len( train_legit[0] ) ):
-		mean_legit.append( mean( [row[n] for row in train_legit] ) )
-		sd_legit.append( standard_dev( [row[n] for row in train_legit] ) )
+		mean_legit.append( mean(  [row[n] for row in train_legit] ) )
+		sd_legit.append( std_dev( [row[n] for row in train_legit] ) )
 
-	for n in range(len(train_spam[0])):
-		mean_spam.append( mean( [row[n] for row in train_spam] ) )
-		sd_spam.append( standard_dev( [row[n] for row in train_spam] ) )
+	for n in range( len( train_spam[0] ) ):
+		mean_spam.append( mean(  [row[n] for row in train_spam] ) )
+		sd_spam.append( std_dev( [row[n] for row in train_spam] ) )
 
 	return mean_legit, mean_spam, sd_legit, sd_spam
 
@@ -116,7 +118,7 @@ def train( train_legit, train_spam ):
 def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 	TOTAL_DOCS = float( len(test_spam) + len(test_legit) )
-	PROB_SPAM = len( test_spam ) / TOTAL_DOCS
+	PROB_SPAM  = len( test_spam )  / TOTAL_DOCS
 	PROB_LEGIT = len( test_legit ) / TOTAL_DOCS
 	SPAM = "spam"
 	LEGIT = "nonspam"
@@ -164,10 +166,21 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 #=========|| 10-FOLD stratified cross validation ||=========#
 
-split_body_legit = split( w_body_legit, FOLD )
-split_body_spam  = split( w_body_spam,  FOLD )
-split_subj_legit = split( w_subj_legit, FOLD )
-split_subj_spam  = split( w_subj_spam,  FOLD )
+sp_body_legit = split( w_body_legit )
+sp_body_spam  = split( w_body_spam  )
+sp_subj_legit = split( w_subj_legit )
+sp_subj_spam  = split( w_subj_spam  )
+
+# Save examples in each fold to csv file
+with open( "body-folds.csv", "wb" ) as f:
+	writer = csv.writer(f)
+	curr_fold = 0
+	for n in range( FOLD ):
+		writer.writerow( [ "fold" + str( n + 1 ) ] )
+		writer.writerows( [row + ["nonspam"] for row in sp_body_legit[n] ] )
+		writer.writerows( [row + ["spam"] for row in sp_body_spam[n] ] )
+		writer.writerow( [ ] ) # Empty line
+	f.close()
 
 sum_accuracy = 0.0
 
@@ -180,19 +193,20 @@ while test_num != FOLD:
 	# Add all the training data together
 	train_legit = []
 	train_spam = []
+
 	for training_num in range( 0, FOLD ):
 		if training_num != test_num:
-			train_legit.extend( split_body_legit[training_num] )
-			train_spam.extend(  split_body_spam[training_num]  )
+			train_legit.extend( sp_body_legit[training_num] )
+			train_spam.extend(  sp_body_spam[training_num]  )
 
 	# Train data
 	mean_legit, mean_spam, sd_legit, sd_spam = train( train_legit, train_spam )
 
 	# Test data
-	accuracy = classify( split_body_legit[test_num], split_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
-	sum_accuracy += accuracy
+	sum_accuracy += classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
 	test_num += 1
 
-print sum_accuracy/10.0
+print sum_accuracy / float(FOLD)
+
 
