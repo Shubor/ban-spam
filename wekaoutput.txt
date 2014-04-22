@@ -1,0 +1,1246 @@
+=== Run information ===
+
+Scheme:weka.classifiers.bayes.NaiveBayes 
+Relation:     body
+Instances:    600
+Attributes:   201
+[list of attributes omitted]
+Test mode:10-fold cross-validation
+
+=== Classifier model (full training set) ===
+
+Naive Bayes Classifier
+
+                 Class
+Attribute      nonspam    spam
+                (0.67)  (0.33)
+===============================
+f1
+  mean           0.0079  0.0142
+  std. dev.      0.0171  0.0254
+  weight sum        400     200
+  precision      0.0009  0.0009
+
+f2
+  mean           0.0247  0.0002
+  std. dev.      0.0407  0.0023
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f3
+  mean           0.0064  0.0316
+  std. dev.       0.017  0.0569
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f4
+  mean           0.0175  0.0013
+  std. dev.      0.0309  0.0091
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f5
+  mean           0.0052   0.017
+  std. dev.      0.0135  0.0247
+  weight sum        400     200
+  precision       0.001   0.001
+
+f6
+  mean           0.0071  0.0176
+  std. dev.      0.0191  0.0348
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f7
+  mean           0.0061  0.0184
+  std. dev.        0.02  0.0246
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f8
+  mean           0.0196  0.0002
+  std. dev.      0.0362  0.0016
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f9
+  mean           0.0059  0.0255
+  std. dev.      0.0152  0.0446
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f10
+  mean           0.0167       0
+  std. dev.      0.0304  0.0002
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f11
+  mean            0.007  0.0189
+  std. dev.      0.0176  0.0374
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f12
+  mean            0.005  0.0211
+  std. dev.      0.0156  0.0355
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f13
+  mean           0.0015  0.0355
+  std. dev.      0.0067  0.0484
+  weight sum        400     200
+  precision      0.0019  0.0019
+
+f14
+  mean           0.0029  0.0195
+  std. dev.      0.0093   0.034
+  weight sum        400     200
+  precision       0.001   0.001
+
+f15
+  mean           0.0053  0.0358
+  std. dev.      0.0155  0.0727
+  weight sum        400     200
+  precision      0.0033  0.0033
+
+f16
+  mean           0.0035  0.0146
+  std. dev.      0.0111  0.0285
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f17
+  mean           0.0055  0.0124
+  std. dev.      0.0174  0.0259
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f18
+  mean           0.0066  0.0141
+  std. dev.      0.0191  0.0317
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f19
+  mean           0.0155       0
+  std. dev.      0.0325  0.0003
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f20
+  mean           0.0056  0.0085
+  std. dev.      0.0162  0.0255
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f21
+  mean           0.0069  0.0111
+  std. dev.      0.0158  0.0332
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f22
+  mean           0.0031   0.028
+  std. dev.      0.0139  0.0481
+  weight sum        400     200
+  precision      0.0019  0.0019
+
+f23
+  mean           0.0023  0.0257
+  std. dev.      0.0099  0.0519
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f24
+  mean           0.0045  0.0061
+  std. dev.      0.0126  0.0157
+  weight sum        400     200
+  precision       0.001   0.001
+
+f25
+  mean           0.0115  0.0013
+  std. dev.      0.0285  0.0061
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f26
+  mean           0.0104       0
+  std. dev.      0.0247  0.0003
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f27
+  mean            0.004  0.0069
+  std. dev.       0.015   0.015
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f28
+  mean           0.0038  0.0094
+  std. dev.      0.0129  0.0212
+  weight sum        400     200
+  precision      0.0013  0.0013
+
+f29
+  mean           0.0042  0.0082
+  std. dev.      0.0135  0.0202
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f30
+  mean           0.0045  0.0094
+  std. dev.      0.0164  0.0204
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f31
+  mean           0.0055  0.0051
+  std. dev.      0.0153  0.0145
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f32
+  mean           0.0133  0.0008
+  std. dev.      0.0364  0.0037
+  weight sum        400     200
+  precision      0.0036  0.0036
+
+f33
+  mean           0.0012  0.0364
+  std. dev.      0.0085  0.0619
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f34
+  mean           0.0107   0.002
+  std. dev.      0.0323  0.0085
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f35
+  mean           0.0034  0.0112
+  std. dev.       0.013  0.0245
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f36
+  mean           0.0031  0.0114
+  std. dev.      0.0122  0.0269
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f37
+  mean           0.0004  0.0196
+  std. dev.      0.0044  0.0297
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f38
+  mean           0.0015  0.0177
+  std. dev.      0.0077  0.0304
+  weight sum        400     200
+  precision      0.0013  0.0013
+
+f39
+  mean           0.0024  0.0176
+  std. dev.      0.0137  0.0369
+  weight sum        400     200
+  precision      0.0023  0.0023
+
+f40
+  mean           0.0041  0.0055
+  std. dev.      0.0142  0.0125
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f41
+  mean           0.0068  0.0051
+  std. dev.      0.0208  0.0202
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f42
+  mean           0.0046  0.0083
+  std. dev.      0.0193  0.0245
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f43
+  mean            0.003  0.0116
+  std. dev.      0.0177  0.0244
+  weight sum        400     200
+  precision      0.0037  0.0037
+
+f44
+  mean           0.0045  0.0049
+  std. dev.      0.0152  0.0176
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f45
+  mean           0.0079  0.0017
+  std. dev.      0.0229  0.0078
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f46
+  mean           0.0034  0.0065
+  std. dev.      0.0119  0.0165
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f47
+  mean           0.0042  0.0065
+  std. dev.      0.0158  0.0162
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f48
+  mean           0.0042  0.0056
+  std. dev.      0.0131  0.0182
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f49
+  mean           0.0032  0.0036
+  std. dev.      0.0114  0.0095
+  weight sum        400     200
+  precision      0.0013  0.0013
+
+f50
+  mean           0.0028  0.0136
+  std. dev.      0.0147  0.0327
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f51
+  mean           0.0057  0.0048
+  std. dev.      0.0193  0.0155
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f52
+  mean           0.0032  0.0064
+  std. dev.      0.0119  0.0175
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f53
+  mean           0.0007  0.0175
+  std. dev.       0.005  0.0319
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f54
+  mean           0.0041  0.0046
+  std. dev.      0.0131  0.0133
+  weight sum        400     200
+  precision      0.0011  0.0011
+
+f55
+  mean           0.0029   0.008
+  std. dev.      0.0125  0.0201
+  weight sum        400     200
+  precision      0.0019  0.0019
+
+f56
+  mean           0.0049  0.0155
+  std. dev.      0.0217  0.0455
+  weight sum        400     200
+  precision      0.0046  0.0046
+
+f57
+  mean           0.0023  0.0076
+  std. dev.      0.0099  0.0184
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f58
+  mean           0.0033  0.0071
+  std. dev.      0.0166  0.0208
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f59
+  mean           0.0041   0.027
+  std. dev.      0.0212  0.0633
+  weight sum        400     200
+  precision       0.004   0.004
+
+f60
+  mean           0.0033  0.0064
+  std. dev.       0.011  0.0155
+  weight sum        400     200
+  precision      0.0012  0.0012
+
+f61
+  mean           0.0022  0.0088
+  std. dev.       0.011  0.0183
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f62
+  mean           0.0027  0.0072
+  std. dev.      0.0117  0.0167
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f63
+  mean           0.0013  0.0124
+  std. dev.      0.0071  0.0245
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f64
+  mean           0.0011  0.0219
+  std. dev.      0.0098  0.0452
+  weight sum        400     200
+  precision      0.0033  0.0033
+
+f65
+  mean           0.0029  0.0069
+  std. dev.      0.0132  0.0158
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f66
+  mean            0.002  0.0143
+  std. dev.      0.0131   0.031
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f67
+  mean           0.0066  0.0037
+  std. dev.      0.0226  0.0154
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f68
+  mean           0.0031  0.0058
+  std. dev.      0.0126  0.0156
+  weight sum        400     200
+  precision      0.0022  0.0022
+
+f69
+  mean           0.0043  0.0092
+  std. dev.      0.0161  0.0357
+  weight sum        400     200
+  precision       0.005   0.005
+
+f70
+  mean            0.001   0.026
+  std. dev.      0.0066  0.0533
+  weight sum        400     200
+  precision      0.0051  0.0051
+
+f71
+  mean            0.008  0.0015
+  std. dev.      0.0209  0.0104
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f72
+  mean           0.0008  0.0105
+  std. dev.      0.0046  0.0212
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f73
+  mean           0.0047  0.0044
+  std. dev.      0.0171  0.0165
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f74
+  mean           0.0001  0.0205
+  std. dev.      0.0016  0.0385
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f75
+  mean           0.0039  0.0055
+  std. dev.      0.0165  0.0151
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f76
+  mean           0.0103  0.0012
+  std. dev.      0.0404  0.0104
+  weight sum        400     200
+  precision      0.0059  0.0059
+
+f77
+  mean            0.004  0.0032
+  std. dev.      0.0124  0.0123
+  weight sum        400     200
+  precision      0.0015  0.0015
+
+f78
+  mean           0.0042  0.0025
+  std. dev.      0.0143  0.0097
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f79
+  mean           0.0021  0.0246
+  std. dev.      0.0114  0.0577
+  weight sum        400     200
+  precision      0.0067  0.0067
+
+f80
+  mean            0.009       0
+  std. dev.      0.0308   0.001
+  weight sum        400     200
+  precision      0.0059  0.0059
+
+f81
+  mean           0.0037   0.006
+  std. dev.      0.0118  0.0213
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f82
+  mean           0.0036  0.0089
+  std. dev.      0.0204  0.0229
+  weight sum        400     200
+  precision      0.0037  0.0037
+
+f83
+  mean           0.0044  0.0033
+  std. dev.      0.0132  0.0164
+  weight sum        400     200
+  precision      0.0029  0.0029
+
+f84
+  mean           0.0051  0.0046
+  std. dev.      0.0183  0.0166
+  weight sum        400     200
+  precision      0.0024  0.0024
+
+f85
+  mean           0.0034  0.0023
+  std. dev.      0.0117  0.0079
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f86
+  mean           0.0021  0.0119
+  std. dev.      0.0098  0.0331
+  weight sum        400     200
+  precision      0.0033  0.0033
+
+f87
+  mean           0.0079  0.0022
+  std. dev.       0.029  0.0149
+  weight sum        400     200
+  precision       0.004   0.004
+
+f88
+  mean           0.0008  0.0127
+  std. dev.      0.0067  0.0241
+  weight sum        400     200
+  precision       0.002   0.002
+
+f89
+  mean           0.0055  0.0047
+  std. dev.       0.021  0.0162
+  weight sum        400     200
+  precision      0.0033  0.0033
+
+f90
+  mean            0.002   0.013
+  std. dev.      0.0103  0.0319
+  weight sum        400     200
+  precision      0.0034  0.0034
+
+f91
+  mean           0.0014  0.0091
+  std. dev.      0.0069  0.0234
+  weight sum        400     200
+  precision      0.0024  0.0024
+
+f92
+  mean           0.0049  0.0017
+  std. dev.      0.0156   0.007
+  weight sum        400     200
+  precision       0.002   0.002
+
+f93
+  mean           0.0009  0.0121
+  std. dev.      0.0081  0.0284
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f94
+  mean           0.0031  0.0094
+  std. dev.      0.0142   0.027
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f95
+  mean           0.0039  0.0016
+  std. dev.      0.0135  0.0101
+  weight sum        400     200
+  precision       0.002   0.002
+
+f96
+  mean           0.0068   0.001
+  std. dev.      0.0246  0.0071
+  weight sum        400     200
+  precision      0.0041  0.0041
+
+f97
+  mean           0.0031  0.0042
+  std. dev.      0.0152  0.0142
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f98
+  mean           0.0042  0.0068
+  std. dev.      0.0176  0.0198
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f99
+  mean            0.006  0.0001
+  std. dev.      0.0189  0.0009
+  weight sum        400     200
+  precision      0.0031  0.0031
+
+f100
+  mean           0.0031  0.0037
+  std. dev.      0.0143  0.0127
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f101
+  mean           0.0056  0.0055
+  std. dev.       0.024  0.0181
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f102
+  mean           0.0022  0.0303
+  std. dev.      0.0167  0.0853
+  weight sum        400     200
+  precision      0.0091  0.0091
+
+f103
+  mean           0.0023  0.0061
+  std. dev.      0.0106  0.0176
+  weight sum        400     200
+  precision      0.0023  0.0023
+
+f104
+  mean           0.0081  0.0022
+  std. dev.      0.0265   0.013
+  weight sum        400     200
+  precision      0.0036  0.0036
+
+f105
+  mean           0.0021   0.007
+  std. dev.      0.0086  0.0219
+  weight sum        400     200
+  precision      0.0031  0.0031
+
+f106
+  mean           0.0037  0.0029
+  std. dev.      0.0156  0.0109
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f107
+  mean           0.0055  0.0019
+  std. dev.       0.023  0.0086
+  weight sum        400     200
+  precision      0.0054  0.0054
+
+f108
+  mean           0.0028   0.004
+  std. dev.      0.0125  0.0144
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f109
+  mean           0.0034  0.0057
+  std. dev.      0.0138  0.0218
+  weight sum        400     200
+  precision      0.0039  0.0039
+
+f110
+  mean            0.003  0.0051
+  std. dev.      0.0153  0.0154
+  weight sum        400     200
+  precision      0.0039  0.0039
+
+f111
+  mean           0.0019  0.0119
+  std. dev.       0.011  0.0323
+  weight sum        400     200
+  precision       0.005   0.005
+
+f112
+  mean           0.0051  0.0086
+  std. dev.      0.0311  0.0322
+  weight sum        400     200
+  precision      0.0087  0.0087
+
+f113
+  mean           0.0026  0.0091
+  std. dev.      0.0144  0.0239
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f114
+  mean           0.0009  0.0096
+  std. dev.      0.0074  0.0202
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f115
+  mean           0.0018  0.0073
+  std. dev.      0.0103  0.0188
+  weight sum        400     200
+  precision      0.0019  0.0019
+
+f116
+  mean           0.0046  0.0068
+  std. dev.      0.0266   0.027
+  weight sum        400     200
+  precision      0.0057  0.0057
+
+f117
+  mean           0.0066  0.0001
+  std. dev.       0.022  0.0017
+  weight sum        400     200
+  precision      0.0041  0.0041
+
+f118
+  mean           0.0075   0.001
+  std. dev.      0.0262  0.0057
+  weight sum        400     200
+  precision      0.0042  0.0042
+
+f119
+  mean           0.0039  0.0028
+  std. dev.      0.0172  0.0088
+  weight sum        400     200
+  precision      0.0041  0.0041
+
+f120
+  mean            0.002  0.0067
+  std. dev.      0.0123  0.0156
+  weight sum        400     200
+  precision      0.0029  0.0029
+
+f121
+  mean           0.0026  0.0035
+  std. dev.      0.0106  0.0102
+  weight sum        400     200
+  precision      0.0014  0.0014
+
+f122
+  mean           0.0017  0.0092
+  std. dev.       0.011  0.0286
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f123
+  mean           0.0026  0.0041
+  std. dev.      0.0128  0.0129
+  weight sum        400     200
+  precision      0.0024  0.0024
+
+f124
+  mean           0.0019  0.0061
+  std. dev.      0.0092  0.0168
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f125
+  mean           0.0023  0.0082
+  std. dev.       0.011  0.0245
+  weight sum        400     200
+  precision       0.004   0.004
+
+f126
+  mean           0.0032  0.0051
+  std. dev.       0.017   0.017
+  weight sum        400     200
+  precision      0.0043  0.0043
+
+f127
+  mean           0.0075       0
+  std. dev.      0.0269  0.0008
+  weight sum        400     200
+  precision      0.0051  0.0051
+
+f128
+  mean           0.0036  0.0107
+  std. dev.      0.0155  0.0355
+  weight sum        400     200
+  precision      0.0037  0.0037
+
+f129
+  mean           0.0014  0.0073
+  std. dev.       0.011  0.0211
+  weight sum        400     200
+  precision      0.0042  0.0042
+
+f130
+  mean           0.0032  0.0134
+  std. dev.      0.0147  0.0587
+  weight sum        400     200
+  precision      0.0109  0.0109
+
+f131
+  mean           0.0032  0.0036
+  std. dev.      0.0132  0.0153
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f132
+  mean           0.0028  0.0035
+  std. dev.      0.0122  0.0111
+  weight sum        400     200
+  precision      0.0018  0.0018
+
+f133
+  mean           0.0027  0.0097
+  std. dev.      0.0135  0.0312
+  weight sum        400     200
+  precision      0.0039  0.0039
+
+f134
+  mean           0.0024  0.0042
+  std. dev.      0.0105   0.012
+  weight sum        400     200
+  precision      0.0017  0.0017
+
+f135
+  mean           0.0055  0.0022
+  std. dev.      0.0248  0.0147
+  weight sum        400     200
+  precision      0.0072  0.0072
+
+f136
+  mean           0.0075       0
+  std. dev.      0.0391  0.0021
+  weight sum        400     200
+  precision      0.0127  0.0127
+
+f137
+  mean           0.0025  0.0058
+  std. dev.       0.018  0.0158
+  weight sum        400     200
+  precision      0.0059  0.0059
+
+f138
+  mean           0.0027  0.0056
+  std. dev.      0.0122   0.017
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f139
+  mean           0.0048  0.0026
+  std. dev.      0.0182  0.0129
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f140
+  mean           0.0061       0
+  std. dev.      0.0181  0.0004
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f141
+  mean           0.0024  0.0066
+  std. dev.      0.0132  0.0222
+  weight sum        400     200
+  precision      0.0044  0.0044
+
+f142
+  mean           0.0065  0.0004
+  std. dev.      0.0207  0.0047
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f143
+  mean           0.0004  0.0255
+  std. dev.      0.0034  0.0839
+  weight sum        400     200
+  precision      0.0146  0.0146
+
+f144
+  mean           0.0062  0.0003
+  std. dev.      0.0225  0.0046
+  weight sum        400     200
+  precision      0.0044  0.0044
+
+f145
+  mean           0.0005  0.0129
+  std. dev.       0.006  0.0304
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f146
+  mean           0.0013  0.0064
+  std. dev.      0.0075  0.0183
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f147
+  mean           0.0022   0.011
+  std. dev.      0.0303  0.0362
+  weight sum        400     200
+  precision      0.0125  0.0125
+
+f148
+  mean           0.0014  0.0056
+  std. dev.      0.0084   0.017
+  weight sum        400     200
+  precision      0.0026  0.0026
+
+f149
+  mean           0.0018  0.0046
+  std. dev.      0.0089  0.0185
+  weight sum        400     200
+  precision      0.0044  0.0044
+
+f150
+  mean            0.005  0.0004
+  std. dev.       0.017  0.0036
+  weight sum        400     200
+  precision       0.003   0.003
+
+f151
+  mean           0.0037  0.0031
+  std. dev.      0.0162   0.012
+  weight sum        400     200
+  precision      0.0043  0.0043
+
+f152
+  mean            0.001  0.0051
+  std. dev.      0.0055  0.0138
+  weight sum        400     200
+  precision      0.0016  0.0016
+
+f153
+  mean           0.0021  0.0047
+  std. dev.       0.011  0.0161
+  weight sum        400     200
+  precision      0.0026  0.0026
+
+f154
+  mean           0.0028  0.0035
+  std. dev.      0.0127  0.0137
+  weight sum        400     200
+  precision      0.0028  0.0028
+
+f155
+  mean           0.0021  0.0121
+  std. dev.      0.0141  0.0341
+  weight sum        400     200
+  precision      0.0053  0.0053
+
+f156
+  mean           0.0015  0.0056
+  std. dev.      0.0075  0.0199
+  weight sum        400     200
+  precision      0.0039  0.0039
+
+f157
+  mean            0.007       0
+  std. dev.      0.0304  0.0015
+  weight sum        400     200
+  precision      0.0092  0.0092
+
+f158
+  mean           0.0031  0.0012
+  std. dev.      0.0118  0.0056
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f159
+  mean           0.0024  0.0033
+  std. dev.      0.0114  0.0123
+  weight sum        400     200
+  precision      0.0025  0.0025
+
+f160
+  mean           0.0044  0.0033
+  std. dev.      0.0186  0.0155
+  weight sum        400     200
+  precision      0.0034  0.0034
+
+f161
+  mean           0.0051  0.0004
+  std. dev.      0.0165  0.0039
+  weight sum        400     200
+  precision      0.0023  0.0023
+
+f162
+  mean           0.0035   0.004
+  std. dev.      0.0178  0.0134
+  weight sum        400     200
+  precision      0.0049  0.0049
+
+f163
+  mean           0.0043  0.0011
+  std. dev.      0.0148  0.0079
+  weight sum        400     200
+  precision      0.0021  0.0021
+
+f164
+  mean           0.0073       0
+  std. dev.      0.0304  0.0012
+  weight sum        400     200
+  precision       0.007   0.007
+
+f165
+  mean           0.0007  0.0101
+  std. dev.      0.0052   0.024
+  weight sum        400     200
+  precision      0.0026  0.0026
+
+f166
+  mean           0.0018  0.0179
+  std. dev.      0.0099  0.0515
+  weight sum        400     200
+  precision      0.0071  0.0071
+
+f167
+  mean           0.0045   0.001
+  std. dev.      0.0184  0.0051
+  weight sum        400     200
+  precision      0.0037  0.0037
+
+f168
+  mean           0.0087  0.0001
+  std. dev.      0.0333  0.0013
+  weight sum        400     200
+  precision      0.0062  0.0062
+
+f169
+  mean           0.0034   0.004
+  std. dev.      0.0155  0.0173
+  weight sum        400     200
+  precision      0.0036  0.0036
+
+f170
+  mean           0.0036  0.0029
+  std. dev.      0.0153  0.0147
+  weight sum        400     200
+  precision      0.0034  0.0034
+
+f171
+  mean           0.0002   0.014
+  std. dev.      0.0035  0.0366
+  weight sum        400     200
+  precision      0.0043  0.0043
+
+f172
+  mean           0.0069  0.0001
+  std. dev.      0.0258  0.0014
+  weight sum        400     200
+  precision      0.0049  0.0049
+
+f173
+  mean           0.0017  0.0147
+  std. dev.      0.0112  0.0546
+  weight sum        400     200
+  precision      0.0094  0.0094
+
+f174
+  mean           0.0031  0.0029
+  std. dev.      0.0135  0.0155
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f175
+  mean           0.0067  0.0004
+  std. dev.       0.025   0.005
+  weight sum        400     200
+  precision      0.0047  0.0047
+
+f176
+  mean           0.0006  0.0114
+  std. dev.      0.0059  0.0279
+  weight sum        400     200
+  precision      0.0034  0.0034
+
+f177
+  mean           0.0001  0.0145
+  std. dev.      0.0017   0.035
+  weight sum        400     200
+  precision      0.0055  0.0055
+
+f178
+  mean           0.0008  0.0149
+  std. dev.      0.0056  0.0426
+  weight sum        400     200
+  precision      0.0052  0.0052
+
+f179
+  mean           0.0045  0.0013
+  std. dev.      0.0172  0.0141
+  weight sum        400     200
+  precision      0.0042  0.0042
+
+f180
+  mean           0.0016  0.0085
+  std. dev.      0.0091  0.0336
+  weight sum        400     200
+  precision       0.008   0.008
+
+f181
+  mean           0.0025   0.003
+  std. dev.       0.012  0.0111
+  weight sum        400     200
+  precision      0.0026  0.0026
+
+f182
+  mean           0.0013   0.007
+  std. dev.      0.0072  0.0192
+  weight sum        400     200
+  precision      0.0022  0.0022
+
+f183
+  mean           0.0049  0.0019
+  std. dev.       0.038  0.0086
+  weight sum        400     200
+  precision      0.0161  0.0161
+
+f184
+  mean           0.0019  0.0054
+  std. dev.      0.0114   0.017
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f185
+  mean           0.0078  0.0011
+  std. dev.      0.0302  0.0087
+  weight sum        400     200
+  precision      0.0055  0.0055
+
+f186
+  mean            0.001   0.007
+  std. dev.      0.0073  0.0179
+  weight sum        400     200
+  precision      0.0022  0.0022
+
+f187
+  mean           0.0026  0.0087
+  std. dev.      0.0131  0.0287
+  weight sum        400     200
+  precision      0.0033  0.0033
+
+f188
+  mean           0.0019  0.0051
+  std. dev.        0.01  0.0183
+  weight sum        400     200
+  precision      0.0035  0.0035
+
+f189
+  mean           0.0011  0.0067
+  std. dev.      0.0076  0.0184
+  weight sum        400     200
+  precision      0.0032  0.0032
+
+f190
+  mean           0.0017  0.0029
+  std. dev.      0.0085  0.0089
+  weight sum        400     200
+  precision      0.0023  0.0023
+
+f191
+  mean            0.004   0.001
+  std. dev.      0.0176  0.0045
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f192
+  mean           0.0005  0.0115
+  std. dev.       0.005  0.0283
+  weight sum        400     200
+  precision      0.0045  0.0045
+
+f193
+  mean           0.0019  0.0094
+  std. dev.      0.0247  0.0313
+  weight sum        400     200
+  precision      0.0102  0.0102
+
+f194
+  mean           0.0023  0.0052
+  std. dev.      0.0116  0.0168
+  weight sum        400     200
+  precision      0.0027  0.0027
+
+f195
+  mean           0.0003  0.0291
+  std. dev.      0.0067  0.0808
+  weight sum        400     200
+  precision      0.0104  0.0104
+
+f196
+  mean            0.003  0.0031
+  std. dev.      0.0187  0.0138
+  weight sum        400     200
+  precision      0.0069  0.0069
+
+f197
+  mean           0.0053  0.0014
+  std. dev.      0.0211  0.0064
+  weight sum        400     200
+  precision      0.0038  0.0038
+
+f198
+  mean           0.0021  0.0077
+  std. dev.      0.0114   0.024
+  weight sum        400     200
+  precision      0.0029  0.0029
+
+f199
+  mean           0.0017  0.0066
+  std. dev.      0.0097  0.0192
+  weight sum        400     200
+  precision      0.0034  0.0034
+
+f200
+  mean            0.004  0.0013
+  std. dev.      0.0177  0.0072
+  weight sum        400     200
+  precision      0.0044  0.0044
+
+
+
+Time taken to build model: 0.08 seconds
+
+=== Stratified cross-validation ===
+=== Summary ===
+
+Correctly Classified Instances         570               95      %
+Incorrectly Classified Instances        30                5      %
+Kappa statistic                          0.89  
+Mean absolute error                      0.0502
+Root mean squared error                  0.222 
+Relative absolute error                 11.2994 %
+Root relative squared error             47.0931 %
+Total Number of Instances              600     
+
+=== Detailed Accuracy By Class ===
+
+               TP Rate   FP Rate   Precision   Recall  F-Measure   ROC Area  Class
+                 0.94      0.03       0.984     0.94      0.962      0.987    nonspam
+                 0.97      0.06       0.89      0.97      0.928      0.973    spam
+Weighted Avg.    0.95      0.04       0.953     0.95      0.951      0.983
+
+=== Confusion Matrix ===
+
+   a   b   <-- classified as
+ 376  24 |   a = nonspam
+   6 194 |   b = spam
+
