@@ -6,8 +6,6 @@ ten_fold = 10
 
 #======|| Read in csv files ||======#
 
-w_body, w_subj = [], []
-
 w_body_legit, w_body_spam = [], []
 w_subj_legit, w_subj_spam = [], []
 
@@ -15,13 +13,12 @@ w_subj_legit, w_subj_spam = [], []
 #	Read in given csv file
 #	Saves data from file into either legit or spam lists
 #		depending on class of file given by last column of csv
-def read_csv(file_name, legit, spam, data):
+def read_csv(file_name, legit, spam):
 	with open(file_name, "rb") as f:
 		row_num = 0
 		for row in csv.reader(f):
 			# Ignore header
 			if row_num != 0:
-				data.append(row)
 				# Check class of file (stored in last row of csv)
 				if row[-1] == "nonspam":
 					# Append row, removing class of doc
@@ -30,11 +27,8 @@ def read_csv(file_name, legit, spam, data):
 					spam.append(row[:-1])
 			row_num += 1
 
-read_csv("body.csv", w_body_legit, w_body_spam, w_body)
-read_csv("subject.csv", w_subj_legit, w_subj_spam, w_subj)
-
-print w_body_legit[0]
-print w_body[0]
+read_csv("body.csv", w_body_legit, w_body_spam)
+read_csv("subject.csv", w_subj_legit, w_subj_spam)
 
 #############################################################################
 # Calculate Naive Bayes, assuming normal distribution                       #
@@ -114,28 +108,23 @@ def split(data):
 		last += n
 	return out
 
-split_body = split(w_body)
-split_subj = split(w_subj)
+split_body_legit = split(w_body_legit)
+split_body_spam  = split(w_body_spam)
+split_subj_legit = split(w_subj_legit)
+split_subj_spam  = split(w_subj_spam)
 
 # Train:
 #	Calculate mean and standard deviation of data based on given training data
-def train(training_data):
-	legit, spam = [], []
+def train(train_legit, train_spam):
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
-	# Separate documents into legit or spam
-	for document in training_data:
-		if document[-1] == "nonspam":
-			legit.append(document[:-1])
-		else:
-			spam.append(document[:-1])
 	# Calculate mean and standard deviation of column fn
-	for n in range(len(legit[0])):
-		mean_legit.append(mean([row[n] for row in legit]))
-		sd_legit.append(standard_dev([row[n] for row in legit]))
-	for n in range(len(spam[0])):
-		mean_spam.append(mean([row[n] for row in spam]))
-		sd_spam.append(standard_dev([row[n] for row in spam]))
+	for n in range(len(train_legit[0])):
+		mean_legit.append(mean([row[n] for row in train_legit]))
+		sd_legit.append(standard_dev([row[n] for row in train_legit]))
+	for n in range(len(train_spam[0])):
+		mean_spam.append(mean([row[n] for row in train_spam]))
+		sd_spam.append(standard_dev([row[n] for row in train_spam]))
 	return mean_legit, mean_spam, sd_legit, sd_spam
 
 # Classify:
@@ -144,12 +133,14 @@ def train(training_data):
 #	Compare P(spam|document) and P(nonspam|document)
 #	If there is a tie, choose non-spam
 #		Should implement a threshold for this to avoid false positives
-def classify(test_data, mean_legit, mean_spam, sd_legit, sd_spam):
+def classify(test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam):
 	num_correct = 0
-	for document in test_data:
+
+	actual_class = "nonspam"
+	for document in test_legit:
 		prob_spam, prob_nonspam = 1.0, 1.0
 		col_num = 0
-		for i in document[:-1]: # Exclude class of document
+		for i in document: # Exclude class of document
 			# Calculate P(f1|spam).....P(f200|spam) for document
 			prob_spam *= prob_density(float(i), mean_spam[col_num], sd_spam[col_num])+1
 			# Calculate P(f1|nonspam).....P(f200|nonspam) for document
@@ -160,9 +151,28 @@ def classify(test_data, mean_legit, mean_spam, sd_legit, sd_spam):
 			prediction = "nonspam"
 		else:
 			prediction = "spam"
-		if document[-1] == prediction:
+		if prediction == actual_class:
 			num_correct += 1
-	accuracy = num_correct/float(len(test_data))
+
+	actual_class = "spam"
+	for document in test_spam:
+		prob_spam, prob_nonspam = 1.0, 1.0
+		col_num = 0
+		for i in document: # Exclude class of document
+			# Calculate P(f1|spam).....P(f200|spam) for document
+			prob_spam *= prob_density(float(i), mean_spam[col_num], sd_spam[col_num])+1
+			# Calculate P(f1|nonspam).....P(f200|nonspam) for document
+			prob_nonspam *= prob_density(float(i), mean_legit[col_num], sd_spam[col_num])+1
+			col_num += 1
+		prediction = ""
+		if prob_nonspam >= prob_spam:
+			prediction = "nonspam"
+		else:
+			prediction = "spam"
+		if prediction == actual_class:
+			num_correct += 1
+
+	accuracy = num_correct/float(len(test_legit)+len(test_spam))
 	return accuracy
 
 #=========|| 10-fold stratified cross validation ||=========#
@@ -182,16 +192,18 @@ while test_num != ten_fold:
 	sd_legit, sd_spam = [], []
 
 	# Add all the training data together
-	training_data = []
+	train_legit = []
+	train_spam = []
 	for training_num in range(0, ten_fold):
 		if training_num != test_num:
-			training_data.extend(split_body[training_num])
+			train_legit.extend(split_body_legit[training_num])
+			train_spam.extend(split_body_spam[training_num])
 
 	# Train data
-	mean_legit, mean_spam, sd_legit, sd_spam = train(training_data)
+	mean_legit, mean_spam, sd_legit, sd_spam = train(train_legit, train_spam)
 
 	# Test data
-	accuracy = classify(split_body[test_num], mean_legit, mean_spam, sd_legit, sd_spam)
+	accuracy = classify(split_body_legit[test_num], split_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam)
 	sum_accuracy += accuracy
 
 	test_num += 1
