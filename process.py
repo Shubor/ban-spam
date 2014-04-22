@@ -59,7 +59,6 @@ for file in os.listdir(path):
 		for line in f:
 			# Replace punctuation with space
 			l = re.sub('[%s]' % re.escape(punctuation), ' ', line)
-
 			# Subject corpus
 			if line.startswith('Subject:'):
 				for word in l.split():
