@@ -128,7 +128,7 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	num_correct = 0
 
 	Lp = 0.05 # Laplace correction used by weka
-	C = 2.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
+	C = 1.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
 
 	# Test on the known legitimate documents
 	for document in test_legit:
@@ -151,12 +151,12 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 				if p_s == 0:
 					P_spam_X *= Lp
 				else:
-					P_spam_X *= p_s
+					P_spam_X *= p_s+Lp
 				
 				if p_l == 0:
 					P_legit_X *= Lp
 				else:
-					P_legit_X *= p_l
+					P_legit_X *= p_l+Lp
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -186,12 +186,12 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 				if p_s == 0:
 					P_spam_X *= Lp
 				else:
-					P_spam_X *= p_s
+					P_spam_X *= p_s +Lp
 				
 				if p_l == 0:
 					P_legit_X *= Lp
 				else:
-					P_legit_X *= p_l	
+					P_legit_X *= p_l+Lp
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -232,6 +232,8 @@ for test_num in range(0,10):
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
 
+	Lp_mean_legit, Lp_mean_spam = [], []
+ 
 	# Create training data from other 9/10 of the examples.
 	train_legit = []
 	train_spam = []
