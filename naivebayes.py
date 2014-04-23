@@ -127,8 +127,16 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	LEGIT = "nonspam"
 	num_correct = 0
 
-	Lp = 0.05 # Laplace correction used by weka
-	C = 1.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
+	# Laplace Correction: E[{X+Lp}] = |X|/(|X|+1) * (E[X] + Lp/|X|), E[X] almost certainly 0 => s=E[X]
+	# 		      E[{X+Lp}] = Lp/(|X|+1)
+	Lp = 10.0
+	Lp_legit = Lp/361.0
+	Lp_spam = Lp/181.0 
+
+	# Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
+	C = 100.0
+	# Multiplier M * P(spam|X=x) > M * P(nonspam|X=x)
+	M = 1000.0
 
 	# Test on the known legitimate documents
 	for document in test_legit:
@@ -137,61 +145,67 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-
-		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
-		if P_legit_X==0 or P_spam_X==0:
-			P_legit_X, P_spam_X = 1.0, 1.0			
-			for x in range(len(document)):
-				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
-				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-	
-				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
+			p_s,p_l = 1.0,1.0
+			
+			# Define P(Xk|spam)			
+			if sd_spam[x]==0 and float(document[x]) != mean_spam[x]:
+				p_s = M * prob_density( float(document[x]), Lp_spam, Lp_spam )
 				if p_s == 0:
-					P_spam_X *= Lp
-				else:
-					P_spam_X *= p_s+Lp
-				
+					print "On S: p.d.f. produced a zero value with x,u,s: ",float(document[x]), Lp_spam
+					p_s = 0.003
+			else:
+				p_s = M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			
+			# Define P(Xk|nonspam)
+			if sd_legit[x]==0 and float(document[x]) != mean_legit[x]:
+				p_l = M * prob_density( float(document[x]), Lp_legit, Lp_legit )
 				if p_l == 0:
-					P_legit_X *= Lp
-				else:
-					P_legit_X *= p_l+Lp
+					print "On L: p.d.f. produced a zero value with x,u,s: ",float(document[x]), Lp_legit
+					p_l = 0.003
+			else:
+				p_l = M * prob_density( float(document[x]), mean_legit[x] , sd_legit[x]  )
+
+			# Update P(X|class)
+			P_spam_X  *= M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_legit_X *= M * prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
 		P_spam_X  *= P_spam
 
 		# Classify
-		if C * P_legit_X >= P_spam_X:
+		if P_legit_X >= P_spam_X:
 			num_correct += 1
-
+	
 	# Test on the known spam documents
 	for document in test_spam:
 		P_legit_X, P_spam_X = 1.0, 1.0
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-
-		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
-		if P_legit_X==0 or P_spam_X==0:
-			P_legit_X, P_spam_X = 1.0, 1.0			
-			for x in range(len(document)):
-				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
-				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-	
-				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
+			p_s,p_l = 1.0,1.0
+			
+			# Define P(Xk|spam)			
+			if sd_spam[x]==0 and float(document[x]) != mean_spam[x]:
+				p_s = M * prob_density( float(document[x]), Lp_spam, Lp_spam )
 				if p_s == 0:
-					P_spam_X *= Lp
-				else:
-					P_spam_X *= p_s +Lp
-				
+					print "p.d.f. produced a zero value"
+					p_s = 0.003
+			else:
+				p_s = M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			
+			# Define P(Xk|nonspam)
+			if sd_legit[x]==0 and float(document[x]) != mean_legit[x]:
+				p_l = M * prob_density( float(document[x]), Lp_legit, Lp_legit )
 				if p_l == 0:
-					P_legit_X *= Lp
-				else:
-					P_legit_X *= p_l+Lp
+					print "p.d.f. produced a zero value"
+					p_l = 0.003
+			else:
+				p_l = M * prob_density( float(document[x]), mean_legit[x] , sd_legit[x]  )
+
+			# Update P(X|class)
+			P_spam_X  *= M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_legit_X *= M * prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -231,8 +245,6 @@ sum_accuracy = 0.0
 for test_num in range(0,10):
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
-
-	Lp_mean_legit, Lp_mean_spam = [], []
  
 	# Create training data from other 9/10 of the examples.
 	train_legit = []
@@ -254,5 +266,3 @@ for test_num in range(0,10):
 	sum_accuracy += classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
 print sum_accuracy / 10.0
-
-
