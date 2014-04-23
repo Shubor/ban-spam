@@ -121,42 +121,84 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 	# Number of examples = 60, prob_spam = number of examples which are spam / examples = 20/60
 	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # Number of examples = 60
-	PROB_SPAM  = len( test_spam )  / TOTAL_DOCS	# P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
-	PROB_LEGIT = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
+	P_spam  = len( test_spam )  / TOTAL_DOCS	# P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
+	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
 	SPAM = "spam"
 	LEGIT = "nonspam"
 	num_correct = 0
 
-	Lp = 1e-75 # Laplace correction used by weka
+	Lp = 0.05 # Laplace correction used by weka
+	C = 2.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
 
+	# Test on the known legitimate documents
 	for document in test_legit:
 
-		spam_vals, legit_vals = 1.0, 1.0
+		P_legit_X, P_spam_X = 1.0, 1.0
 
+		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			# Calculate P(f1|spam).....P(f200|spam) for document
-			spam_vals  *= prob_density( float(document[x]), mean_spam[x], sd_spam[x] )   + Lp
-			# Calculate P(f1|nonspam).....P(f200|nonspam) for document
-			legit_vals *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] ) + Lp
+			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-		spam_vals  *= PROB_SPAM
-		legit_vals *= PROB_LEGIT
+		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
+		if P_legit_X==0 or P_spam_X==0:
+			P_legit_X, P_spam_X = 1.0, 1.0			
+			for x in range(len(document)):
+				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
+				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+	
+				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
+				if p_s == 0:
+					P_spam_X *= Lp
+				else:
+					P_spam_X *= p_s
+				
+				if p_l == 0:
+					P_legit_X *= Lp
+				else:
+					P_legit_X *= p_l
 
-		if legit_vals >= spam_vals:
+		# P(class|X) = P(X|class) P(class)
+		P_legit_X *= P_legit
+		P_spam_X  *= P_spam
+
+		# Classify
+		if C * P_legit_X >= P_spam_X:
 			num_correct += 1
 
+	# Test on the known spam documents
 	for document in test_spam:
+		P_legit_X, P_spam_X = 1.0, 1.0
 
-		spam_vals, legit_vals = 1.0, 1.0
-
+		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			spam_vals  *= prob_density( float(document[x]), mean_spam[x], sd_spam[x] )   + Lp
-			legit_vals *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] ) + Lp
+			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-		spam_vals  *= PROB_SPAM
-		legit_vals *= PROB_LEGIT
+		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
+		if P_legit_X==0 or P_spam_X==0:
+			P_legit_X, P_spam_X = 1.0, 1.0			
+			for x in range(len(document)):
+				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
+				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+	
+				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
+				if p_s == 0:
+					P_spam_X *= Lp
+				else:
+					P_spam_X *= p_s
+				
+				if p_l == 0:
+					P_legit_X *= Lp
+				else:
+					P_legit_X *= p_l	
 
-		if spam_vals > legit_vals:
+		# P(class|X) = P(X|class) P(class)
+		P_legit_X *= P_legit
+		P_spam_X  *= P_spam
+
+		# Classify
+		if C * P_legit_X < P_spam_X:
 			num_correct += 1
 
 	# Accuracy
