@@ -15,7 +15,7 @@ w_subj_legit, w_subj_spam = [], []
 #		depending on class of file given by last column of csv
 def read_csv( file_name, legit, spam ):
 
-	with open( file_name, "rb" ) as f:
+	with open( file_name, "r" ) as f:
 		row_num = 0
 		for row in csv.reader(f):
 			# Ignore header
@@ -62,10 +62,11 @@ def std_dev( column ):
 # 	returns float
 def prob_density( x, u, s ):
 
-	if s==0 and x==u:
-		return 1
-	elif s==0 and x!=u:
-		return 0
+	if s == 0 and x == u:
+		return 1.0
+
+	elif s == 0 and x != u:
+		return 0.0
 
 	coefficient = ( s * math.sqrt( 2 * math.pi ) )
 	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
@@ -97,6 +98,9 @@ def split( data ):
 #	Calculate mean and standard deviation of data based on given training data
 def train( train_legit, train_spam ):
 
+	# 40 * 9 => legit emails
+	# 20 * 9 => spam emails
+
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
 
@@ -121,7 +125,7 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 	# Number of examples = 60, prob_spam = number of examples which are spam / examples = 20/60
 	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # Number of examples = 60
-	P_spam  = len( test_spam )  / TOTAL_DOCS	# P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
+	P_spam  = len( test_spam )  / TOTAL_DOCS # P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
 	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
 	SPAM = "spam"
 	LEGIT = "nonspam"
@@ -140,19 +144,20 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
-		if P_legit_X==0 or P_spam_X==0:
-			P_legit_X, P_spam_X = 1.0, 1.0			
+		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0
+		if P_legit_X == 0 or P_spam_X == 0:
+
+			P_legit_X, P_spam_X = 1.0, 1.0
 			for x in range(len(document)):
 				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
 				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-	
+
 				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
 				if p_s == 0:
 					P_spam_X *= Lp
 				else:
 					P_spam_X *= p_s
-				
+
 				if p_l == 0:
 					P_legit_X *= Lp
 				else:
@@ -175,23 +180,24 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			P_spam_X  *= prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			P_legit_X *= prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0 
-		if P_legit_X==0 or P_spam_X==0:
-			P_legit_X, P_spam_X = 1.0, 1.0			
+		# Laplace correction because P(Xn|class) = 0 => P(class|X)=0
+		if P_legit_X == 0 or P_spam_X == 0:
+
+			P_legit_X, P_spam_X = 1.0, 1.0
 			for x in range(len(document)):
 				p_s = prob_density( float(document[x]), mean_spam[x], sd_spam[x] )
 				p_l = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
-	
+
 				# P(X=xn|class) -> Lp if otherwise was P(X=xn|class)=0
 				if p_s == 0:
 					P_spam_X *= Lp
 				else:
 					P_spam_X *= p_s
-				
+
 				if p_l == 0:
 					P_legit_X *= Lp
 				else:
-					P_legit_X *= p_l	
+					P_legit_X *= p_l
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -213,11 +219,11 @@ sp_subj_legit = split( w_subj_legit )
 sp_subj_spam  = split( w_subj_spam  )
 
 # Save examples in each fold to csv file
-with open( "body-folds.csv", "wb" ) as f:
+with open( "body-folds.csv", "w" ) as f:
 	writer = csv.writer(f)
 
 	for n in range( FOLD ):
-		writer.writerow( [ "fold" + str( n + 1 ) ] )
+		writer.writerow( [ "fold" +  str( n + 1 ) ] )
 		writer.writerows( [row + ["nonspam"] for row in sp_body_legit[n] ] )
 		writer.writerows( [row + ["spam"] for row in sp_body_spam[n] ] )
 		writer.writerow( [ ] ) # Empty line
@@ -228,7 +234,8 @@ sum_accuracy = 0.0
 #========|| Perform over K-groups ||========#
 
 # Iterate for each for fold
-for test_num in range(0,10):
+for test_num in range( 10 ):
+
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
 
@@ -236,7 +243,7 @@ for test_num in range(0,10):
 	train_legit = []
 	train_spam = []
 
-	for training_num in range( 0, FOLD ):
+	for training_num in range( FOLD ):
 		if training_num != test_num:
 			train_legit.extend( sp_body_legit[training_num] )
 			train_spam.extend(  sp_body_spam[training_num]  )
@@ -251,6 +258,6 @@ for test_num in range(0,10):
 	# Checking accuracy on test data 361:400
 	sum_accuracy += classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-print sum_accuracy / 10.0
+print( sum_accuracy / 10.0 )
 
 
