@@ -1,0 +1,102 @@
+\documentclass[10pt, a4paper]{article}
+
+\usepackage{amssymb,amsmath}
+
+\makeatletter
+\def\@seccntformat#1{%
+  \expandafter\ifx\csname c@#1\endcsname\c@section\else
+  \csname the#1\endcsname\quad
+  \fi}
+\makeatother
+
+\usepackage{fancyhdr}
+\fancyfoot[C]{\thepage}
+\lhead{COMP3608}
+\rhead{Email Classification}
+\pagestyle{fancy}
+
+\begin{document}
+
+\section{Email Classification}
+
+\subsection*{Aim}
+% State aim of study, and write a paragraph about why the problem is important
+
+Email users spend a large amount of time regularly deleting spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. The aim of this study is to examine spam detection using the Naive Bayesian technique. 
+
+With email dominating as the main form of communication, spam detection to remove spam is important as it is a global issue that negatively affects productivity and uses up valuable resources. 
+
+\subsection*{Data Preprocessing and Feature Selection}
+% Briefly describe what you did.
+% Show the number of words for each corpus – initially and after removing the stop-words.
+% List the top 100 words for each corpus and show their DF score. Examine the list. Does the selection make sense to you given the task? Are the two lists similar?
+
+\subsection*{Subject vs Body: Results and Discussion}
+% Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
+
+\begin{tabular}{|l|l|}
+\hline 
+\multicolumn{2}{|l|}{Corpus: Subject} \\ 
+\hline 
+• & Accuracy [\%] \\ 
+\hline 
+ZeroR & • \\ 
+\hline 
+OneR & • \\ 
+\hline 
+1-NN & • \\ 
+\hline 
+3-NN & • \\ 
+\hline 
+NB & • \\ 
+\hline 
+DT & • \\ 
+\hline 
+MLP & • \\ 
+\hline 
+MyNB & • \\ 
+\hline 
+\end{tabular} 
+
+\begin{tabular}{|l|l|}
+\hline 
+\multicolumn{2}{|l|}{Corpus: Body} \\ 
+\hline 
+• & Accuracy [\%] \\ 
+\hline 
+ZeroR & • \\ 
+\hline 
+OneR & • \\ 
+\hline 
+1-NN & • \\ 
+\hline 
+3-NN & • \\ 
+\hline 
+NB & • \\ 
+\hline 
+DT & • \\ 
+\hline 
+MLP & • \\ 
+\hline 
+MyNB & • \\ 
+\hline 
+\end{tabular} 
+
+% Discussion – compare the performance of the classifiers on the 2 corpora, compare your NB with the Weka’s NB, anything else you consider important.
+
+\subsection*{Challenge Results and Discussion}
+% describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
+
+\subsection*{Conclusions}
+% summarize your main findings and, if possible, suggest future work.
+
+The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails. 
+
+By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased. 
+
+\subsection*{Reflection}
+% what was the most important thing you learned from this assignment? (1-2 paragraphs).
+
+\subsection*{Instructions: How to run code}
+
+\end{document}
