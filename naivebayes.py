@@ -71,9 +71,6 @@ def prob_density( x, u, s ):
 	coefficient = 1 / ( s * math.sqrt( 2 * math.pi ) )
 	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
 
-	if s > 0:
-		print(s)
-
 	return coefficient * math.exp(exponent)
 
 #=========|| Naive Bayes ||=========#
@@ -211,6 +208,8 @@ sum_accuracy = 0.0
 
 #========|| Perform over K-groups ||========#
 
+print("Accuracy of Naive on folds")
+
 # Iterate for each for fold
 for test_num in range( 10 ):
 
@@ -234,7 +233,11 @@ for test_num in range( 10 ):
 	# works for mean_legit and sd_legit
 
 	# Checking accuracy on test data 361:400
-	sum_accuracy += classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
+	accuracy = classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-print( sum_accuracy / 10.0 )
+	print( "Test on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
+
+	sum_accuracy += accuracy
+
+print("\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ))
 
