@@ -28,7 +28,7 @@ def read_csv( file_name, legit, spam ):
 					spam.append( row[:-1] )
 			row_num += 1
 
-read_csv( "body.csv", w_body_legit, w_body_spam )
+read_csv( "body-mj.csv", w_body_legit, w_body_spam )
 read_csv( "subject.csv", w_subj_legit, w_subj_spam )
 
 #############################################################################
@@ -63,14 +63,18 @@ def std_dev( column ):
 def prob_density( x, u, s ):
 
 	if s == 0 and x == u:
-		return 1
+		return 1.0
+
 	elif s == 0 and x != u:
-		return 0
+		return 0.00005
 
 	coefficient = ( s * math.sqrt( 2 * math.pi ) )
 	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
 
-	return coefficient * math.exp(exponent)
+	if exponent < -745:
+		print("---", (1/coefficient) * math.exp(exponent))
+
+	return (1/coefficient) * math.exp(exponent)
 
 #=========|| Naive Bayes ||=========#
 # Given: a vector of cosine normed tdidf values of top200 document set terms
@@ -97,6 +101,9 @@ def split( data ):
 #	Calculate mean and standard deviation of data based on given training data
 def train( train_legit, train_spam ):
 
+	# 40 * 9 => legit emails
+	# 20 * 9 => spam emails
+
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
 
@@ -121,22 +128,14 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 	# Number of examples = 60, prob_spam = number of examples which are spam / examples = 20/60
 	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # Number of examples = 60
-	P_spam  = len( test_spam )  / TOTAL_DOCS	# P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
+	P_spam  = len( test_spam )  / TOTAL_DOCS # P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
 	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
 	SPAM = "spam"
 	LEGIT = "nonspam"
 	num_correct = 0
 
-	# Laplace Correction: E[{X+Lp}] = |X|/(|X|+1) * (E[X] + Lp/|X|), E[X] almost certainly 0 => s=E[X]
-	# 		      E[{X+Lp}] = Lp/(|X|+1)
-	Lp = 10.0
-	Lp_legit = Lp/361.0
-	Lp_spam = Lp/181.0
-
-	# Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
-	C = 100.0
-	# Multiplier M * P(spam|X=x) > M * P(nonspam|X=x)
-	M = 1000.0
+	# Lp = 0.05 # Laplace correction used by weka
+	C = 1.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
 
 	# Test on the known legitimate documents
 	for document in test_legit:
@@ -145,36 +144,20 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			p_s,p_l = 1.0, 1.0
+			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			# Define P(Xk|spam)
-			if sd_spam[x] == 0 and float(document[x]) != mean_spam[x]:
-				p_s = M * prob_density( float(document[x]), Lp_spam, Lp_spam )
-				if p_s == 0:
-					print("On S: p.d.f. produced a zero value with x,u,s: ",float(document[x]), Lp_spam)
-					p_s = 0.003
-			else:
-				p_s = M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-
-			# Define P(Xk|nonspam)
-			if sd_legit[x] == 0 and float(document[x]) != mean_legit[x]:
-				p_l = M * prob_density( float(document[x]), Lp_legit, Lp_legit )
-				if p_l == 0:
-					print("On L: p.d.f. produced a zero value with x,u,s: ",float(document[x]), Lp_legit)
-					p_l = 0.003
-			else:
-				p_l = M * prob_density( float(document[x]), mean_legit[x] , sd_legit[x]  )
-
-			# Update P(X|class)
-			P_spam_X  *= M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_legit_X *= M * prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+			# if a != 0.0:
+			# 	P_spam_X  *= a
+			# if b != 0.0:
+			# 	P_legit_X *= b
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
 		P_spam_X  *= P_spam
 
 		# Classify
-		if P_legit_X >= P_spam_X:
+		if C * P_legit_X >= P_spam_X:
 			num_correct += 1
 
 	# Test on the known spam documents
@@ -183,29 +166,13 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			p_s,p_l = 1.0, 1.0
+			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			# Define P(Xk|spam)
-			if sd_spam[x]==0 and float(document[x]) != mean_spam[x]:
-				p_s = M * prob_density( float(document[x]), Lp_spam, Lp_spam )
-				if p_s == 0:
-					print("p.d.f. produced a zero value")
-					p_s = 0.003
-			else:
-				p_s = M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-
-			# Define P(Xk|nonspam)
-			if sd_legit[x] == 0 and float(document[x]) != mean_legit[x]:
-				p_l = M * prob_density( float(document[x]), Lp_legit, Lp_legit )
-				if p_l == 0:
-					print("p.d.f. produced a zero value")
-					p_l = 0.003
-			else:
-				p_l = M * prob_density( float(document[x]), mean_legit[x] , sd_legit[x]  )
-
-			# Update P(X|class)
-			P_spam_X  *= M * prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_legit_X *= M * prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+			# if a != 0:
+			# 	P_spam_X  *= a
+			# if b != 0:
+			# 	P_legit_X *= b
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -231,7 +198,7 @@ with open( "body-folds.csv", "w" ) as f:
 	writer = csv.writer(f)
 
 	for n in range( FOLD ):
-		writer.writerow( [ "fold" + str( n + 1 ) ] )
+		writer.writerow( [ "fold" +  str( n + 1 ) ] )
 		writer.writerows( [row + ["nonspam"] for row in sp_body_legit[n] ] )
 		writer.writerows( [row + ["spam"] for row in sp_body_spam[n] ] )
 		writer.writerow( [ ] ) # Empty line
@@ -243,6 +210,7 @@ sum_accuracy = 0.0
 
 # Iterate for each for fold
 for test_num in range( 10 ):
+
 	mean_legit, mean_spam = [], []
 	sd_legit, sd_spam = [], []
 
@@ -266,3 +234,4 @@ for test_num in range( 10 ):
 	sum_accuracy += classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
 print( sum_accuracy / 10.0 )
+
