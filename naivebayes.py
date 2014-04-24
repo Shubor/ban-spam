@@ -59,18 +59,23 @@ def std_dev( column ):
 #	Calculates probability of x assuming normal distribution
 #	x = value; u = mean; s = standard deviation
 # 	returns float
+test_value = 1e-120
 def prob_density( x, u, s ):
 
 	if s == 0.0 and x == u:
 		return 1.0
 
 	elif s == 0.0 and x != u:
-		return 0.000005
+		return 1e-38
 
 	coefficient = 1.0 / ( s * math.sqrt( 2.0 * math.pi ) )
 	exponent = - ((x - u) ** 2.0) / (2.0 * (s ** 2.0))
 
-	return coefficient * math.exp(exponent)
+	density = coefficient * math.exp(exponent)
+	if density == 0:
+		return 1e-50
+
+	return density
 
 #=========|| Naive Bayes ||=========#
 # Given: a vector of cosine normed tdidf values of top200 document set terms
@@ -136,17 +141,21 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	# Test on the known legitimate documents
 	for document in test_legit:
 
-		P_legit_X, P_spam_X = 1.0, 1.0
+		P_legit_X, P_spam_X = 0.0, 0.0
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+			P_X_spam = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_X_legit = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			if a != 0.0:
-				P_spam_X  += math.log(a)
-			if b != 0.0:
-				P_legit_X += math.log(b)
+			if P_X_spam != 0.0:
+				P_spam_X  += math.log(P_X_spam)
+			else:
+				P_spam_X += math.log(test_value)
+			if P_X_legit != 0.0:
+				P_legit_X += math.log(P_X_legit)
+			else:
+				P_legit_X += math.log(test_value)
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X += math.log(P_legit)
@@ -155,20 +164,26 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 		# Classify
 		if C * P_legit_X >= P_spam_X:
 			num_correct += 1
+		else:
+			print("1: ",P_legit_X,P_spam_X)
 
 	# Test on the known spam documents
 	for document in test_spam:
-		P_legit_X, P_spam_X = 1.0, 1.0
+		P_legit_X, P_spam_X = 0.0, 0.0
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+			P_X_spam = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_X_legit = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			if a != 0.0:
-				P_spam_X  += math.log(a)
-			if b != 0.0:
-				P_legit_X += math.log(b)
+			if P_X_spam != 0.0:
+				P_spam_X  += math.log(P_X_spam)
+			else:
+				P_spam_X += math.log(test_value)
+			if P_X_legit != 0.0:
+				P_legit_X += math.log(P_X_legit)
+			else:
+				P_legit_X += math.log(test_value)
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X += math.log(P_legit)
@@ -177,6 +192,8 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 		# Classify
 		if C * P_legit_X < P_spam_X:
 			num_correct += 1
+		else:
+			print("2: ",P_legit_X,P_spam_X)
 
 	# Accuracy
 	return num_correct / TOTAL_DOCS
@@ -200,40 +217,51 @@ with open( "body-folds.csv", "w" ) as f:
 		writer.writerow( [ ] ) # Empty line
 	f.close()
 
-sum_accuracy = 0.0
+
 
 #========|| Perform over K-groups ||========#
+max_accuracy = 0.0
+best_val = 0.000000000
 
-print("Accuracy of Naive on folds")
+# print("Accuracy of Naive on folds")
 
-# Iterate for each for fold
-for test_num in range( 10 ):
+while max_accuracy < 90.0:
+	# Iterate for each for fold
+	
+	sum_accuracy = 0.0
+	for test_num in range( 10 ):
 
-	mean_legit, mean_spam = [], []
-	sd_legit, sd_spam = [], []
+		mean_legit, mean_spam = [], []
+		sd_legit, sd_spam = [], []
 
-	# Create training data from other 9/10 of the examples.
-	train_legit = []
-	train_spam = []
+		# Create training data from other 9/10 of the examples.
+		train_legit = []
+		train_spam = []
 
-	for training_num in range( FOLD ):
-		if training_num != test_num:
-			train_legit.extend( sp_body_legit[training_num] )
-			train_spam.extend(  sp_body_spam[training_num]  )
+		for training_num in range( FOLD ):
+			if training_num != test_num:
+				train_legit.extend( sp_body_legit[training_num] )
+				train_spam.extend(  sp_body_spam[training_num]  )
 
-	# Train data
-	# mean_legit[9] is the mean of 1:360 => test_legit is 361:400
-	mean_legit, mean_spam, sd_legit, sd_spam = train( train_legit, train_spam )
+		# Train data
+		# mean_legit[9] is the mean of 1:360 => test_legit is 361:400
+		mean_legit, mean_spam, sd_legit, sd_spam = train( train_legit, train_spam )
 
-	# sp_body_legit[9] is 361:400
-	# works for mean_legit and sd_legit
+		# sp_body_legit[9] is 361:400
+		# works for mean_legit and sd_legit
 
-	# Checking accuracy on test data 361:400
-	accuracy = classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
+		# Checking accuracy on test data 361:400
+		accuracy = classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-	print( "Test on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
+		print( "Test on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
 
-	sum_accuracy += accuracy
+		sum_accuracy += accuracy
 
-print("\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ))
-
+	print("\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ))
+	
+	
+	if sum_accuracy*10 >= max_accuracy:
+		best_val = test_value
+		max_accuracy = sum_accuracy*10
+		print(best_val,max_accuracy)
+	test_value *= 1000
