@@ -16,15 +16,14 @@ w_subj_legit, w_subj_spam = [], []
 def read_csv( file_name, legit, spam ):
 
 	with open( file_name, "r" ) as f:
-		row_num = 0
-		for row in csv.reader(f):
+		for row_num, row in enumerate( csv.reader(f) ):
 			# Ignore header
 			if row_num != 0:
-				# Check class of file (stored in last row of csv)
+				# Check class of file (stored in last column of csv)
 				if row[-1] == "nonspam":
 					# Append row, removing class of doc
 					legit.append( row[:-1] )
-				else:
+				elif row[-1] == "spam":
 					spam.append( row[:-1] )
 			row_num += 1
 
@@ -62,14 +61,14 @@ def std_dev( column ):
 # 	returns float
 def prob_density( x, u, s ):
 
-	if s == 0 and x == u:
+	if s == 0.0 and x == u:
 		return 1.0
 
-	elif s == 0 and x != u:
+	elif s == 0.0 and x != u:
 		return 0.000005
 
-	coefficient = 1 / ( s * math.sqrt( 2 * math.pi ) )
-	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
+	coefficient = 1.0 / ( s * math.sqrt( 2.0 * math.pi ) )
+	exponent = - ((x - u) ** 2.0) / (2.0 * (s ** 2.0))
 
 	return coefficient * math.exp(exponent)
 
@@ -144,17 +143,14 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			# if a > 1:
-			# 	print(a)
-
 			if a != 0.0:
-				P_spam_X  *= a
+				P_spam_X  += math.log(a)
 			if b != 0.0:
-				P_legit_X *= b
+				P_legit_X += math.log(b)
 
 		# P(class|X) = P(X|class) P(class)
-		P_legit_X *= P_legit
-		P_spam_X  *= P_spam
+		P_legit_X += math.log(P_legit)
+		P_spam_X  += math.log(P_spam)
 
 		# Classify
 		if C * P_legit_X >= P_spam_X:
@@ -169,14 +165,14 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			if a != 0:
-				P_spam_X  *= a
-			if b != 0:
-				P_legit_X *= b
+			if a != 0.0:
+				P_spam_X  += math.log(a)
+			if b != 0.0:
+				P_legit_X += math.log(b)
 
 		# P(class|X) = P(X|class) P(class)
-		P_legit_X *= P_legit
-		P_spam_X  *= P_spam
+		P_legit_X += math.log(P_legit)
+		P_spam_X  += math.log(P_spam)
 
 		# Classify
 		if C * P_legit_X < P_spam_X:
