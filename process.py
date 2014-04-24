@@ -49,7 +49,7 @@ with open('english.stop', 'rU') as stop_file:
 # Append words to either subject or body list
 for file in os.listdir(path):
 	num_files += 1
-	f = gzip.open(os.path.join(path, file), 'rb')
+	f = gzip.open(os.path.join(path, file), "rb")
 
 	# Counter data structure to store DF of each word in current file
 	curr_body_corpus = Counter()
@@ -58,9 +58,10 @@ for file in os.listdir(path):
 	try:
 		for line in f:
 			# Replace punctuation with space
-			l = re.sub('[%s]' % re.escape(punctuation), ' ', line)
+			line = line.decode("utf-8")
+			l = re.sub('[%s]' % re.escape(punctuation), " ", line)
 			# Subject corpus
-			if line.startswith('Subject:'):
+			if line.startswith("Subject:"):
 				for word in l.split():
 					if not clean(word):
 						if word != 'Subject':
@@ -162,7 +163,7 @@ for document in c_subj_spam:
 def write_csv( file_name, legit, spam ):
 	header = [ "f" + str(x) for x in range(1, N + 1) ]
 	header.append("class")
-	with open(file_name, "wb") as f:
+	with open(file_name, "w") as f:
 		writer = csv.writer(f)
 		writer.writerow(header)
 		writer.writerows( [row + ["nonspam"] for row in legit] )

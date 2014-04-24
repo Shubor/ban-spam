@@ -28,7 +28,7 @@ def read_csv( file_name, legit, spam ):
 					spam.append( row[:-1] )
 			row_num += 1
 
-read_csv( "body-mj.csv", w_body_legit, w_body_spam )
+read_csv( "body.csv", w_body_legit, w_body_spam )
 read_csv( "subject.csv", w_subj_legit, w_subj_spam )
 
 #############################################################################
@@ -66,15 +66,15 @@ def prob_density( x, u, s ):
 		return 1.0
 
 	elif s == 0 and x != u:
-		return 0.00005
+		return 0.000005
 
-	coefficient = ( s * math.sqrt( 2 * math.pi ) )
+	coefficient = 1 / ( s * math.sqrt( 2 * math.pi ) )
 	exponent = - ((x - u) ** 2) / (2 * (s ** 2))
 
-	if exponent < -745:
-		print("---", (1/coefficient) * math.exp(exponent))
+	if s > 0:
+		print(s)
 
-	return (1/coefficient) * math.exp(exponent)
+	return coefficient * math.exp(exponent)
 
 #=========|| Naive Bayes ||=========#
 # Given: a vector of cosine normed tdidf values of top200 document set terms
@@ -147,10 +147,13 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			# if a != 0.0:
-			# 	P_spam_X  *= a
-			# if b != 0.0:
-			# 	P_legit_X *= b
+			# if a > 1:
+			# 	print(a)
+
+			if a != 0.0:
+				P_spam_X  *= a
+			if b != 0.0:
+				P_legit_X *= b
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
@@ -169,10 +172,10 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 			a = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
 			b = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			# if a != 0:
-			# 	P_spam_X  *= a
-			# if b != 0:
-			# 	P_legit_X *= b
+			if a != 0:
+				P_spam_X  *= a
+			if b != 0:
+				P_legit_X *= b
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X *= P_legit
