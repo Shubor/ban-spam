@@ -21,7 +21,6 @@
 
 \subsection*{Aim}
 % State aim of study, and write a paragraph about why the problem is important
-
 The aim of this study is to implement text classification of emails using the Naive Bayes classifier for spam detection.
 
 With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. 
@@ -35,8 +34,8 @@ The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-
 \begin{enumerate}
 \item For each file in the sample set \emph{Lingpspam-mini600}:
 	\begin{itemize}
-	\item Open the file and read it line by line.
-	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
+	\item File opened and read line by line.
+	\item All punctuation and special symbols from each line are replaced with a space. (e.g. ``don't" becomes ``don", ``t")
 	\item The corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 	\item Words from each line are extracted using space as a delimiter.
 	\item Stop words, numbers and words containing digits are removed.
@@ -49,7 +48,6 @@ The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-
 \end{enumerate}
 
 % Show the number of words for each corpus – initially and after removing the stop-words.
-
 The removal of stop words is an important process in text processing, as it filters out extremely common words that have little value in classification. Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpuses respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
