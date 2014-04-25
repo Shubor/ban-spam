@@ -89,6 +89,55 @@ for file in os.listdir(path):
 	finally:
 		f.close()
 
+
+df_body = Counter()
+df_subj = Counter()
+# Append words to either subject or body list
+for file in os.listdir(path):
+	f = gzip.open(os.path.join(path, file), "r")
+
+	# Counter data structure to store DF of each word in current file
+	curr_body_corpus = Counter()
+	curr_subj_corpus = Counter()
+
+	try:
+		for line in f:
+			# Replace punctuation with space
+			line = line.decode("utf-8")
+			l = re.sub('[%s]' % re.escape(punctuation), " ", line)
+			# Subject corpus
+			if line.startswith("Subject:"):
+				for word in l.split():
+					if not clean(word):
+						if word != 'Subject':
+							curr_subj_corpus[word] += 1
+					if word in stop_words:
+						curr_subj_corpus[word] += 1
+			# Body corpus
+			else:
+				for word in l.split():
+					if not clean(word):
+						curr_body_corpus[word] += 1
+					if word in stop_words:
+						curr_body_corpus[word] += 1
+
+
+
+		# Update number of documents with term word i.e. #Tr(t_k)
+		for word in curr_body_corpus:
+			df_body[word] += 1
+		for word in curr_subj_corpus:
+			df_subj[word] += 1
+
+	finally:
+		f.close()
+
+def print_top_100_elements_in_LaTeX_tabular_form( x ):
+	# x and y are lists of top 100 in sorted order
+	for i in range(20):
+		print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( x[i][0], x[i][1], x[i+20][0], x[i+20][1], x[i+40][0], x[i+40][1], x[i+60][0], x[i+60][1], x[i+80][0], x[i+80][1] ))
+print_top_100_elements_in_LaTeX_tabular_form( body_corpus.most_common(100) )
+
 #############################################################################
 # Feature weighting with tf-idf, then cosine normalisation of top 200 words #
 #############################################################################
