@@ -1,13 +1,15 @@
 \documentclass[10pt, a4paper]{article}
 
 \usepackage{amssymb,amsmath}
+\usepackage[showframe=false]{geometry}
+\usepackage{hyperref}
 
-\makeatletter
-\def\@seccntformat#1{%
-  \expandafter\ifx\csname c@#1\endcsname\c@section\else
-  \csname the#1\endcsname\quad
-  \fi}
-\makeatother
+%\makeatletter
+%\def\@seccntformat#1{%
+%  \expandafter\ifx\csname c@#1\endcsname\c@section\else
+%  \csname the#1\endcsname\quad
+%  \fi}
+%\makeatother
 
 \usepackage{fancyhdr}
 \fancyfoot[C]{\thepage}
@@ -15,27 +17,32 @@
 \rhead{Email Classification}
 \pagestyle{fancy}
 
+\title{Email Classification}
+\author{Mitchell Della-Marta, Shu Han Bor}
+\date{}
+
 \begin{document}
 
-\section{Email Classification}
+\maketitle
 
-\subsection*{Aim}
+\section{Aim}
 % State aim of study, and write a paragraph about why the problem is important
+
 The aim of this study is to implement text classification of emails using the Naive Bayes classifier for spam detection.
 
-With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. 
+With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required.
 
-Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware. Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques. 
+Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware. Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
 
-\subsection*{Data Preprocessing and Feature Selection}
+\section{Data Preprocessing and Feature Selection}
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. A feature selection method - \emph{document frequency} - is then used, which picks the best features to use to build a classifier for the given documents. Then the representation is discretised using \emph{tf-idf} to weigh selected words, then normalised using \emph{cosine normalisation}. 
+The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. A feature selection method - \emph{document frequency} - is then used, which picks the best features to use to build a classifier for the given documents. Then the representation is discretised using \emph{tf-idf} to weigh selected words, then normalised using \emph{cosine normalisation}.
 
 \begin{enumerate}
 \item For each file in the sample set \emph{Lingpspam-mini600}:
 	\begin{itemize}
-	\item File opened and read line by line.
-	\item All punctuation and special symbols from each line are replaced with a space. (e.g. ``don't" becomes ``don", ``t")
+	\item Open the file and read it line by line.
+	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
 	\item The corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 	\item Words from each line are extracted using space as a delimiter.
 	\item Stop words, numbers and words containing digits are removed.
@@ -43,84 +50,187 @@ The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-
 	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding sub-corpus.
 	\end{itemize}
 \item The words with the top 200 Document Frequency (words which are appeared in the most number of documents) in each corpus was selected for the features of that corpus.
-\item For each selected word, its \emph{tf-idf} score is calculated.
+\item For each selected word, the \emph{tf-idf} score of each word is calculated.
 \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
 \end{enumerate}
 
 % Show the number of words for each corpus – initially and after removing the stop-words.
-The removal of stop words is an important process in text processing, as it filters out extremely common words that have little value in classification. Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpuses respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
+Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpora respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
+\begin{table}[h!]
+\caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\hskip-.8cm \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
+\hline
+\textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}\\
+\hline\hline
+1 & sum & 30 & 35 & armey & 6 & 69 & address & 4 \\
+2 & summary & 26 & 36 & workshop & 6 & 70 & information & 4 \\
+3 & english & 24 & 37 & dick & 6 & 71 & future & 3 \\
+4 & language & 21 & 38 & internet & 6 & 72 & offer & 3 \\
+5 & free & 20 & 39 & languages & 5 & 73 & decimal & 3 \\
+6 & disc & 19 & 40 & grammar & 5 & 74 & chomsky & 3 \\
+7 & query & 18 & 41 & word & 5 & 75 & double & 3 \\
+8 & linguistics & 15 & 42 & research & 5 & 76 & change & 3 \\
+9 & sex & 13 & 43 & time & 5 & 77 & credit & 3 \\
+10 & comparative & 13 & 44 & linguist & 5 & 78 & opportunity & 3 \\
+11 & words & 12 & 45 & software & 5 & 79 & requested & 3 \\
+12 & opposites & 12 & 46 & needed & 5 & 80 & dental & 3 \\
+13 & email & 10 & 47 & native & 5 & 81 & reference & 3 \\
+14 & book & 10 & 48 & resources & 5 & 82 & school & 3 \\
+15 & call & 9 & 49 & spanish & 5 & 83 & counting & 3 \\
+16 & job & 9 & 50 & list & 5 & 84 & french & 3 \\
+17 & method & 9 & 51 & jobs & 5 & 85 & released & 3 \\
+18 & japanese & 8 & 52 & american & 4 & 86 & world & 3 \\
+19 & correction & 8 & 53 & request & 4 & 87 & linguists & 3 \\
+20 & chinese & 7 & 54 & intuitions & 4 & 88 & site & 3 \\
+21 & program & 7 & 55 & www & 4 & 89 & misc & 3 \\
+22 & syntax & 7 & 56 & read & 4 & 90 & addresses & 3 \\
+23 & announcement & 7 & 57 & pig & 4 & 91 & uniformitarianism & 3 \\
+24 & qs & 7 & 58 & programs & 4 & 92 & video & 3 \\
+25 & million & 7 & 59 & secrets & 4 & 93 & life & 3 \\
+26 & money & 6 & 60 & phonetics & 4 & 94 & debt & 3 \\
+27 & mail & 6 & 61 & banning & 4 & 95 & make & 3 \\
+28 & slip & 6 & 62 & books & 4 & 96 & youthese & 3 \\
+29 & business & 6 & 63 & fwd & 4 & 97 & names & 3 \\
+30 & part & 6 & 64 & great & 4 & 98 & corpus & 3 \\
+31 & speaker & 6 & 65 & unlimited & 4 & 99 & policy & 3 \\
+32 & lang & 6 & 66 & summer & 4 & 100 & dutch & 3 \\
+33 & conference & 6 & 67 & systems & 4 &  &  &  \\
+34 & german & 6 & 68 & web & 4 &  &  &  \\
+\hline
+\end{tabular}
+\label{table:subjcorpus}
+\end{table}
 
+\begin{table}[h!]
+\caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\begin{tabular}{|c|l|c||c|l|c||c|l|c|}
+\hline
+\textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}\\
+\hline\hline
+1 & information & 205 & 35 & word & 91 & 69 & system & 74 \\
+2 & language & 192 & 36 & ll & 89 & 70 & full & 74 \\
+3 & mail & 183 & 37 & receive & 88 & 71 & ac & 73 \\
+4 & university & 179 & 38 & check & 88 & 72 & today & 73 \\
+5 & time & 178 & 39 & phone & 88 & 73 & remove & 72 \\
+6 & list & 171 & 40 & good & 87 & 74 & interest & 72 \\
+7 & address & 165 & 41 & year & 86 & 75 & questions & 72 \\
+8 & english & 159 & 42 & day & 86 & 76 & john & 71 \\
+9 & linguistics & 156 & 43 & interested & 86 & 77 & found & 70 \\
+10 & http & 156 & 44 & case & 85 & 78 & related & 70 \\
+11 & people & 146 & 45 & working & 85 & 79 & site & 69 \\
+12 & send & 146 & 46 & include & 85 & 80 & linguist & 69 \\
+13 & free & 144 & 47 & based & 84 & 81 & usa & 69 \\
+14 & make & 140 & 48 & ve & 84 & 82 & text & 68 \\
+15 & email & 133 & 49 & home & 83 & 83 & read & 68 \\
+16 & work & 128 & 50 & part & 83 & 84 & point & 68 \\
+17 & number & 128 & 51 & note & 83 & 85 & ago & 67 \\
+18 & www & 122 & 52 & made & 83 & 86 & week & 67 \\
+19 & languages & 119 & 53 & mailing & 81 & 87 & book & 67 \\
+20 & find & 118 & 54 & including & 81 & 88 & dear & 66 \\
+21 & fax & 116 & 55 & type & 80 & 89 & making & 66 \\
+22 & order & 108 & 56 & web & 79 & 90 & cost & 66 \\
+23 & call & 103 & 57 & give & 79 & 91 & question & 65 \\
+24 & form & 101 & 58 & program & 79 & 92 & simply & 65 \\
+25 & research & 100 & 59 & place & 79 & 93 & offer & 63 \\
+26 & linguistic & 99 & 60 & line & 78 & 94 & general & 63 \\
+27 & state & 99 & 61 & special & 78 & 95 & received & 63 \\
+28 & world & 98 & 62 & date & 78 & 96 & data & 62 \\
+29 & years & 98 & 63 & days & 77 & 97 & important & 62 \\
+30 & subject & 98 & 64 & back & 76 & 98 & ca & 61 \\
+31 & contact & 97 & 65 & internet & 76 & 99 & summary & 61 \\
+32 & de & 96 & 66 & service & 75 & 100 & long & 61 \\
+33 & money & 94 & 67 & american & 75 &  &  &  \\
+34 & word & 91 & 68 & business & 74 &  &  &  \\
+\hline
+\end{tabular}
+\label{table:bodycorpus}
+\end{table}
 
 % Does the selection make sense to you given the task? Are the two lists similar?
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. In fact, our classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
 
-\subsection*{Subject vs Body: Results and Discussion}
+\section{Subject vs Body Analysis}
+
+\subsection{Results}
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
 \begin{tabular}{|l|l|}
-\hline 
-\multicolumn{2}{|l|}{Corpus: Subject} \\ 
-\hline 
-• & Accuracy [\%] \\ 
-\hline 
-ZeroR & • \\ 
-\hline 
-OneR & • \\ 
-\hline 
-1-NN & • \\ 
-\hline 
-3-NN & • \\ 
-\hline 
-NB & • \\ 
-\hline 
-DT & • \\ 
-\hline 
-MLP & • \\ 
-\hline 
-MyNB & • \\ 
-\hline 
-\end{tabular} 
+\hline
+\multicolumn{2}{|l|}{Corpus: Subject} \\
+\hline
+• & Accuracy [\%] \\
+\hline
+ZeroR & • \\
+\hline
+OneR & • \\
+\hline
+1-NN & • \\
+\hline
+3-NN & • \\
+\hline
+NB & • \\
+\hline
+DT & • \\
+\hline
+MLP & • \\
+\hline
+MyNB & • \\
+\hline
+\end{tabular}
 
 \begin{tabular}{|l|l|}
-\hline 
-\multicolumn{2}{|l|}{Corpus: Body} \\ 
-\hline 
-• & Accuracy [\%] \\ 
-\hline 
-ZeroR & • \\ 
-\hline 
-OneR & • \\ 
-\hline 
-1-NN & • \\ 
-\hline 
-3-NN & • \\ 
-\hline 
-NB & • \\ 
-\hline 
-DT & • \\ 
-\hline 
-MLP & • \\ 
-\hline 
-MyNB & • \\ 
-\hline 
-\end{tabular} 
+\hline
+\multicolumn{2}{|l|}{Corpus: Body} \\
+\hline
+• & Accuracy [\%] \\
+\hline
+ZeroR & • \\
+\hline
+OneR & • \\
+\hline
+1-NN & • \\
+\hline
+3-NN & • \\
+\hline
+NB & • \\
+\hline
+DT & • \\
+\hline
+MLP & • \\
+\hline
+MyNB & • \\
+\hline
+\end{tabular}
+
+\subsection{Discussion}
 
 % Discussion – compare the performance of the classifiers on the 2 corpora, compare your NB with the Weka’s NB, anything else you consider important.
 
-\subsection*{Challenge Results and Discussion}
+\section{Challenge Analysis}
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
 
-\subsection*{Conclusions}
+\subsection{Results}
+
+\subsection{Discussion}
+
+\section{Conclusions}
 % summarize your main findings and, if possible, suggest future work.
 
-The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails. 
+The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails.
 
-By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased. 
+By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
 
-\subsection*{Reflection}
+\section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
 
-\subsection*{Instructions: How to run code}
+\section{Instructions: How to run code}
+
+\section{Bibliography}
 
 \end{document}
