@@ -52,10 +52,12 @@ $$ tf-idf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
 $$ w_kj = \frac{tf-idf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tf-idf(t_s, d_j))^2 }} $$
 \end{enumerate}
 
+\subsection{Data Characteristics}
+
 \setlength\extrarowheight{3pt}
 \begin{table}[H]
 \centering
-\caption{Data characteristics}\vspace{1em}
+\caption{Characteristics of dataset}\vspace{1em}
 \begin{tabular}{|l||c|c|}
 \hline
 & \textbf{Subject} & \textbf{Body} \\
@@ -77,14 +79,14 @@ The ``bag-of-words" model produced 19886 and 1074 features in the body and subje
 % Does the selection make sense to you given the task? Are the two lists similar?
 Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
 
-Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. In fact, our classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. %Classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
 
 A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
 \begin{table}[H]
 \caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
-\hskip-.8cm \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
+\hskip-.7cm \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
 \hline
 \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
 	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
@@ -181,57 +183,96 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 \subsection{Results}
 
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
-\begin{tabular}{|l|l|}
-\hline
-\multicolumn{2}{|l|}{Corpus: Subject} \\
-\hline
-• & Accuracy [\%] \\
-\hline
-ZeroR & 66.67 \\
-\hline
-OneR & 70.00 \\
-\hline
-1-NN & 80.00 \\
-\hline
-3-NN & 69.83 \\
-\hline
-NB & 68.5 \\
-\hline
-DT & 66.67 \\
-\hline
-MLP & 78.17 \\
-\hline
-MyNB & • \\
-\hline
-\end{tabular}
 
-\begin{tabular}{|l|l|}
+% \begin{table}[H]
+% \centering
+% \caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
+% \begin{tabular}{|l|l|}
+% \hline
+% \multicolumn{2}{|l|}{\textbf{Corpus: Subject}} \\
+% \hline
+% • & \textbf{Accuracy [\%]} \\
+% \hline
+% ZeroR & 66.67 \\
+% \hline
+% OneR & 70.00 \\
+% \hline
+% 1-NN & 80.00 \\
+% \hline
+% 3-NN & 69.83 \\
+% \hline
+% NB & 68.5 \\
+% \hline
+% DT & 66.67 \\
+% \hline
+% MLP & 78.17 \\
+% \hline
+% MyNB & • \\
+% \hline
+% \end{tabular}
+% \begin{tabular}{|l|l|}
+% \hline
+% \multicolumn{2}{|l|}{\textbf{Corpus: Body}} \\
+% \hline
+% • & \textbf{Accuracy [\%]} \\
+% \hline
+% ZeroR & 66.67 \\
+% \hline
+% OneR & 82.00 \\
+% \hline
+% 1-NN & 87.17 \\
+% \hline
+% 3-NN & 84.33 \\
+% \hline
+% NB & 94.67 \\
+% \hline
+% DT & 92.50 \\
+% \hline
+% MLP & 96.67 \\
+% \hline
+% MyNB & 94.83 \\
+% \hline
+% \end{tabular}
+% \label{table:results}
+% \end{table}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
+\begin{tabular}{|l||c|c|}
 \hline
-\multicolumn{2}{|l|}{Corpus: Body} \\
+• & \textbf{Corpus: Subject} & \textbf{Corpus: Body} \\
 \hline
-• & Accuracy [\%] \\
+& \multicolumn{2}{c|}{\textbf{Accuracy [\%]}} \\
+\hline\hline
+ZeroR & 66.67 & 66.67 \\
 \hline
-ZeroR & 66.67 \\
+OneR & 70.00 & 82.00 \\
 \hline
-OneR & 82.00 \\
+1-NN & 80.00 & 87.17 \\
 \hline
-1-NN & 87.17 \\
+3-NN & 69.83 & 84.33 \\
 \hline
-3-NN & 84.33 \\
+NB & 68.5 & 94.67 \\
 \hline
-NB & 94.67 \\
+DT & 66.67 & 92.50 \\
 \hline
-DT & 92.50 \\
+MLP & 78.17 & 96.67 \\
 \hline
-MLP & 96.67 \\
-\hline
-MyNB & 94.83 \\
+MyNB & • & 94.83 \\
 \hline
 \end{tabular}
+\label{table:results}
+\end{table}
 
 \subsection{Discussion}
 
 % Discussion – compare the performance of the classifiers on the 2 corpora, compare your NB with the Weka’s NB, anything else you consider important.
+%
+% -correct and deep discussion of the results
+% ----comparison between the classifiers (accuracy, training time, other advantages)
+% ----myNB vs Weka’s NB
+% ----comparison between the 2 corpora
 
 \section{Challenge Analysis}
 
