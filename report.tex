@@ -1,5 +1,7 @@
 \documentclass[10pt, a4paper]{article}
 
+\usepackage{array}
+\usepackage{float}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{amssymb,amsmath}
@@ -11,9 +13,8 @@
 \rhead{Email Classification}
 \pagestyle{fancy}
 
-\title{Email Classification}
+\title{Email Classification with Na\"ive Bayes}
 \author{Mitchell Della-Marta, Shu Han Bor}
-\date{}
 
 \begin{document}
 
@@ -22,38 +23,66 @@
 \section{Aim}
 
 % State aim of study, and write a paragraph about why the problem is important
-The aim of this study is to implement text classification of emails using the Naive Bayes classifier for spam detection.
+The aim of this study is to implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
 
 With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required.
 
 Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware. Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
 
-\section{Data Preprocessing and Feature Selection}
+\section{Data Preprocessing}
 
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}.
+The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}\cite{sebastiani}.
 
 \begin{enumerate}
 \item For each file in the sample set \emph{Lingpspam-mini600}:
 	\begin{enumerate}[label*=\arabic*.]
 	\item Open the file and read it line by line.
-	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
+	\item Replace all punctuation and special symbols from each line with a space (e.g. ``don't" becomes ``don", ``t").
 	\item The sub-corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 	\item Words from each line are extracted using space as a delimiter.
 	\item Stop words, numbers and words containing digits are removed.
-	\item A counter is created for both corpora. For each word that appears in the email add it to its respective counter.
+	\item A counter is created for both corpora. For each word that appears in the email, it is added to its respective counter.
 	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
 	\end{enumerate}
-\item In each corpus the words with the top 200 Document Frequency (words which are appeared in the most number of documents) were selected as features for that corpus.
+\item In each corpus the words with the top 200 document frequency score (words which appear in the most number of documents) are selected as features for that corpus.
 \item For each feature, its \emph{tf-idf} score is calculated.
+$$ tf-idf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
 \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
+$$ w_kj = \frac{tf-idf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tf-idf(t_s, d_j))^2 }} $$
 \end{enumerate}
 
+\setlength\extrarowheight{3pt}
+\begin{table}[H]
+\centering
+\caption{Data characteristics}\vspace{1em}
+\begin{tabular}{|l||c|c|}
+\hline
+& \textbf{Subject} & \textbf{Body} \\
+\hline\hline
+\# Features before removing stop words & 1074 & 19886 \\
+\# Features after removing stop words & 915 & 19386 \\
+\# $Class_{nonspam}$ & 600 & 600 \\
+\# $Class_{spam}$ & 200 & 200 \\
+\hline
+\end{tabular}
+\label{table:datacharacteristics}
+\end{table}
+
 % Show the number of words for each corpus – initially and after removing the stop-words.
-Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpora respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
+The ``bag-of-words" model produced 19886 and 1074 features in the body and subject corpora respectively. After the removal of stop words, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus (see \autoref{table:datacharacteristics}).
+
+\section{Feature Selection}
+
+% Does the selection make sense to you given the task? Are the two lists similar?
+Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
+
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. In fact, our classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
+
+A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
-\begin{table}[h!]
+\begin{table}[H]
 \caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
 \hskip-.8cm \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
 \hline
@@ -100,7 +129,7 @@ Before stop words were removed, there were 19886 and 1074 unique words in the bo
 \label{table:subjcorpus}
 \end{table}
 
-\begin{table}[h!]
+\begin{table}[H]
 \caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}\vspace{1em}
 \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
 \hline
@@ -146,9 +175,6 @@ Before stop words were removed, there were 19886 and 1074 unique words in the bo
 \end{tabular}
 \label{table:bodycorpus}
 \end{table}
-
-% Does the selection make sense to you given the task? Are the two lists similar?
-Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. In fact, our classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
 
 \section{Subject vs Body Analysis}
 
@@ -199,7 +225,7 @@ DT & 92.50 \\
 \hline
 MLP & 96.67 \\
 \hline
-MyNB & • \\
+MyNB & 94.83 \\
 \hline
 \end{tabular}
 
@@ -227,6 +253,15 @@ By taking into account permutations of consecutive words, or words that appear w
 
 \section{Instructions: How to run code}
 
-\section{Bibliography}
+\begin{thebibliography}{9}
+
+\bibitem{sebastiani}
+  Fabrizio Sebastiani,
+  \emph{Machine learning in automated text categorization}.
+  ACM Computing Surveys,
+  34(1):1-47,
+  2002.
+
+\end{thebibliography}
 
 \end{document}
