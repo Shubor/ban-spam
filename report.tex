@@ -36,21 +36,21 @@ Classification of emails to separate and remove spam from other emails, aims to 
 
 \section{Data Preprocessing and Feature Selection}
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. A feature selection method - \emph{document frequency} - is then used, which picks the best features to use to build a classifier for the given documents. Then the representation is discretised using \emph{tf-idf} to weigh selected words, then normalised using \emph{cosine normalisation}.
+The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}.
 
 \begin{enumerate}
 \item For each file in the sample set \emph{Lingpspam-mini600}:
-	\begin{itemize}
+	\begin{enumerate}[label*=\arabic*.]
 	\item Open the file and read it line by line.
 	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
-	\item The corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+	\item The sub-corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 	\item Words from each line are extracted using space as a delimiter.
 	\item Stop words, numbers and words containing digits are removed.
-	\item A counter is created for each word in the email.
-	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding sub-corpus.
-	\end{itemize}
-\item The words with the top 200 Document Frequency (words which are appeared in the most number of documents) in each corpus was selected for the features of that corpus.
-\item For each selected word, the \emph{tf-idf} score of each word is calculated.
+	\item A counter is created for both corpora. For each word that appears in the email add it to its respective counter.
+	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
+	\end{enumerate}
+\item In each corpus the words with the top 200 Document Frequency (words which are appeared in the most number of documents) were selected as features for that corpus.
+\item For each feature, its \emph{tf-idf} score is calculated.
 \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
 \end{enumerate}
 
@@ -166,19 +166,19 @@ Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 1
 \hline
 • & Accuracy [\%] \\
 \hline
-ZeroR & • \\
+ZeroR & 66.67 \\
 \hline
-OneR & • \\
+OneR & 70.00 \\
 \hline
-1-NN & • \\
+1-NN & 80.00 \\
 \hline
-3-NN & • \\
+3-NN & 69.83 \\
 \hline
-NB & • \\
+NB & 68.5 \\
 \hline
-DT & • \\
+DT & 66.67 \\
 \hline
-MLP & • \\
+MLP & 78.17 \\
 \hline
 MyNB & • \\
 \hline
@@ -190,19 +190,19 @@ MyNB & • \\
 \hline
 • & Accuracy [\%] \\
 \hline
-ZeroR & • \\
+ZeroR & 66.67 \\
 \hline
-OneR & • \\
+OneR & 82.00 \\
 \hline
-1-NN & • \\
+1-NN & 87.17 \\
 \hline
-3-NN & • \\
+3-NN & 84.33 \\
 \hline
-NB & • \\
+NB & 94.67 \\
 \hline
-DT & • \\
+DT & 92.50 \\
 \hline
-MLP & • \\
+MLP & 96.67 \\
 \hline
 MyNB & • \\
 \hline
