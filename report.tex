@@ -22,14 +22,40 @@
 \subsection*{Aim}
 % State aim of study, and write a paragraph about why the problem is important
 
-Email users spend a large amount of time regularly deleting spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. The aim of this study is to examine spam detection using the Naive Bayesian technique. 
+The aim of this study is to implement text classification of emails using the Naive Bayes classifier for spam detection.
 
-With email dominating as the main form of communication, spam detection to remove spam is important as it is a global issue that negatively affects productivity and uses up valuable resources. 
+With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. 
+
+Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware. Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques. 
 
 \subsection*{Data Preprocessing and Feature Selection}
 % Briefly describe what you did.
+The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. A feature selection method - \emph{document frequency} - is then used, which picks the best features to use to build a classifier for the given documents. Then the representation is discretised using \emph{tf-idf} to weigh selected words, then normalised using \emph{cosine normalisation}. 
+
+\begin{enumerate}
+\item For each file in the sample set \emph{Lingpspam-mini600}:
+	\begin{itemize}
+	\item Open the file and read it line by line.
+	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
+	\item The corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+	\item Words from each line are extracted using space as a delimiter.
+	\item Stop words, numbers and words containing digits are removed.
+	\item A counter is created for each word in the email.
+	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding sub-corpus.
+	\end{itemize}
+\item The words with the top 200 Document Frequency (words which are appeared in the most number of documents) in each corpus was selected for the features of that corpus.
+\item For each selected word, its \emph{tf-idf} score is calculated.
+\item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
+\end{enumerate}
+
 % Show the number of words for each corpus – initially and after removing the stop-words.
-% List the top 100 words for each corpus and show their DF score. Examine the list. Does the selection make sense to you given the task? Are the two lists similar?
+
+The removal of stop words is an important process in text processing, as it filters out extremely common words that have little value in classification. Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpuses respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
+
+% List the top 100 words for each corpus and show their DF score. Examine the list.
+
+
+% Does the selection make sense to you given the task? Are the two lists similar?
 
 \subsection*{Subject vs Body: Results and Discussion}
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
