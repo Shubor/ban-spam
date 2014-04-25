@@ -1,6 +1,7 @@
 \documentclass[10pt, a4paper]{article}
 
 \usepackage{amssymb,amsmath}
+\usepackage{longtable}
 
 \makeatletter
 \def\@seccntformat#1{%
@@ -31,7 +32,7 @@ Spam emails are usually sent to derive cash from the user either directly by tri
 \subsection*{Data Preprocessing and Feature Selection}
 % Briefly describe what you did.
 The files in the sample set \emph{Lingpspam-mini600} were read individually and line by line.
-\begin{itemize}
+\begin{enumerate}
 \item Open a file in the set and read it line by line.
 \item If the line begins with \"Subject:\" assume it is of the subject corpus, otherwise it is of the body corpus.
 \item All punctuation is replaced with whitespace.
@@ -40,10 +41,10 @@ The files in the sample set \emph{Lingpspam-mini600} were read individually and 
 \item The words with the top 200 Document Frequency (words which are appeared in the most number of documents) in each corpus was selected for the features of that corpus.
 \item The TD-IDF for each feature was calculated.
 \item TD-IDF values were then normalised using Cosine Normalisation.
-\end{itemize}
+\end{enumerate}
 
 % Show the number of words for each corpus – initially and after removing the stop-words.
-\begin{tabular}{l c l c}
+\begin{longtable}{l c l c}
 information & 205 & the & 549 \\
 language & 192 & of & 541 \\
 mail & 183 & and & 533 \\
@@ -144,9 +145,9 @@ data & 62 & them & 140 \\
 summary & 61 & am & 140 \\
 ca & 61 & make & 140 \\
 long & 61 & does & 136 \\
-\end{tabular}
+\end{longtable}
 
-\begin{tabular}{l c l c}
+\begin{longtable}{l c l c}
 sum & 30 & re & 82 \\
 summary & 26 & in & 49 \\
 english & 24 & and & 49 \\
@@ -247,7 +248,7 @@ requested & 3 & programs & 4 \\
 verbal & 3 & phonetics & 4 \\
 debt & 3 & hi & 4 \\
 dental & 3 & he & 4 \\
-\end{tabular}
+\end{longtable}
 % List the top 100 words for each corpus and show their DF score. Examine the list. Does the selection make sense to you given the task? Are the two lists similar?
 
 \subsection*{Subject vs Body: Results and Discussion}
