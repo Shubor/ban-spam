@@ -2,10 +2,13 @@
 
 \usepackage{array}
 \usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{amssymb,amsmath}
 \usepackage[showframe=false]{geometry}
+\usepackage[font=small,format=plain,labelfont={bf,up}]{caption}
 
 \usepackage{fancyhdr}
 \fancyfoot[C]{\thepage}
@@ -14,20 +17,29 @@
 \pagestyle{fancy}
 
 \title{Email Classification with Na\"ive Bayes}
-\author{Mitchell Della-Marta, Shu Han Bor}
+\author{Mitchell Della Marta, Shu Bor}
+\date{}
+
+% \captionsetup{format = upper}
 
 \begin{document}
 
+\renewcommand\thetable{\Roman{table}}
+
 \maketitle
 
-\section{Aim}
+\section{Introduction}
+
+\subsection{Aim}
 
 % State aim of study, and write a paragraph about why the problem is important
-The aim of this study is to implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
+To implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
 
-With email dominating as the main form of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required.
+\subsection{Importance}
 
-Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware. Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
+As email is one of the main forms of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. %Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware.
+
+Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
 
 \section{Data Preprocessing}
 
@@ -47,26 +59,27 @@ The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-
 	\end{enumerate}
 \item In each corpus the words with the top 200 document frequency score (words which appear in the most number of documents) are selected as features for that corpus.
 \item For each feature, its \emph{tf-idf} score is calculated.
-$$ tf-idf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
+$$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
 \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
-$$ w_kj = \frac{tf-idf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tf-idf(t_s, d_j))^2 }} $$
+$$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
 \end{enumerate}
 
 \subsection{Data Characteristics}
 
 \setlength\extrarowheight{3pt}
+
 \begin{table}[H]
 \centering
 \caption{Characteristics of dataset}\vspace{1em}
-\begin{tabular}{|l||c|c|}
-\hline
+\begin{tabular}{@{}lrr@{}}
+\toprule
 & \textbf{Subject} & \textbf{Body} \\
-\hline\hline
+\midrule
 \# Features before removing stop words & 1074 & 19886 \\
 \# Features after removing stop words & 915 & 19386 \\
 \# $Class_{nonspam}$ & 600 & 600 \\
 \# $Class_{spam}$ & 200 & 200 \\
-\hline
+\bottomrule
 \end{tabular}
 \label{table:datacharacteristics}
 \end{table}
@@ -79,19 +92,19 @@ The ``bag-of-words" model produced 19886 and 1074 features in the body and subje
 % Does the selection make sense to you given the task? Are the two lists similar?
 Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
 
-Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removals low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. %Classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removes low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. %Classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
 
 A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
 \begin{table}[H]
 \caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
-\hskip-.7cm \begin{tabular}{|c|l|c||c|l|c||c|l|c|}
-\hline
-\textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
-	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
-	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}\\
-\hline\hline
+\hskip-.3cm \begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
 1 & sum & 30 & 35 & armey & 6 & 69 & address & 4 \\
 2 & summary & 26 & 36 & workshop & 6 & 70 & information & 4 \\
 3 & english & 24 & 37 & dick & 6 & 71 & future & 3 \\
@@ -126,19 +139,20 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 32 & lang & 6 & 66 & summer & 4 & 100 & dutch & 3 \\
 33 & conference & 6 & 67 & systems & 4 &  &  &  \\
 34 & german & 6 & 68 & web & 4 &  &  &  \\
-\hline
+\bottomrule
 \end{tabular}
 \label{table:subjcorpus}
 \end{table}
 
 \begin{table}[H]
+\centering
 \caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}\vspace{1em}
-\begin{tabular}{|c|l|c||c|l|c||c|l|c|}
-\hline
-\textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
-	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}
-	& \textbf{Rank} & \multicolumn{1}{c|}{\textbf{Word}} & \textbf{Score}\\
-\hline\hline
+\begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
 1 & information & 205 & 35 & word & 91 & 69 & system & 74 \\
 2 & language & 192 & 36 & ll & 89 & 70 & full & 74 \\
 3 & mail & 183 & 37 & receive & 88 & 71 & ac & 73 \\
@@ -173,7 +187,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 32 & de & 96 & 66 & service & 75 & 100 & long & 61 \\
 33 & money & 94 & 67 & american & 75 &  &  &  \\
 34 & word & 91 & 68 & business & 74 &  &  &  \\
-\hline
+\bottomrule
 \end{tabular}
 \label{table:bodycorpus}
 \end{table}
@@ -184,83 +198,24 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
-% \begin{table}[H]
-% \centering
-% \caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
-% \begin{tabular}{|l|l|}
-% \hline
-% \multicolumn{2}{|l|}{\textbf{Corpus: Subject}} \\
-% \hline
-% • & \textbf{Accuracy [\%]} \\
-% \hline
-% ZeroR & 66.67 \\
-% \hline
-% OneR & 70.00 \\
-% \hline
-% 1-NN & 80.00 \\
-% \hline
-% 3-NN & 69.83 \\
-% \hline
-% NB & 68.5 \\
-% \hline
-% DT & 66.67 \\
-% \hline
-% MLP & 78.17 \\
-% \hline
-% MyNB & • \\
-% \hline
-% \end{tabular}
-% \begin{tabular}{|l|l|}
-% \hline
-% \multicolumn{2}{|l|}{\textbf{Corpus: Body}} \\
-% \hline
-% • & \textbf{Accuracy [\%]} \\
-% \hline
-% ZeroR & 66.67 \\
-% \hline
-% OneR & 82.00 \\
-% \hline
-% 1-NN & 87.17 \\
-% \hline
-% 3-NN & 84.33 \\
-% \hline
-% NB & 94.67 \\
-% \hline
-% DT & 92.50 \\
-% \hline
-% MLP & 96.67 \\
-% \hline
-% MyNB & 94.83 \\
-% \hline
-% \end{tabular}
-% \label{table:results}
-% \end{table}
-
 \begin{table}[H]
 \centering
 \caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
-\begin{tabular}{|l||c|c|}
-\hline
-• & \textbf{Corpus: Subject} & \textbf{Corpus: Body} \\
-\hline
-& \multicolumn{2}{c|}{\textbf{Accuracy [\%]}} \\
-\hline\hline
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
+\midrule
+\textbf{Classifier} & \textbf{Subject} & \textbf{Body} \\
+\midrule
 ZeroR & 66.67 & 66.67 \\
-\hline
 OneR & 70.00 & 82.00 \\
-\hline
 1-NN & 80.00 & 87.17 \\
-\hline
 3-NN & 69.83 & 84.33 \\
-\hline
-NB & 68.5 & 94.67 \\
-\hline
+NB & 68.50 & 94.67 \\
 DT & 66.67 & 92.50 \\
-\hline
 MLP & 78.17 & 96.67 \\
-\hline
 MyNB & • & 94.83 \\
-\hline
+\bottomrule
 \end{tabular}
 \label{table:results}
 \end{table}
@@ -274,6 +229,8 @@ MyNB & • & 94.83 \\
 % ----myNB vs Weka’s NB
 % ----comparison between the 2 corpora
 
+The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus.
+
 \section{Challenge Analysis}
 
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
@@ -282,7 +239,7 @@ MyNB & • & 94.83 \\
 
 \subsection{Discussion}
 
-\section{Conclusions}
+\section{Conclusion and Future Work}
 
 % summarize your main findings and, if possible, suggest future work.
 The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails.
