@@ -10,6 +10,10 @@
 \usepackage[showframe=false]{geometry}
 \usepackage[font=small,format=plain,labelfont={bf,up}]{caption}
 
+\usepackage[T3,T1]{fontenc}
+\DeclareSymbolFont{tipa}{T3}{cmr}{m}{n}
+\DeclareMathAccent{\invbreve}{\mathalpha}{tipa}{16}
+
 \usepackage{fancyhdr}
 \fancyfoot[C]{\thepage}
 \lhead{COMP3608}
@@ -44,25 +48,54 @@ Traditional non-machine learning based techniques are easily fooled by spammers 
 \section{Data Preprocessing}
 
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}\cite{sebastiani}.
+
+Before classification can be performed, we must represent the files in our sample set \emph{Lingpspam-mini600} appropriately. Using the ``bag-of-words'' model, words are extracted from the file and treated as features. There are two main characteristics in an email; the subject and the body. Thus, we will construct two ``bags-of-words'', one for each component. To determine which corpus a feature will belong to, we if the line begins with ``Subject:''. If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+
+To each file, we performed the following steps:
 
 \begin{enumerate}
-\item For each file in the sample set \emph{Lingpspam-mini600}:
-	\begin{enumerate}[label*=\arabic*.]
-	\item Open the file and read it line by line.
-	\item Replace all punctuation and special symbols from each line with a space (e.g. ``don't" becomes ``don", ``t").
-	\item The sub-corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
-	\item Words from each line are extracted using space as a delimiter.
-	\item Stop words, numbers and words containing digits are removed.
-	\item A counter is created for both corpora. For each word that appears in the email, it is added to its respective counter.
-	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
-	\end{enumerate}
-\item In each corpus the words with the top 200 document frequency score (words which appear in the most number of documents) are selected as features for that corpus.
-\item For each feature, its \emph{tf-idf} score is calculated.
-$$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
-\item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
-$$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
+	\item Replace all punctuation and special symbols with a space.
+	\item Remove stop words, using a list of stop words ``english.stop''.
+	\item Remove numbers or words containing digits.
 \end{enumerate}
+
+The tokenisation schemes used in the example data are different to that used in our stop words list. The data detaches clitics and contraction affices, whereas the stop words list is tokenised based on whitespace and punctuation characters. Therefore, we chose to replace punctuation with a space (e.g. ``n't'' becomes ``n'', ``t'') instead of simply removing them. This meant that the stop word list would remove clitics as it removes single characters, instead of keeping it as a feature as (``nt'' isn't in the stop words list).
+
+The \emph{document frequency} feature selection method was then used to select the 200 words which occured in the most documents, and used to build a classifier for the given documents. The following steps were taken to accomplish this:
+
+\begin{enumerate}
+\item Counter is created for each email, counting the number of times each word appears in that email.
+\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
+\item In each corpus the words with the top 200 document frequency score, are selected as features to represent that corpus.
+\end{enumerate}
+
+Each selected feature was then weighted using its \emph{td-idf} score\cite{sebastiani}.
+
+$$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
+
+Then the scores were normalised, using \emph{cosine normalisation}\cite{sebastiani}.
+
+$$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
+
+% The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}\cite{sebastiani}.
+
+% \begin{enumerate}
+% \item For each file in the sample set \emph{Lingpspam-mini600}:
+% 	\begin{enumerate}[label*=\arabic*.]
+% 	\item Open the file and read it line by line.
+% 	\item Replace all punctuation and special symbols from each line with a space (e.g. ``don't" becomes ``don", ``t").
+% 	\item The sub-corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+% 	\item Words from each line are extracted using space as a delimiter.
+% 	\item Stop words, numbers and words containing digits are removed.
+% 	\item A counter is created for both corpora. For each word that appears in the email, it is added to its respective counter.
+% 	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
+% 	\end{enumerate}
+% \item In each corpus the words with the top 200 document frequency score (words which appear in the most number of documents) are selected as features for that corpus.
+% \item For each feature, its \emph{tf-idf} score is calculated.
+% $$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
+% \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
+% $$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
+% \end{enumerate}
 
 \subsection{Data Characteristics}
 
@@ -105,40 +138,40 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
 	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
 \midrule
-1 & sum & 30 & 35 & armey & 6 & 69 & address & 4 \\
-2 & summary & 26 & 36 & workshop & 6 & 70 & information & 4 \\
-3 & english & 24 & 37 & dick & 6 & 71 & future & 3 \\
-4 & language & 21 & 38 & internet & 6 & 72 & offer & 3 \\
-5 & free & 20 & 39 & languages & 5 & 73 & decimal & 3 \\
-6 & disc & 19 & 40 & grammar & 5 & 74 & chomsky & 3 \\
-7 & query & 18 & 41 & word & 5 & 75 & double & 3 \\
-8 & linguistics & 15 & 42 & research & 5 & 76 & change & 3 \\
-9 & sex & 13 & 43 & time & 5 & 77 & credit & 3 \\
-10 & comparative & 13 & 44 & linguist & 5 & 78 & opportunity & 3 \\
-11 & words & 12 & 45 & software & 5 & 79 & requested & 3 \\
-12 & opposites & 12 & 46 & needed & 5 & 80 & dental & 3 \\
-13 & email & 10 & 47 & native & 5 & 81 & reference & 3 \\
-14 & book & 10 & 48 & resources & 5 & 82 & school & 3 \\
-15 & call & 9 & 49 & spanish & 5 & 83 & counting & 3 \\
-16 & job & 9 & 50 & list & 5 & 84 & french & 3 \\
-17 & method & 9 & 51 & jobs & 5 & 85 & released & 3 \\
-18 & japanese & 8 & 52 & american & 4 & 86 & world & 3 \\
-19 & correction & 8 & 53 & request & 4 & 87 & linguists & 3 \\
-20 & chinese & 7 & 54 & intuitions & 4 & 88 & site & 3 \\
-21 & program & 7 & 55 & www & 4 & 89 & misc & 3 \\
-22 & syntax & 7 & 56 & read & 4 & 90 & addresses & 3 \\
-23 & announcement & 7 & 57 & pig & 4 & 91 & uniformitarianism & 3 \\
-24 & qs & 7 & 58 & programs & 4 & 92 & video & 3 \\
-25 & million & 7 & 59 & secrets & 4 & 93 & life & 3 \\
-26 & money & 6 & 60 & phonetics & 4 & 94 & debt & 3 \\
-27 & mail & 6 & 61 & banning & 4 & 95 & make & 3 \\
-28 & slip & 6 & 62 & books & 4 & 96 & youthese & 3 \\
-29 & business & 6 & 63 & fwd & 4 & 97 & names & 3 \\
-30 & part & 6 & 64 & great & 4 & 98 & corpus & 3 \\
-31 & speaker & 6 & 65 & unlimited & 4 & 99 & policy & 3 \\
-32 & lang & 6 & 66 & summer & 4 & 100 & dutch & 3 \\
-33 & conference & 6 & 67 & systems & 4 &  &  &  \\
-34 & german & 6 & 68 & web & 4 &  &  &  \\
+1 & sum & 30 & 35 & business & 6 & 69 & great & 4 \\
+2 & summary & 26 & 36 & workshop & 6 & 70 & summer & 4 \\
+3 & english & 24 & 37 & speaker & 6 & 71 & home & 3 \\
+4 & language & 21 & 38 & german & 6 & 72 & people & 3 \\
+5 & free & 20 & 39 & linguist & 5 & 73 & profit & 3 \\
+6 & disc & 19 & 40 & list & 5 & 74 & linguists & 3 \\
+7 & query & 18 & 41 & native & 5 & 75 & decimal & 3 \\
+8 & linguistics & 15 & 42 & resources & 5 & 76 & line & 3 \\
+9 & sex & 13 & 43 & grammar & 5 & 77 & credit & 3 \\
+10 & comparative & 13 & 44 & time & 5 & 78 & verbal & 3 \\
+11 & opposites & 12 & 45 & research & 5 & 79 & video & 3 \\
+12 & words & 12 & 46 & word & 5 & 80 & millions & 3 \\
+13 & email & 10 & 47 & needed & 5 & 81 & lists & 3 \\
+14 & book & 10 & 48 & languages & 5 & 82 & dental & 3 \\
+15 & method & 9 & 49 & software & 5 & 83 & life & 3 \\
+16 & call & 9 & 50 & jobs & 5 & 84 & resolution & 3 \\
+17 & job & 9 & 51 & spanish & 5 & 85 & comparison & 3 \\
+18 & japanese & 8 & 52 & fwd & 4 & 86 & offer & 3 \\
+19 & correction & 8 & 53 & web & 4 & 87 & latin & 3 \\
+20 & announcement & 7 & 54 & phonetics & 4 & 88 & change & 3 \\
+21 & syntax & 7 & 55 & american & 4 & 89 & uniformitarianism & 3 \\
+22 & million & 7 & 56 & request & 4 & 90 & check & 3 \\
+23 & qs & 7 & 57 & banning & 4 & 91 & hey & 3 \\
+24 & chinese & 7 & 58 & intuitions & 4 & 92 & reference & 3 \\
+25 & program & 7 & 59 & pig & 4 & 93 & debt & 3 \\
+26 & lang & 6 & 60 & books & 4 & 94 & synthetic & 3 \\
+27 & internet & 6 & 61 & unlimited & 4 & 95 & world & 3 \\
+28 & slip & 6 & 62 & programs & 4 & 96 & chomsky & 3 \\
+29 & armey & 6 & 63 & systems & 4 & 97 & site & 3 \\
+30 & money & 6 & 64 & address & 4 & 98 & released & 3 \\
+31 & mail & 6 & 65 & secrets & 4 & 99 & mac & 3 \\
+32 & part & 6 & 66 & information & 4 & 100 & sites & 3 \\
+33 & conference & 6 & 67 & www & 4 & & & \\
+34 & dick & 6 & 68 & read & 4 & & & \\
 \bottomrule
 \end{tabular}
 \label{table:subjcorpus}
@@ -153,40 +186,40 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
 	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
 \midrule
-1 & information & 205 & 35 & word & 91 & 69 & system & 74 \\
-2 & language & 192 & 36 & ll & 89 & 70 & full & 74 \\
-3 & mail & 183 & 37 & receive & 88 & 71 & ac & 73 \\
-4 & university & 179 & 38 & check & 88 & 72 & today & 73 \\
-5 & time & 178 & 39 & phone & 88 & 73 & remove & 72 \\
+1 & information & 205 & 35 & message & 91 & 69 & full & 74 \\
+2 & language & 192 & 36 & ll & 89 & 70 & business & 74 \\
+3 & mail & 183 & 37 & phone & 88 & 71 & today & 73 \\
+4 & university & 179 & 38 & check & 88 & 72 & ac & 73 \\
+5 & time & 178 & 39 & receive & 88 & 73 & questions & 72 \\
 6 & list & 171 & 40 & good & 87 & 74 & interest & 72 \\
-7 & address & 165 & 41 & year & 86 & 75 & questions & 72 \\
-8 & english & 159 & 42 & day & 86 & 76 & john & 71 \\
-9 & linguistics & 156 & 43 & interested & 86 & 77 & found & 70 \\
-10 & http & 156 & 44 & case & 85 & 78 & related & 70 \\
+7 & address & 165 & 41 & day & 86 & 75 & remove & 72 \\
+8 & english & 159 & 42 & year & 86 & 76 & john & 71 \\
+9 & http & 156 & 43 & interested & 86 & 77 & found & 70 \\
+10 & linguistics & 156 & 44 & case & 85 & 78 & related & 70 \\
 11 & people & 146 & 45 & working & 85 & 79 & site & 69 \\
-12 & send & 146 & 46 & include & 85 & 80 & linguist & 69 \\
-13 & free & 144 & 47 & based & 84 & 81 & usa & 69 \\
+12 & send & 146 & 46 & include & 85 & 80 & usa & 69 \\
+13 & free & 144 & 47 & based & 84 & 81 & linguist & 69 \\
 14 & make & 140 & 48 & ve & 84 & 82 & text & 68 \\
-15 & email & 133 & 49 & home & 83 & 83 & read & 68 \\
-16 & work & 128 & 50 & part & 83 & 84 & point & 68 \\
-17 & number & 128 & 51 & note & 83 & 85 & ago & 67 \\
-18 & www & 122 & 52 & made & 83 & 86 & week & 67 \\
-19 & languages & 119 & 53 & mailing & 81 & 87 & book & 67 \\
-20 & find & 118 & 54 & including & 81 & 88 & dear & 66 \\
-21 & fax & 116 & 55 & type & 80 & 89 & making & 66 \\
-22 & order & 108 & 56 & web & 79 & 90 & cost & 66 \\
+15 & email & 133 & 49 & made & 83 & 83 & read & 68 \\
+16 & work & 128 & 50 & home & 83 & 84 & point & 68 \\
+17 & number & 128 & 51 & note & 83 & 85 & week & 67 \\
+18 & www & 122 & 52 & part & 83 & 86 & ago & 67 \\
+19 & languages & 119 & 53 & including & 81 & 87 & book & 67 \\
+20 & find & 118 & 54 & mailing & 81 & 88 & cost & 66 \\
+21 & fax & 116 & 55 & type & 80 & 89 & dear & 66 \\
+22 & order & 108 & 56 & place & 79 & 90 & making & 66 \\
 23 & call & 103 & 57 & give & 79 & 91 & question & 65 \\
-24 & form & 101 & 58 & program & 79 & 92 & simply & 65 \\
-25 & research & 100 & 59 & place & 79 & 93 & offer & 63 \\
-26 & linguistic & 99 & 60 & line & 78 & 94 & general & 63 \\
-27 & state & 99 & 61 & special & 78 & 95 & received & 63 \\
-28 & world & 98 & 62 & date & 78 & 96 & data & 62 \\
-29 & years & 98 & 63 & days & 77 & 97 & important & 62 \\
-30 & subject & 98 & 64 & back & 76 & 98 & ca & 61 \\
+24 & form & 101 & 58 & web & 79 & 92 & simply & 65 \\
+25 & research & 100 & 59 & program & 79 & 93 & offer & 63 \\
+26 & state & 99 & 60 & special & 78 & 94 & general & 63 \\
+27 & linguistic & 99 & 61 & date & 78 & 95 & received & 63 \\
+28 & subject & 98 & 62 & line & 78 & 96 & important & 62 \\
+29 & years & 98 & 63 & days & 77 & 97 & data & 62 \\
+30 & world & 98 & 64 & back & 76 & 98 & ca & 61 \\
 31 & contact & 97 & 65 & internet & 76 & 99 & summary & 61 \\
 32 & de & 96 & 66 & service & 75 & 100 & long & 61 \\
-33 & money & 94 & 67 & american & 75 &  &  &  \\
-34 & word & 91 & 68 & business & 74 &  &  &  \\
+33 & money & 94 & 67 & american & 75 & & & \\
+34 & word & 91 & 68 & system & 74 & & & \\
 \bottomrule
 \end{tabular}
 \label{table:bodycorpus}
@@ -208,13 +241,13 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 \textbf{Classifier} & \textbf{Subject} & \textbf{Body} \\
 \midrule
 ZeroR & 66.67 & 66.67 \\
-OneR & 70.00 & 82.00 \\
-1-NN & 80.00 & 87.17 \\
-3-NN & 69.83 & 84.33 \\
-NB & 68.50 & 94.67 \\
-DT & 66.67 & 92.50 \\
-MLP & 78.17 & 96.67 \\
-MyNB & • & 94.83 \\
+OneR & 70.00 & 81.50 \\
+1-NN & 75.5 & 87.50 \\
+3-NN & 71.17 & 84.33 \\
+NB & 69.67 & 95.00 \\
+DT & 66.67 & 91.50 \\
+MLP & 79.00 & 96.83 \\
+MyNB & 66.17 & 94.83 \\
 \bottomrule
 \end{tabular}
 \label{table:results}
@@ -230,6 +263,23 @@ MyNB & • & 94.83 \\
 % ----comparison between the 2 corpora
 
 The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus.
+
+In order to find out if the differences are significant, we can use a paired t-test.
+
+\begin{enumerate}
+\item Calculate difference
+\end{enumerate}
+
+$$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma ^{2} $$
+
+% - **T-paired test**
+%     1. Calculate the differences _di_
+%     2. Calculate the _variance_ of the difference (estimate of the true variance). If k is sufficiently large, _di_ is normally distributed
+%     3. Calculate _confidence interval_ _Z_
+%     4. If interval contains 0 – difference not significant, else significant
+%     - Variance: $\invbreve\sigma ^{2} = \frac{{\sum\nolimits_{j=1}^k (di-d_{mean})}^2 }{k(k-1)}$
+%     - Confidence interval: $Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma ^{2}$
+%         + $1-\alpha$: confidence level; $k-1$ degree of freedom
 
 \section{Challenge Analysis}
 
