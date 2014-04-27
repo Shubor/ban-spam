@@ -217,8 +217,6 @@ with open( "body-folds.csv", "w" ) as f:
 		writer.writerow( [ ] ) # Empty line
 	f.close()
 
-
-
 #========|| Perform over K-groups ||========#
 max_accuracy = 0.0
 best_val = 0.000000000
@@ -227,7 +225,7 @@ best_val = 0.000000000
 
 while max_accuracy < 90.0:
 	# Iterate for each for fold
-	
+
 	sum_accuracy = 0.0
 	for test_num in range( 10 ):
 
@@ -257,11 +255,11 @@ while max_accuracy < 90.0:
 
 		sum_accuracy += accuracy
 
-	print("\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ))
-	
-	
-	if sum_accuracy*10 >= max_accuracy:
+	print( "\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ) )
+
+
+	if sum_accuracy * 10 >= max_accuracy:
 		best_val = test_value
-		max_accuracy = sum_accuracy*10
+		max_accuracy = sum_accuracy * 10
 		print(best_val,max_accuracy)
 	test_value *= 1000

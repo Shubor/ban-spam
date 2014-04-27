@@ -29,7 +29,7 @@ subj_corpus = Counter()
 # 	Returns 1 if irrevelant, otherwise 0
 def clean( word ):
 	# Remove if word is punctuation or if word is in stop words
-	if (word in punctuation) or (word.isdigit()) or (word in stop_words):
+	if word in stop_words:
 		return 1
 	# Remove strings that contain digits e.g. 'qwoie192kjwe' or '12312-123'
 	elif re.compile('\d').search(word):
@@ -132,11 +132,11 @@ for file in os.listdir(path):
 	finally:
 		f.close()
 
-def print_top_100_elements_in_LaTeX_tabular_form( x ):
-	# x and y are lists of top 100 in sorted order
-	for i in range(20):
-		print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( x[i][0], x[i][1], x[i+20][0], x[i+20][1], x[i+40][0], x[i+40][1], x[i+60][0], x[i+60][1], x[i+80][0], x[i+80][1] ))
-print_top_100_elements_in_LaTeX_tabular_form( body_corpus.most_common(100) )
+# def print_top_100_elements_in_LaTeX_tabular_form( x ):
+# 	# x and y are lists of top 100 in sorted order
+# 	for i in range(20):
+# 		print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( x[i][0], x[i][1], x[i+20][0], x[i+20][1], x[i+40][0], x[i+40][1], x[i+60][0], x[i+60][1], x[i+80][0], x[i+80][1] ))
+# print_top_100_elements_in_LaTeX_tabular_form( body_corpus.most_common(100) )
 
 #############################################################################
 # Feature weighting with tf-idf, then cosine normalisation of top 200 words #

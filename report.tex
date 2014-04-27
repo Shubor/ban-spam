@@ -1,183 +1,265 @@
 \documentclass[10pt, a4paper]{article}
 
-\usepackage{amssymb,amsmath}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{hyperref}
 \usepackage{enumitem}
-
-\makeatletter
-\def\@seccntformat#1{%
-  \expandafter\ifx\csname c@#1\endcsname\c@section\else
-  \csname the#1\endcsname\quad
-  \fi}
-\makeatother
+\usepackage{amssymb,amsmath}
+\usepackage[showframe=false]{geometry}
+\usepackage[font=small,format=plain,labelfont={bf,up}]{caption}
 
 \usepackage{fancyhdr}
 \fancyfoot[C]{\thepage}
 \lhead{COMP3608}
-\rhead{Na\"{i}ve Bayes}
+\rhead{Email Classification}
 \pagestyle{fancy}
+
+\title{Email Classification with Na\"ive Bayes}
+\author{Mitchell Della Marta, Shu Bor}
+\date{}
+
+% \captionsetup{format = upper}
 
 \begin{document}
 
-\section{Email Classification}
+\renewcommand\thetable{\Roman{table}}
 
-\subsection*{Aim}
+\maketitle
+
+\section{Introduction}
+
+\subsection{Aim}
+
 % State aim of study, and write a paragraph about why the problem is important
+To implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
 
-The aim of this study is to implement text classification of emails using the Na\"{i}ve Bayes classifier for spam detection.
+\subsection{Importance}
 
-Spam emails are usually sent to derive cash from the user either directly by tricking the user into purchasing something or indirectly by ticking them into parting with information. The classification of emails aims foremost to protect the unaware user from the malicious intent of spam emails. Classification of emails also saves the user the time and hassle of manually classifying and deleting spam.
+As email is one of the main forms of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. %Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware.
 
-\subsection*{Data Preprocessing and Feature Selection}
+Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
+
+\section{Data Preprocessing}
+
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}.
+The files in the sample set \emph{Lingpspam-mini600} are represented as a ``bag-of-words", where words are extracted from the file and treated as a feature. The \emph{document frequency} feature selection method was used, to select the 200 words which occured in the most documents as features, and used to build a classifier for the given documents. The features are then weighted using \emph{td-idf} and normalised using \emph{cosine normalisation}\cite{sebastiani}.
 
 \begin{enumerate}
 \item For each file in the sample set \emph{Lingpspam-mini600}:
 	\begin{enumerate}[label*=\arabic*.]
 	\item Open the file and read it line by line.
-	\item Replace all punctuation and special symbols from each line with a space. (e.g. ``don't" becomes ``don", ``t")
+	\item Replace all punctuation and special symbols from each line with a space (e.g. ``don't" becomes ``don", ``t").
 	\item The sub-corpus the line belongs to is determined by checking if the line begins with ``Subject:". If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 	\item Words from each line are extracted using space as a delimiter.
 	\item Stop words, numbers and words containing digits are removed.
-	\item A counter is created for both corpora. For each word that appears in the email add it to its respective counter.
+	\item A counter is created for both corpora. For each word that appears in the email, it is added to its respective counter.
 	\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
 	\end{enumerate}
-\item In each corpus the words with the top 200 Document Frequency (words which are appeared in the most number of documents) were selected as features for that corpus.
+\item In each corpus the words with the top 200 document frequency score (words which appear in the most number of documents) are selected as features for that corpus.
 \item For each feature, its \emph{tf-idf} score is calculated.
+$$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
 \item The \emph{tf-idf} values are normalised using \emph{cosine normalisation}.
+$$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
 \end{enumerate}
 
+\subsection{Data Characteristics}
+
+\setlength\extrarowheight{3pt}
+
+\begin{table}[H]
+\centering
+\caption{Characteristics of dataset}\vspace{1em}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \textbf{Subject} & \textbf{Body} \\
+\midrule
+\# Features before removing stop words & 1074 & 19886 \\
+\# Features after removing stop words & 915 & 19386 \\
+\# $Class_{nonspam}$ & 600 & 600 \\
+\# $Class_{spam}$ & 200 & 200 \\
+\bottomrule
+\end{tabular}
+\label{table:datacharacteristics}
+\end{table}
+
 % Show the number of words for each corpus – initially and after removing the stop-words.
+The ``bag-of-words" model produced 19886 and 1074 features in the body and subject corpora respectively. After the removal of stop words, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus (see \autoref{table:datacharacteristics}).
 
-The removal of stop words in text processing filters out common words that offer little value for classification. Before stop words were removed, there were 19886 and 1074 unique words in the body and subject corpuses respectively. After their removal, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus.
-
-% List the top 100 words for each corpus and show their DF score. Examine the list.
-\begin{tabular}{|c|c||c|c||c|c||c|c||c|c|}\centering
-
-Feature & DF & Feature & DF & Feature & DF & Feature & DF & Feature & DF \\
-\hline
-sum & 30 & qs & 7 & spanish & 5 & secrets & 4 & youthese & 3 \\
-summary & 26 & syntax & 7 & list & 5 & address & 4 & offer & 3 \\
-english & 24 & chinese & 7 & time & 5 & fwd & 4 & line & 3 \\
-language & 21 & million & 7 & word & 5 & read & 4 & home & 3 \\
-free & 20 & program & 7 & software & 5 & request & 4 & site & 3 \\
-disc & 19 & business & 6 & languages & 5 & information & 4 & check & 3 \\
-query & 18 & slip & 6 & linguist & 5 & systems & 4 & reference & 3 \\
-linguistics & 15 & conference & 6 & jobs & 5 & american & 4 & background & 3 \\
-comparative & 13 & lang & 6 & research & 5 & intuitions & 4 & cd & 3 \\
-sex & 13 & part & 6 & native & 5 & great & 4 & teaching & 3 \\
-words & 12 & german & 6 & resources & 5 & double & 3 & decimal & 3 \\
-opposites & 12 & money & 6 & www & 4 & change & 3 & latin & 3 \\
-book & 10 & workshop & 6 & unlimited & 4 & synthetic & 3 & names & 3 \\
-email & 10 & armey & 6 & programs & 4 & credit & 3 & counting & 3 \\
-method & 9 & speaker & 6 & web & 4 & requested & 3 & ipa & 3 \\
-job & 9 & dick & 6 & banning & 4 & future & 3 & corpus & 3 \\
-call & 9 & mail & 6 & phonetics & 4 & tonight & 3 & complete & 3 \\
-japanese & 8 & internet & 6 & summer & 4 & make & 3 & world & 3 \\
-correction & 8 & grammar & 5 & books & 4 & comparison & 3 & resolution & 3 \\
-announcement & 7 & needed & 5 & pig & 4 & hey & 3 & dialect & 3 \\
-\hline
-
-\end{tabular}
-
-
-\begin{tabular}{|c|c||c|c||c|c||c|c||c|c|}\centering
-
-Feature & DF & Feature & DF & Feature & DF & Feature & DF & Feature & DF \\
-\hline
-information & 205 & fax & 116 & interested & 86 & special & 78 & site & 69 \\
-language & 192 & order & 108 & year & 86 & line & 78 & text & 68 \\
-mail & 183 & call & 103 & day & 86 & days & 77 & read & 68 \\
-university & 179 & form & 101 & working & 85 & internet & 76 & point & 68 \\
-time & 178 & research & 100 & include & 85 & back & 76 & week & 67 \\
-list & 171 & linguistic & 99 & case & 85 & american & 75 & ago & 67 \\
-address & 165 & state & 99 & based & 84 & service & 75 & book & 67 \\
-english & 159 & subject & 98 & ve & 84 & system & 74 & dear & 66 \\
-linguistics & 156 & years & 98 & note & 83 & business & 74 & cost & 66 \\
-http & 156 & world & 98 & home & 83 & full & 74 & making & 66 \\
-people & 146 & contact & 97 & made & 83 & ac & 73 & question & 65 \\
-send & 146 & de & 96 & part & 83 & today & 73 & simply & 65 \\
-free & 144 & money & 94 & including & 81 & interest & 72 & offer & 63 \\
-make & 140 & message & 91 & mailing & 81 & questions & 72 & received & 63 \\
-email & 133 & word & 91 & type & 80 & remove & 72 & general & 63 \\
-number & 128 & ll & 89 & web & 79 & john & 71 & data & 62 \\
-work & 128 & check & 88 & give & 79 & related & 70 & important & 62 \\
-www & 122 & phone & 88 & program & 79 & found & 70 & ca & 61 \\
-languages & 119 & receive & 88 & place & 79 & linguist & 69 & summary & 61 \\
-find & 118 & good & 87 & date & 78 & usa & 69 & long & 61 \\
-\hline
-
-\end{tabular}
-
+\section{Feature Selection}
 
 % Does the selection make sense to you given the task? Are the two lists similar?
+Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
 
-\subsection*{Subject vs Body: Results and Discussion}
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removes low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier. %Classifier has an average accuracy of 93.83\% without removing stop words, and 94.67\% when stop words are removed.
+
+A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
+
+% List the top 100 words for each corpus and show their DF score. Examine the list.
+\begin{table}[H]
+\caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\hskip-.3cm \begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
+1 & sum & 30 & 35 & armey & 6 & 69 & address & 4 \\
+2 & summary & 26 & 36 & workshop & 6 & 70 & information & 4 \\
+3 & english & 24 & 37 & dick & 6 & 71 & future & 3 \\
+4 & language & 21 & 38 & internet & 6 & 72 & offer & 3 \\
+5 & free & 20 & 39 & languages & 5 & 73 & decimal & 3 \\
+6 & disc & 19 & 40 & grammar & 5 & 74 & chomsky & 3 \\
+7 & query & 18 & 41 & word & 5 & 75 & double & 3 \\
+8 & linguistics & 15 & 42 & research & 5 & 76 & change & 3 \\
+9 & sex & 13 & 43 & time & 5 & 77 & credit & 3 \\
+10 & comparative & 13 & 44 & linguist & 5 & 78 & opportunity & 3 \\
+11 & words & 12 & 45 & software & 5 & 79 & requested & 3 \\
+12 & opposites & 12 & 46 & needed & 5 & 80 & dental & 3 \\
+13 & email & 10 & 47 & native & 5 & 81 & reference & 3 \\
+14 & book & 10 & 48 & resources & 5 & 82 & school & 3 \\
+15 & call & 9 & 49 & spanish & 5 & 83 & counting & 3 \\
+16 & job & 9 & 50 & list & 5 & 84 & french & 3 \\
+17 & method & 9 & 51 & jobs & 5 & 85 & released & 3 \\
+18 & japanese & 8 & 52 & american & 4 & 86 & world & 3 \\
+19 & correction & 8 & 53 & request & 4 & 87 & linguists & 3 \\
+20 & chinese & 7 & 54 & intuitions & 4 & 88 & site & 3 \\
+21 & program & 7 & 55 & www & 4 & 89 & misc & 3 \\
+22 & syntax & 7 & 56 & read & 4 & 90 & addresses & 3 \\
+23 & announcement & 7 & 57 & pig & 4 & 91 & uniformitarianism & 3 \\
+24 & qs & 7 & 58 & programs & 4 & 92 & video & 3 \\
+25 & million & 7 & 59 & secrets & 4 & 93 & life & 3 \\
+26 & money & 6 & 60 & phonetics & 4 & 94 & debt & 3 \\
+27 & mail & 6 & 61 & banning & 4 & 95 & make & 3 \\
+28 & slip & 6 & 62 & books & 4 & 96 & youthese & 3 \\
+29 & business & 6 & 63 & fwd & 4 & 97 & names & 3 \\
+30 & part & 6 & 64 & great & 4 & 98 & corpus & 3 \\
+31 & speaker & 6 & 65 & unlimited & 4 & 99 & policy & 3 \\
+32 & lang & 6 & 66 & summer & 4 & 100 & dutch & 3 \\
+33 & conference & 6 & 67 & systems & 4 &  &  &  \\
+34 & german & 6 & 68 & web & 4 &  &  &  \\
+\bottomrule
+\end{tabular}
+\label{table:subjcorpus}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
+1 & information & 205 & 35 & word & 91 & 69 & system & 74 \\
+2 & language & 192 & 36 & ll & 89 & 70 & full & 74 \\
+3 & mail & 183 & 37 & receive & 88 & 71 & ac & 73 \\
+4 & university & 179 & 38 & check & 88 & 72 & today & 73 \\
+5 & time & 178 & 39 & phone & 88 & 73 & remove & 72 \\
+6 & list & 171 & 40 & good & 87 & 74 & interest & 72 \\
+7 & address & 165 & 41 & year & 86 & 75 & questions & 72 \\
+8 & english & 159 & 42 & day & 86 & 76 & john & 71 \\
+9 & linguistics & 156 & 43 & interested & 86 & 77 & found & 70 \\
+10 & http & 156 & 44 & case & 85 & 78 & related & 70 \\
+11 & people & 146 & 45 & working & 85 & 79 & site & 69 \\
+12 & send & 146 & 46 & include & 85 & 80 & linguist & 69 \\
+13 & free & 144 & 47 & based & 84 & 81 & usa & 69 \\
+14 & make & 140 & 48 & ve & 84 & 82 & text & 68 \\
+15 & email & 133 & 49 & home & 83 & 83 & read & 68 \\
+16 & work & 128 & 50 & part & 83 & 84 & point & 68 \\
+17 & number & 128 & 51 & note & 83 & 85 & ago & 67 \\
+18 & www & 122 & 52 & made & 83 & 86 & week & 67 \\
+19 & languages & 119 & 53 & mailing & 81 & 87 & book & 67 \\
+20 & find & 118 & 54 & including & 81 & 88 & dear & 66 \\
+21 & fax & 116 & 55 & type & 80 & 89 & making & 66 \\
+22 & order & 108 & 56 & web & 79 & 90 & cost & 66 \\
+23 & call & 103 & 57 & give & 79 & 91 & question & 65 \\
+24 & form & 101 & 58 & program & 79 & 92 & simply & 65 \\
+25 & research & 100 & 59 & place & 79 & 93 & offer & 63 \\
+26 & linguistic & 99 & 60 & line & 78 & 94 & general & 63 \\
+27 & state & 99 & 61 & special & 78 & 95 & received & 63 \\
+28 & world & 98 & 62 & date & 78 & 96 & data & 62 \\
+29 & years & 98 & 63 & days & 77 & 97 & important & 62 \\
+30 & subject & 98 & 64 & back & 76 & 98 & ca & 61 \\
+31 & contact & 97 & 65 & internet & 76 & 99 & summary & 61 \\
+32 & de & 96 & 66 & service & 75 & 100 & long & 61 \\
+33 & money & 94 & 67 & american & 75 &  &  &  \\
+34 & word & 91 & 68 & business & 74 &  &  &  \\
+\bottomrule
+\end{tabular}
+\label{table:bodycorpus}
+\end{table}
+
+\section{Subject vs Body Analysis}
+
+\subsection{Results}
+
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
-\begin{tabular}{|l|l|}
-\hline 
-\multicolumn{2}{|l|}{Corpus: Subject} \\ 
-\hline 
-• & Accuracy [\%] \\ 
-\hline 
-ZeroR & 66.67 \\ 
-\hline 
-OneR & 70.00 \\ 
-\hline 
-1-NN & 80.00 \\ 
-\hline 
-3-NN & 69.83 \\ 
-\hline 
-NB & 68.5 \\ 
-\hline 
-DT & 66.67 \\ 
-\hline 
-MLP & 78.17 \\ 
-\hline 
-MyNB & • \\ 
-\hline 
-\end{tabular} 
+\begin{table}[H]
+\centering
+\caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
+\midrule
+\textbf{Classifier} & \textbf{Subject} & \textbf{Body} \\
+\midrule
+ZeroR & 66.67 & 66.67 \\
+OneR & 70.00 & 82.00 \\
+1-NN & 80.00 & 87.17 \\
+3-NN & 69.83 & 84.33 \\
+NB & 68.50 & 94.67 \\
+DT & 66.67 & 92.50 \\
+MLP & 78.17 & 96.67 \\
+MyNB & • & 94.83 \\
+\bottomrule
+\end{tabular}
+\label{table:results}
+\end{table}
 
-\begin{tabular}{|l|l|}
-\hline 
-\multicolumn{2}{|l|}{Corpus: Body} \\ 
-\hline 
-• & Accuracy [\%] \\ 
-\hline 
-ZeroR & 66.67 \\ 
-\hline 
-OneR & 82.00 \\ 
-\hline 
-1-NN & 87.17 \\ 
-\hline 
-3-NN & 84.33 \\ 
-\hline 
-NB & 94.67 \\ 
-\hline 
-DT & 92.50 \\ 
-\hline 
-MLP & 96.67 \\ 
-\hline 
-MyNB & • \\ 
-\hline 
-\end{tabular} 
+\subsection{Discussion}
 
 % Discussion – compare the performance of the classifiers on the 2 corpora, compare your NB with the Weka’s NB, anything else you consider important.
+%
+% -correct and deep discussion of the results
+% ----comparison between the classifiers (accuracy, training time, other advantages)
+% ----myNB vs Weka’s NB
+% ----comparison between the 2 corpora
 
-\subsection*{Challenge Results and Discussion}
+The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus.
+
+\section{Challenge Analysis}
+
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
 
-\subsection*{Conclusions}
+\subsection{Results}
+
+\subsection{Discussion}
+
+\section{Conclusion and Future Work}
+
 % summarize your main findings and, if possible, suggest future work.
+The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails.
 
-The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails. 
+By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
 
-By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased. 
-
-\subsection*{Reflection}
+\section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
 
-\subsection*{Instructions: How to run code}
+\section{Instructions: How to run code}
+
+\begin{thebibliography}{9}
+
+\bibitem{sebastiani}
+  Fabrizio Sebastiani,
+  \emph{Machine learning in automated text categorization}.
+  ACM Computing Surveys,
+  34(1):1-47,
+  2002.
+
+\end{thebibliography}
 
 \end{document}
