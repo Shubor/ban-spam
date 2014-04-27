@@ -2,13 +2,14 @@
 
 \usepackage{array}
 \usepackage{float}
+\usepackage{parskip}
 \usepackage{caption}
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{amssymb,amsmath}
 \usepackage[showframe=false]{geometry}
-\usepackage[font=small,format=plain,labelfont={bf,up}]{caption}
+\usepackage[font=small,format=plain,labelfont={bf,up},justification=centering]{caption}
 
 \usepackage[T3,T1]{fontenc}
 \DeclareSymbolFont{tipa}{T3}{cmr}{m}{n}
@@ -21,10 +22,13 @@
 \pagestyle{fancy}
 
 \title{Email Classification with Na\"ive Bayes}
-\author{Mitchell Della Marta, Shu Bor}
+\author{Mitchell Della Marta, Shu Han Bor}
 
 \begin{document}
 
+\setlist{nolistsep}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{\baselineskip}
 \renewcommand\thetable{\Roman{table}}
 
 \maketitle
@@ -66,6 +70,8 @@ The \emph{document frequency} feature selection method was then used to select t
 \item In each corpus the words with the top 200 document frequency score are selected as features to represent that corpus.
 \end{enumerate}
 
+Note that different runs of our preprocessing script can result in different classifier accuracies. As the counter is stored in a hashmap, words with the same frequency before and after the 200 word cutoff are chosen arbitrarily. Depending on the words chosen, the accuracy of the classifier can be affected.
+
 Each selected feature was then weighted using its \emph{td-idf} score \cite{sebastiani}.
 
 $$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
@@ -80,7 +86,7 @@ $$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }}
 
 \begin{table}[H]
 \centering
-\caption{Characteristics of dataset}\vspace{1em}
+\caption{Characteristics of dataset}
 \begin{tabular}{@{}lrr@{}}
 \toprule
 & \textbf{Subject} & \textbf{Body} \\
@@ -102,13 +108,13 @@ The ``bag-of-words" model produced 19886 and 1074 features in the body and subje
 % Does the selection make sense to you given the task? Are the two lists similar?
 Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
 
-Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removes low quality features, allowing more significant features to have precedence. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier.
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removes low quality features, allowing more significant features to have precedence. Most resulting words are sensible, although there are some aren't (e.g. ``qs'', ``ll'', ``ca''). However, removing these words results in a lower accuracy. Therefore, we have chosen to retain these as some of them may be help the classifier distinguish between spam and non-spam emails. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier.
 
 A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
 
 % List the top 100 words for each corpus and show their DF score. Examine the list.
 \begin{table}[H]
-\caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}
 \hskip-.3cm \begin{tabular}{@{}rlrrlrrlr@{}}
 \toprule
 \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
@@ -156,7 +162,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \begin{table}[H]
 \centering
-\caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}\vspace{1em}
+\caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}
 \begin{tabular}{@{}rlrrlrrlr@{}}
 \toprule
 \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
@@ -206,11 +212,13 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \subsection{Results}
 
+We ran out preprocessed data against a variety of Weka classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP) tested with their 10 fold cross validation, as well as against our Na\"ive Bayes classifier (MyNB) tested with our 10 fold cross validation method (\autoref{table:results}).
+
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
 \begin{table}[H]
 \centering
-\caption{Accuracy of various classifiers tested with 10 fold cross validation for both the subject and body corpora}\vspace{1em}
+\caption{Various classifiers tested with 10 fold cross validation for both the subject and body corpora}
 \begin{tabular}{@{}lrr@{}}
 \toprule
 & \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
@@ -241,11 +249,11 @@ MyNB & 66.17 & 94.83 \\
 
 \subsubsection{Comparison of Classifiers}
 
-
+The ZeroR classifier performs poorly for both subject and body, returning only an accuracy of 66.67\% for both. This is because it returns the majority of the class given in the training data. As our dataset always contains more non-spam than spam emails (twice as many), it will always return non-spam.
 
 \subsubsection{Comparison of myNB vs Weka's NB}
 
-In order to find out if the differences are significant, we use a paired t-test:
+Both our and Weka's Na\"ive Bayes classifiers return similar accuracies for both subject and body. The discrepancies between the accuracies of the two classifiers for the subject and body are $\pm 3.5\%$ and $\pm 0.17\%$ respectively. To find out if this difference is significant, we conduct a paired t-test:
 
 \begin{enumerate}
 \item Calculate differences between the folds in our Bayes classifier and Weka's Bayes classifier.
@@ -258,7 +266,7 @@ $$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma $$
 
 \begin{table}[H]
 \centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}\vspace{1em}
+\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
@@ -283,7 +291,7 @@ Mean & 66.17 & 69.67 & -3.5 \\
 
 \begin{table}[H]
 \centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for body corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}\vspace{1em}
+\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for body corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
