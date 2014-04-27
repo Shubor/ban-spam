@@ -75,7 +75,7 @@ def norm( x, y ):
 
 	d = 0.0
 
-	for i in len(x):
+	for i in range( len(x) ):
 		d += ( x[i] - y[i] )**2
 
 	return math.sqrt(d)
@@ -85,7 +85,7 @@ def dot_product( x, y ):
 
 	product = 0.0
 
-	for i in range(len(x)):
+	for i in range( len(x) ):
 		product += x[i] * y[i]
 
 	return product
@@ -117,14 +117,14 @@ def generate_membership( stored, N, C ):
 def member_of_degree( x, j, cluster_centres, m ):
 
 	degree = 0.0
-	numerator 	= norm( x, cluster_centres[j] )
+	numerator = norm( x, cluster_centres[j] )
 
 	if numerator == 0:
 		return -1
 
 	power = 2/(m-1)
 
-	for k in range(len(cluster_centres)):
+	for k in range( len(cluster_centres) ):
 
 		denominator = norm( x, cluster_centres[k] )
 		if denominator == 0:
@@ -135,8 +135,8 @@ def member_of_degree( x, j, cluster_centres, m ):
 # For a given data point x_i, the degree of its membership to cluster j is calculated as follows:
 def membership( data_points, cluster_centres, memberships, m ):
 
-	for i in len(data_points):
-		for j in len(cluster_centres):
+	for i in range( len(data_points) ):
+		for j in range( len(cluster_centres) ):
 
 			memberships[i][j] = member_of_degree( data_points[i], j, cluster_centres, m )
 
@@ -146,13 +146,24 @@ def membership( data_points, cluster_centres, memberships, m ):
 def objective_func( data_points, degree_of_membership, cluster_centres ):
 	J = 0
 
-	for i in len(data_points):
-		for j in len(cluster_centres):
+	for i in range( len(data_points) ):
+		for j in range( len(cluster_centres) ):
 
 			J += degree_of_membership[i][j] *  norm( data_points[i], cluster_centres[j] )
 
 #========|| Calculate centre vector ||=========#
-def centre( data_points, degree_of_membership, m ):
+def centre( data_points, degree_of_membership, j, m ):
+
+	denominator = 0.0
+	numerator	= 0.0
+
+	for i in range( len(data_points) ):
+
+		mem_degree = math.pow(degree_of_membership[i][j],m)
+
+		denominator += mem_degree
+
+		numerator 	+= dot_product( mem_degree, data_points[i] )
 
 
 
