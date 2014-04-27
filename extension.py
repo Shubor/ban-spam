@@ -90,6 +90,11 @@ def dot_product( x, y ):
 
 	return product
 
+# Multiplys verctor x by scalar value a
+def scalar_mult( a, x ):
+
+	return [a*x[i] for i in range( len(x) )]
+
 
 #=======|| Initialise degree of membership ||=======#
 
@@ -157,14 +162,31 @@ def centre( data_points, degree_of_membership, j, m ):
 	denominator = 0.0
 	numerator	= 0.0
 
+	n_features = len( data_points[0] )
+
+	vector = [0.0 for foo in range( n_features )]
+
 	for i in range( len(data_points) ):
 
-		mem_degree = math.pow(degree_of_membership[i][j],m)
+		mem = math.pow(degree_of_membership[i][j],m)
 
-		denominator += mem_degree
+		vector = [ vector[f] +  mem * data_points[i][f] for f in range(n_features)]
 
-		numerator 	+= dot_product( mem_degree, data_points[i] )
+		denominator += mem
 
+	# No data points are even partially in c_j
+	if denominator == 0.0:
+		
+		print("Error: no data points have partial membership to c{}".format(j))
+		return [inf for f in range( n_features )]
+
+	elif numerator == 0.0:
+		
+		return [0.0 for f in range( n_features )]
+
+	else:
+
+		return [ vector[f] / denominator for foo in range( n_features )]
 
 
 #======|| Probability Density Function ||======#
