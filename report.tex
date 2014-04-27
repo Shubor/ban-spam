@@ -22,7 +22,6 @@
 
 \title{Email Classification with Na\"ive Bayes}
 \author{Mitchell Della Marta, Shu Bor}
-\date{}
 
 \begin{document}
 
@@ -211,7 +210,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \begin{table}[H]
 \centering
-\caption{Accuracy of various classifiers tested with 10 fold cross validation for the subject and body corpus}\vspace{1em}
+\caption{Accuracy of various classifiers tested with 10 fold cross validation for both the subject and body corpora}\vspace{1em}
 \begin{tabular}{@{}lrr@{}}
 \toprule
 & \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
@@ -220,7 +219,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 \midrule
 ZeroR & 66.67 & 66.67 \\
 OneR & 70.00 & 81.50 \\
-1-NN & 75.5 & 87.50 \\
+1-NN & 75.50 & 87.50 \\
 3-NN & 71.17 & 84.33 \\
 NB & 69.67 & 95.00 \\
 DT & 66.67 & 91.50 \\
@@ -240,21 +239,26 @@ MyNB & 66.17 & 94.83 \\
 % ----myNB vs Weka’s NB
 % ----comparison between the 2 corpora
 
-The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus.
+\subsubsection{Comparison of Classifiers}
 
-In order to find out if the differences are significant, we can use a paired t-test.
+
+
+\subsubsection{Comparison of myNB vs Weka's NB}
+
+In order to find out if the differences are significant, we use a paired t-test:
 
 \begin{enumerate}
 \item Calculate differences between the folds in our Bayes classifier and Weka's Bayes classifier.
 \item Calculate variance of the difference.
-$\invbreve\sigma ^{2} = \frac{{\sum\nolimits_{i=1}^k (di-d_{mean})}^2 }{k(k-1)}$
-\item Calculate the confidence interval $Z$ using variance.
-$$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma ^{2} $$
+$$ \invbreve\sigma ^{2} = \frac{ {\sum\nolimits_{i=1}^k (di-d_{mean})}^2 }{k-1} $$
+\item Calculate the confidence interval $Z$ with a confidence level $(1-\alpha)$ of $95\%$.
+$$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma $$
+\item If the interval Z contains 0, the difference is not significant. Otherwise, it is.
 \end{enumerate}
 
 \begin{table}[H]
 \centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between them}\vspace{1em}
+\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}\vspace{1em}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
@@ -279,7 +283,7 @@ Mean & 66.17 & 69.67 & -3.5 \\
 
 \begin{table}[H]
 \centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for body corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between them}\vspace{1em}
+\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for body corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}\vspace{1em}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
@@ -296,20 +300,27 @@ Fold 8 & 95.00 & 98.33 & -3.33 \\
 Fold 9 & 93.33 & 93.33 & 0.00 \\
 Fold 10 & 86.67 & 95.00 & -8.33 \\
 \bottomrule
-Mean & 94.83 & 95.00 & -0.166 \\
+Mean & 94.83 & 95.00 & -0.17 \\
 \bottomrule
 \end{tabular}
 \label{table:diffbody}
 \end{table}
 
-% - **T-paired test**
-%     1. Calculate the differences _di_
-%     2. Calculate the _variance_ of the difference (estimate of the true variance). If k is sufficiently large, _di_ is normally distributed
-%     3. Calculate _confidence interval_ _Z_
-%     4. If interval contains 0 – difference not significant, else significant
-%     - Variance: $\invbreve\sigma ^{2} = \frac{{\sum\nolimits_{j=1}^k (di-d_{mean})}^2 }{k(k-1)}$
-%     - Confidence interval: $Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma ^{2}$
-%         + $1-\alpha$: confidence level; $k-1$ degree of freedom
+Given the differences calculated in \autoref{table:diffsubj}, we get that for the subject corpus:
+\begin{align*}
+\invbreve\sigma &= 10.38 \\
+Z &= -3.5 \pm 2.26 \times 10.38 \\ &= -3.5 \pm 23.46
+\end{align*}
+
+Similarly, given the differences calculated in \autoref{table:diffbody}, we obtain for body corpus:
+\begin{align*}
+\invbreve\sigma &= 4.47 \\
+Z &= -0.17 \pm 2.26 \times 4.47 \\ &= -0.17 \pm 10.10
+\end{align*}
+
+\subsubsection{Comparison Between Subject and Body Corpora}
+
+The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus. This suggests that the email body is a better indicator of content.
 
 \section{Challenge Analysis}
 
