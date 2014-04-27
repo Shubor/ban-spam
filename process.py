@@ -28,6 +28,7 @@ subj_corpus = Counter()
 # 	Check if word is not irrelevant
 # 	Returns 1 if irrevelant, otherwise 0
 def clean( word ):
+
 	# Remove if word is punctuation or if word is in stop words
 	if word in stop_words:
 		return 1
@@ -42,12 +43,13 @@ stop_words = []
 with open('english.stop', 'rU') as stop_file:
 	stop_words = [ line.rstrip('\n') for line in stop_file ]
 
-#############################################################################
+#===========================================================================#
 # Read in emails and compute document frequency scores                      #
-#############################################################################
+#===========================================================================#
 
 # Append words to either subject or body list
 for file in os.listdir(path):
+
 	num_files += 1
 	f = gzip.open(os.path.join(path, file), "rb")
 
@@ -57,6 +59,7 @@ for file in os.listdir(path):
 
 	try:
 		for line in f:
+
 			# Replace punctuation with space
 			line = line.decode("utf-8")
 			l = re.sub('[%s]' % re.escape(punctuation), " ", line)
@@ -89,55 +92,6 @@ for file in os.listdir(path):
 	finally:
 		f.close()
 
-
-df_body = Counter()
-df_subj = Counter()
-# Append words to either subject or body list
-for file in os.listdir(path):
-	f = gzip.open(os.path.join(path, file), "r")
-
-	# Counter data structure to store DF of each word in current file
-	curr_body_corpus = Counter()
-	curr_subj_corpus = Counter()
-
-	try:
-		for line in f:
-			# Replace punctuation with space
-			line = line.decode("utf-8")
-			l = re.sub('[%s]' % re.escape(punctuation), " ", line)
-			# Subject corpus
-			if line.startswith("Subject:"):
-				for word in l.split():
-					if not clean(word):
-						if word != 'Subject':
-							curr_subj_corpus[word] += 1
-					if word in stop_words:
-						curr_subj_corpus[word] += 1
-			# Body corpus
-			else:
-				for word in l.split():
-					if not clean(word):
-						curr_body_corpus[word] += 1
-					if word in stop_words:
-						curr_body_corpus[word] += 1
-
-
-
-		# Update number of documents with term word i.e. #Tr(t_k)
-		for word in curr_body_corpus:
-			df_body[word] += 1
-		for word in curr_subj_corpus:
-			df_subj[word] += 1
-
-	finally:
-		f.close()
-
-# def print_top_100_elements_in_LaTeX_tabular_form( x ):
-# 	# x and y are lists of top 100 in sorted order
-# 	for i in range(20):
-# 		print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( x[i][0], x[i][1], x[i+20][0], x[i+20][1], x[i+40][0], x[i+40][1], x[i+60][0], x[i+60][1], x[i+80][0], x[i+80][1] ))
-# print_top_100_elements_in_LaTeX_tabular_form( body_corpus.most_common(100) )
-
 #############################################################################
 # Feature weighting with tf-idf, then cosine normalisation of top 200 words #
 #############################################################################
@@ -151,6 +105,7 @@ logT = math.log(T)
 # log(#T(tk)) of body and subject
 logTk_body = {}
 logTk_subj = {}
+
 for tk in body_corpus:	# ALL terms
 	logTk_body[tk] = math.log( body_corpus[tk] )
 for tk in subj_corpus:	# ALL terms
@@ -160,12 +115,14 @@ for tk in subj_corpus:	# ALL terms
 #	Calculates td-idf of term tk in document dj
 #	Returns positive float if tk in dj; 0 otherwise
 def TFIDF( term, n_term_in_doc, logTk ):
+
 	return n_term_in_doc[term] * ( logT - logTk[term] )
 
 # Cosine Norm:
 #	Calculates cosine norm for term tk in document dj
 #	Return 0 if tk not in dj; value in [0,1] otherwise
 def cosine_norm( term, n_term_in_doc, corpus, logTk ):
+
 	denominator = 0
 	for word in n_term_in_doc:
 		denominator += ( TFIDF( word, n_term_in_doc, logTk ) ** 2 )
@@ -210,6 +167,7 @@ for document in c_subj_spam:
 #	Write to given csv file
 #	Saves data to file, adding class of file into last column of csv
 def write_csv( file_name, legit, spam ):
+
 	header = [ "f" + str(x) for x in range(1, N + 1) ]
 	header.append("class")
 	with open(file_name, "w") as f:

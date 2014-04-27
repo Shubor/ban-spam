@@ -59,7 +59,6 @@ def std_dev( column ):
 #	Calculates probability of x assuming normal distribution
 #	x = value; u = mean; s = standard deviation
 # 	returns float
-test_value = 1e-120
 def prob_density( x, u, s ):
 
 	if s == 0.0 and x == u:
@@ -135,9 +134,6 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	LEGIT = "nonspam"
 	num_correct = 0
 
-	# Lp = 0.05 # Laplace correction used by weka
-	C = 1.0 # Threshold for spam: P(spam|X=x) > C P(C=legit|X=x)
-
 	# Test on the known legitimate documents
 	for document in test_legit:
 
@@ -162,10 +158,8 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 		P_spam_X  += math.log(P_spam)
 
 		# Classify
-		if C * P_legit_X >= P_spam_X:
+		if P_legit_X >= P_spam_X:
 			num_correct += 1
-		else:
-			print("1: ",P_legit_X,P_spam_X)
 
 	# Test on the known spam documents
 	for document in test_spam:
@@ -190,10 +184,8 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 		P_spam_X  += math.log(P_spam)
 
 		# Classify
-		if C * P_legit_X < P_spam_X:
+		if P_legit_X < P_spam_X:
 			num_correct += 1
-		else:
-			print("2: ",P_legit_X,P_spam_X)
 
 	# Accuracy
 	return num_correct / TOTAL_DOCS
@@ -217,49 +209,45 @@ with open( "body-folds.csv", "w" ) as f:
 		writer.writerow( [ ] ) # Empty line
 	f.close()
 
-#========|| Perform over K-groups ||========#
-max_accuracy = 0.0
-best_val = 0.000000000
+#========|| Perform over k-groups ||========#
 
-# print("Accuracy of Naive on folds")
-
-while max_accuracy < 90.0:
-	# Iterate for each for fold
+# Output accuracy
+#	Given data split into k-groups for both legit and spam
+#	Train data on k-1 groups
+#	Test classifier on remaining group
+#	Print average accuracy of classifier after 10 iterations
+def output_accuracy(sp_legit, sp_spam):
 
 	sum_accuracy = 0.0
+
 	for test_num in range( 10 ):
 
 		mean_legit, mean_spam = [], []
 		sd_legit, sd_spam = [], []
 
-		# Create training data from other 9/10 of the examples.
+		# Combine 9/10 of the data to create training data
 		train_legit = []
 		train_spam = []
 
 		for training_num in range( FOLD ):
 			if training_num != test_num:
-				train_legit.extend( sp_body_legit[training_num] )
-				train_spam.extend(  sp_body_spam[training_num]  )
+				train_legit.extend( sp_legit[training_num] )
+				train_spam.extend(  sp_spam[training_num]  )
 
 		# Train data
-		# mean_legit[9] is the mean of 1:360 => test_legit is 361:400
 		mean_legit, mean_spam, sd_legit, sd_spam = train( train_legit, train_spam )
 
-		# sp_body_legit[9] is 361:400
-		# works for mean_legit and sd_legit
+		# Checking accuracy of classifier on test data
+		accuracy = classify( sp_legit[test_num], sp_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-		# Checking accuracy on test data 361:400
-		accuracy = classify( sp_body_legit[test_num], sp_body_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
-
-		print( "Test on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
+		print( "\tTest on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
 
 		sum_accuracy += accuracy
 
-	print( "\nAverage of accuracies: {}%".format( round((sum_accuracy / FOLD) * 100, 2) ) )
+	print( "\n\tAverage of accuracies: {}%\n".format( round((sum_accuracy / FOLD) * 100, 2) ) )
 
+print("Accuracy of Classifier on Subject Corpus\n")
+output_accuracy(sp_subj_legit, sp_subj_spam)
 
-	if sum_accuracy * 10 >= max_accuracy:
-		best_val = test_value
-		max_accuracy = sum_accuracy * 10
-		print(best_val,max_accuracy)
-	test_value *= 1000
+print("Accuracy of Classifier on Body Corpus\n")
+output_accuracy(sp_body_legit, sp_body_spam)
