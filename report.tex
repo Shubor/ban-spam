@@ -258,7 +258,7 @@ Both our and Weka's Na\"ive Bayes classifiers return similar accuracies for both
 \begin{enumerate}
 \item Calculate differences between the folds in our Bayes classifier and Weka's Bayes classifier.
 \item Calculate variance of the difference.
-$$ \invbreve\sigma ^{2} = \frac{ {\sum\nolimits_{i=1}^k (di-d_{mean})}^2 }{k-1} $$
+$$ \invbreve\sigma ^{2} = \frac{ {\sum\nolimits_{i=1}^k (d_{i}-d_{mean})}^2 }{k-1} $$
 \item Calculate the confidence interval $Z$ with a confidence level $(1-\alpha)$ of $95\%$.
 $$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma $$
 \item If the interval Z contains 0, the difference is not significant. Otherwise, it is.
@@ -266,7 +266,7 @@ $$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma $$
 
 \begin{table}[H]
 \centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = C1_{i} - C2_{i}$ between the two classifiers at each fold}
+\caption{Comparison of fold accuracy between our Na\"ive Bayes clssifier (C1) and Weka's (C2) for subject corpus, and difference $d_{i} = | C1_{i} - C2_{i} |$ between the two classifiers at each fold}
 \begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
@@ -274,16 +274,16 @@ $$ Z = d_{mean} \pm t_{(1-\alpha)(k-1)} \invbreve\sigma $$
 \midrule
 Fold 1 & 71.67 & 58.33 & 13.34 \\
 Fold 2 & 66.67 & 56.67 & 10.00 \\
-Fold 3 & 58.33 & 66.67 & -8.34 \\
-Fold 4 & 53.33 & 71.67 & -18.34 \\
-Fold 5 & 63.33 & 65.00 & -1.67 \\
-Fold 6 & 70.00 & 78.33 & -8.33 \\
-Fold 7 & 66.67 & 80.00 & -13.33 \\
+Fold 3 & 58.33 & 66.67 & 8.34 \\
+Fold 4 & 53.33 & 71.67 & 18.34 \\
+Fold 5 & 63.33 & 65.00 & 1.67 \\
+Fold 6 & 70.00 & 78.33 & 8.33 \\
+Fold 7 & 66.67 & 80.00 & 13.33 \\
 Fold 8 & 71.67 & 65.00 & 6.67 \\
-Fold 9 & 70.00 & 76.67 & -6.67 \\
-Fold 10 & 70.00 & 78.33 & -8.33 \\
+Fold 9 & 70.00 & 76.67 & 6.67 \\
+Fold 10 & 70.00 & 78.33 & 8.33 \\
 \bottomrule
-Mean & 66.17 & 69.67 & -3.5 \\
+Mean & 66.17 & 69.67 & 9.5 \\
 \bottomrule
 \end{tabular}
 \label{table:diffsubj}
@@ -297,18 +297,18 @@ Mean & 66.17 & 69.67 & -3.5 \\
 \textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
 	& \textbf{Difference} \\
 \midrule
-Fold 1 & 98.33 & 100.00 & -1.67 \\
+Fold 1 & 98.33 & 100.00 & 1.67 \\
 Fold 2 & 98.33 & 98.33 & 0.00 \\
 Fold 3 & 100.00 & 93.33 & 6.67 \\
 Fold 4 & 98.33 & 91.67 & 6.66 \\
-Fold 5 & 91.67 & 93.33 & -1.66 \\
+Fold 5 & 91.67 & 93.33 & 1.66 \\
 Fold 6 & 96.67 & 95.00 & 1.67 \\
-Fold 7 & 90.00 & 91.67 & -1.67 \\
-Fold 8 & 95.00 & 98.33 & -3.33 \\
+Fold 7 & 90.00 & 91.67 & 1.67 \\
+Fold 8 & 95.00 & 98.33 & 3.33 \\
 Fold 9 & 93.33 & 93.33 & 0.00 \\
-Fold 10 & 86.67 & 95.00 & -8.33 \\
+Fold 10 & 86.67 & 95.00 & 8.33 \\
 \bottomrule
-Mean & 94.83 & 95.00 & -0.17 \\
+Mean & 94.83 & 95.00 & 3.17 \\
 \bottomrule
 \end{tabular}
 \label{table:diffbody}
@@ -317,14 +317,16 @@ Mean & 94.83 & 95.00 & -0.17 \\
 Given the differences calculated in \autoref{table:diffsubj}, we get that for the subject corpus:
 \begin{align*}
 \invbreve\sigma &= 10.38 \\
-Z &= -3.5 \pm 2.26 \times 10.38 \\ &= -3.5 \pm 23.46
+Z &= 9.5 \pm 2.26 \times 4.59 \\ &= 9.5 \pm 10.37
 \end{align*}
 
 Similarly, given the differences calculated in \autoref{table:diffbody}, we obtain for body corpus:
 \begin{align*}
 \invbreve\sigma &= 4.47 \\
-Z &= -0.17 \pm 2.26 \times 4.47 \\ &= -0.17 \pm 10.10
+Z &= 3.17 \pm 2.26 \times 2.99 \\ &= 3.17 \pm 6.76
 \end{align*}
+
+For the subject, $Z = [-0.87, 19.87]$ and for body, $Z = [-3.59, 9.93]$. In both cases the interval $Z$ contains 0. Therefore, the difference between the two classifiers for both subject and body are not significant.
 
 \subsubsection{Comparison Between Subject and Body Corpora}
 
