@@ -27,7 +27,7 @@ def read_csv( file_name, legit, spam ):
 					spam.append( row[:-1] )
 			row_num += 1
 
-read_csv( "body.csv", w_body_legit, w_body_spam )
+read_csv( "body-mj.csv", w_body_legit, w_body_spam )
 read_csv( "subject.csv", w_subj_legit, w_subj_spam )
 
 #############################################################################
