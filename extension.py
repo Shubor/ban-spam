@@ -157,7 +157,7 @@ def objective_func( data_points, degree_of_membership, cluster_centres ):
 			J += degree_of_membership[i][j] *  norm( data_points[i], cluster_centres[j] )
 
 #========|| Calculate centre vector ||=========#
-def centre( data_points, degree_of_membership, j, m ):
+def centre_vector( data_points, degree_of_membership, j, m ):
 
 	denominator = 0.0
 	numerator	= 0.0
@@ -177,7 +177,7 @@ def centre( data_points, degree_of_membership, j, m ):
 	# No data points are even partially in c_j
 	if denominator == 0.0:
 		
-		print("Error: no data points have partial membership to c{}".format(j))
+		print("Error? No data points have partial membership to c{}".format(j))
 		return [inf for f in range( n_features )]
 
 	elif numerator == 0.0:
