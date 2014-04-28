@@ -197,7 +197,7 @@ def TFIDF( term, TF, logTk ):
 
 #============|| Feature Selection ||==============#
 
-def CPD( n_category, term_freq, n ):
+def CPD( n_category, term_freq, d, n ):
 
 	CPD_values = Counter()
 
@@ -214,9 +214,11 @@ def CPD( n_category, term_freq, n ):
 			numerator 	= float( A - B )
 			denominator = float( A + B )
 
-			print("term: {} with {} on {} is {}".format(term,numerator,denominator,numerator/denominator))
+			# print("term: {} with {} on {} is {}".format(term,numerator,denominator,numerator/denominator))
 
-			CPD_values[term] = max( CPD_values[word], numerator/denominator )
+
+			if denominator > d:
+				CPD_values[term] = max( CPD_values[word], numerator/denominator )
 
 	return CPD_values.most_common(n)
 
@@ -250,7 +252,7 @@ def chi( n_category, term_freq, n ):
 			numerator = N * ( A*D - B*C ) ** 2
 			denominator = (A + C) * (B + D) * (A + B) * (C + D)
 
-			print("term: {} with {} on {}".format(term,numerator,denominator))
+			#print("term: {} with {} on {}".format(term,numerator,denominator))
 
 			if denominator == 0:
 				chi_values[term] = float('Infinity')
@@ -293,10 +295,16 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 	return corpus_cosNorm
 
-body_features = CPD( [400,200], [tf_body_legit, tf_body_spam], 200 )
-subj_features = CPD( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
 
-print(body_features)
+d1, d2 = 13, 0
+body_features = CPD( [400,200], [tf_body_legit, tf_body_spam], d1, 200 )
+subj_features = CPD( [400,200], [tf_subj_legit, tf_subj_spam], d2, 200 )
+
+print("Body denominator: {} features: {}".format(d1,len(body_features)))
+print("Subj denominator: {} features: {}".format(d2,len(subj_features)))
+
+
+#print(body_features)
 #print(subj_features)
 #====|Calculate cosine normalised values|====#
 
