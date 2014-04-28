@@ -197,6 +197,43 @@ def TFIDF( term, TF, logTk ):
 
 #============|| Feature Selection ||==============#
 
+def IG_Error( x, y ):
+
+	X_on_top = x / ( x + y )
+	Y_on_top = y / ( x + y )
+
+	return - (X_on_top * math.log2( X_on_top ) + Y_on_top * math.log2( Y_on_top ))
+
+def Information_Gain( n_category, term_freq, n):
+	
+	IG_values = Counter()
+
+	for category in range( len(term_freq) ):
+
+		for term in term_freq[category]:
+
+			# Number of documents
+			N = sum(n_category)
+
+			# Number of documents of category with term 
+			A = term_freq[category][term]
+
+			# Number of documents of not category with term
+			B = term_freq[category][term]
+
+			# Number of category without term
+			C = n_category[category] - A
+
+			# Number of documents of not category without term
+			# D = n_category[-category] - B
+			D = N - A - B - C
+
+			POS = A + C
+			NEG = B + D
+
+			PW 	= POS / N
+			PNW = 1 - PW
+
 def CPD( n_category, term_freq, d, n ):
 
 	CPD_values = Counter()
@@ -217,7 +254,7 @@ def CPD( n_category, term_freq, d, n ):
 			# print("term: {} with {} on {} is {}".format(term,numerator,denominator,numerator/denominator))
 
 
-			if denominator > d:
+			if A-B > d:
 				CPD_values[term] = max( CPD_values[word], numerator/denominator )
 
 	return CPD_values.most_common(n)
@@ -235,12 +272,11 @@ def chi( n_category, term_freq, n ):
 
 		for term in term_freq[category]:
 
-			#print(term_freq[0].most_common(200))
 			# Number of documents of category with term 
 			A = term_freq[category][term]
 
 			# Number of documents of not category with term
-			B = term_freq[category][term]
+			B = term_freq[1-category][term]
 
 			# Number of category without term
 			C = n_category[category] - A
@@ -260,6 +296,34 @@ def chi( n_category, term_freq, n ):
 				chi_values[term] = max( chi_values[word], numerator/denominator )
 
 	return chi_values.most_common(n)
+
+def Mutual_Information( n_category, term_freq, n ):
+
+	MI_values = Counter()
+
+	for category in range( len(term_freq) ):
+
+		for term in term_freq[category]:
+
+			# Number of documents of category with term 
+			A = term_freq[category][term]
+
+			# Number of documents of not category with term
+			B = term_freq[1-category][term]
+
+			# Number of category without term
+			C = n_category[category] - A
+
+			N = sum(n_category)
+
+			MI = math.log( (A * N) / ( (A + B) * (A + C) ) )
+
+			print(term,A,N,B,C,MI)
+
+			MI_values[term] = max( MI_values[word], MI )
+
+	return MI_values.most_common(n)
+
 
 #=======|| Cosine Normalisation ||========#
 
@@ -296,12 +360,11 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 	return corpus_cosNorm
 
 
-d1, d2 = 13, 0
-body_features = CPD( [400,200], [tf_body_legit, tf_body_spam], d1, 200 )
-subj_features = CPD( [400,200], [tf_subj_legit, tf_subj_spam], d2, 200 )
+d1, d2 = 25, 3
+body_features = Mutual_Information( [400,200], [tf_body_legit, tf_body_spam], 200 )
+subj_features = Mutual_Information( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
 
-print("Body denominator: {} features: {}".format(d1,len(body_features)))
-print("Subj denominator: {} features: {}".format(d2,len(subj_features)))
+print(body_features)
 
 
 #print(body_features)

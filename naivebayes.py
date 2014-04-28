@@ -62,7 +62,7 @@ def std_dev( column ):
 def prob_density( x, u, s ):
 
 	if s == 0.0 and x == u:
-		return 1.0
+		return 40.0
 
 	elif s == 0.0 and x != u:
 		return 1e-38
