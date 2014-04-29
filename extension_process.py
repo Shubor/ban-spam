@@ -132,30 +132,6 @@ for file in os.listdir(path):
 		for term in terms_subj_spam:			
 			tf_subj_spam[term]	+= 1
 
-		# if "spmsg" in file:
-			
-		# 	if line.startswith("Subject:"):
-		
-		# 		for word in curr_subj_corpus:
-		# 			tf_subj_spam[word] += 1
-		
-		# 	else:
-		
-		# 		for word in curr_body_corpus:
-		# 			tf_body_spam[word] += 1
-
-		# else:
-
-		# 	if line.startswith("Subject:"):
-		
-		# 		for word in curr_subj_corpus:
-		# 			tf_subj_legit[word] += 1
-		
-		# 	else:
-		
-		# 		for word in curr_body_corpus:
-		# 			tf_body_spam[word] += 1
-
 		# Counter of ALL the terms of the document
 
 		if "spmsg" in file:
@@ -195,7 +171,9 @@ def TFIDF( term, TF, logTk ):
 	return TF[term] * ( logT - logTk[term] )
 
 
-#============|| Feature Selection ||==============#
+#================|| Feature Selection ||==================#
+
+#====|| Information Gain ||====#
 
 def IG_Error( x, y ):
 
@@ -234,7 +212,9 @@ def Information_Gain( n_category, term_freq, n):
 			PW 	= POS / N
 			PNW = 1 - PW
 
-def CPD( n_category, term_freq, d, n ):
+#========|| Categorical Proportional Difference ||========#
+
+def CPD( n_category, term_freq, n ):
 
 	CPD_values = Counter()
 
@@ -249,13 +229,11 @@ def CPD( n_category, term_freq, d, n ):
 			B = term_freq[1-category][term]
 
 			numerator 	= float( A - B )
-			denominator = float( A + B )
+			denominator = float( A + B + 2 )
 
 			# print("term: {} with {} on {} is {}".format(term,numerator,denominator,numerator/denominator))
 
-
-			if A-B > d:
-				CPD_values[term] = max( CPD_values[word], numerator/denominator )
+			CPD_values[term] = max( CPD_values[word], numerator/denominator )
 
 	return CPD_values.most_common(n)
 
@@ -314,15 +292,44 @@ def Mutual_Information( n_category, term_freq, n ):
 			# Number of category without term
 			C = n_category[category] - A
 
+			# Total number of documents
 			N = sum(n_category)
 
-			MI = math.log( (A * N) / ( (A + B) * (A + C) ) )
+			#----- Mutual Information of term -----#
+			numerator 	= A * N
+			denominator = ( A + B ) * ( A + C )
+
+			MI = math.log2( numerator / denominator )
 
 			print(term,A,N,B,C,MI)
 
-			MI_values[term] = max( MI_values[word], MI )
+			# Add M.I. value to counter 
+			if A > 5 or (A > 2 and B > 3):
+				MI_values[term] = max( MI_values[word], MI )
 
 	return MI_values.most_common(n)
+
+import random
+def rand_feature( n_category, term_freq, n ):
+
+	RND_values = Counter()
+
+	for category in range( len(term_freq) ):
+
+		for term in term_freq[category]:
+
+			if not RND_values[term]:
+				RND_values[term] = random.random()
+
+	return RND_values.most_common(n)
+
+def DFreq( n_category, term_freq, n ):
+
+	DFreq_values = Counter()
+
+	term_freq[0].update(term_freq[1])
+
+	return term_freq[0].most_common(n)
 
 
 #=======|| Cosine Normalisation ||========#
@@ -359,13 +366,9 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 	return corpus_cosNorm
 
-
-d1, d2 = 25, 3
-body_features = Mutual_Information( [400,200], [tf_body_legit, tf_body_spam], 200 )
-subj_features = Mutual_Information( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
-
-print(body_features)
-
+body_features = DFreq( [400,200], [tf_body_legit, tf_body_spam], 200 )
+#subj_features = DFreq( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
+subj_features = subj_corpus.most_common(200)
 
 #print(body_features)
 #print(subj_features)
