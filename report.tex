@@ -251,7 +251,11 @@ MyNB & 66.17 & 94.83 \\
 
 The ZeroR classifier adheres to no rules and performs poorly for both subject and body, returning only an accuracy of 66.67\% for both. This is because it returns the majority of the class given in the training data. As our dataset always contains more non-spam than spam emails (twice as many), it will always return non-spam.
 
-Multilayer perceptron (MLP) returns the best accuracy in both cases.
+In contrast, Multilayer perceptron (MLP) returns the best accuracy in both cases.
+
+OneR generates one rule for each item in the dataset. After calculating rules for each, it will select the rule that gives the smallest total error. Although it is simple, it only performs slightly worse than more complicated algorithms such as 1-NN or 3-NN.
+
+1-NN and 3-NN are both types of the k-nearest neighbour algorithm, where $k = 1$ and $k = 3$ respectively. Although they use similar algorithms, 1-NN performs better than 3-NN. 1-NN takes one neighbour, whereas 3-NN takes three. Therefore, this disparity is probably because in most cases the closest neighbour correctly classifies the new example, but the next two closest do not. Hence 1-NN gets a greater accuracy than 3-NN.
 
 \subsubsection{Comparison of myNB vs Weka's NB}
 
