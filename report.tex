@@ -251,16 +251,16 @@ MyNB & 66.17 & 94.83 \\
 
 The ZeroR classifier returns the majority class given from the training data. As a result ZeroR returns ``nonspam'' as there are 400 non-spam and 200 spam cases. Thus ZeroR produces a correct answer for and only for test data of the majority class, ``nonspam'', which is 
 \begin{align*}
-	$
-\frac{v^2}{c^2}
-$
+	
+\frac{\# nonspam}{\# documents} &=  \frac{360}{540} \\
+&= 66.67\%
+
 \end{align*}
+as obtained.
 
- accuracy of 66.67\%
+The multilayer perceptron (MLP) ``consists of multiple layers of simple, two-state, sigmoid processing elements (nodes) or neurons that interact using weighted connections.'' (Pal 1992 p,.684).  
 
-adheres to no rules and performs poorly for both subject and body, returning only an accuracy of 66.67\% for both. This is because it returns the majority of the class given in the training data. As our dataset always contains more non-spam than spam emails (twice as many), it will always return non-spam.
-
-A multilayer perceptron (MLP) is a feedforward artificial neural network model that maps sets of input data onto a set of appropriate outputs. A MLP consists of multiple layers of nodes in a directed graph, with each layer fully connected to the next one. Except for the input nodes, each node is a neuron (or processing element) with a nonlinear activation function.
+is a feedforward artificial neural network model that maps sets of input data onto a set of appropriate outputs. A MLP consists of multiple layers of nodes in a directed graph, with each layer fully connected to the next one. Except for the input nodes, each node is a neuron (or processing element) with a nonlinear activation function.
 
 
 
