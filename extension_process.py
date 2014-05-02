@@ -367,8 +367,7 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 	return corpus_cosNorm
 
 body_features = DFreq( [400,200], [tf_body_legit, tf_body_spam], 200 )
-#subj_features = DFreq( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
-subj_features = subj_corpus.most_common(200)
+subj_features = DFreq( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
 
 #print(body_features)
 #print(subj_features)
@@ -401,3 +400,16 @@ def write_csv( file_name, legit, spam ):
 
 write_csv("body.csv"   , cosnorm_body_legit, cosnorm_body_spam)
 write_csv("subject.csv", cosnorm_subj_legit, cosnorm_subj_spam)
+
+
+def printTable( x ):
+	# x and y are lists of top 100 in sorted order
+ 	for i in range(34):
+ 		if i == 32 or i == 33:
+ 			break
+ 		print("{} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( i+1, x[i][0], x[i][1], i+35, x[i+34][0], x[i+34][1], i+69, x[i+68][0], x[i+68][1] ))
+ 	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 33, x[32][0], x[32][1], 67, x[66][0], x[66][1] ))
+ 	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 34, x[33][0], x[33][1], 68, x[67][0], x[67][1] ))
+
+printTable( body_features )
+printTable( subj_features )

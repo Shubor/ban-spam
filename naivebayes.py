@@ -59,20 +59,22 @@ def std_dev( column ):
 #	Calculates probability of x assuming normal distribution
 #	x = value; u = mean; s = standard deviation
 # 	returns float
-def prob_density( x, u, s ):
+
+def pdf( x, u, s ):
 
 	if s == 0.0 and x == u:
-		return 40.0
+		return HIGH_DENSITY
 
 	elif s == 0.0 and x != u:
-		return 1e-38
+		return TINY_DENSITY
 
 	coefficient = 1.0 / ( s * math.sqrt( 2.0 * math.pi ) )
 	exponent = - ((x - u) ** 2.0) / (2.0 * (s ** 2.0))
 
 	density = coefficient * math.exp(exponent)
+	
 	if density == 0:
-		return 1e-50
+		return LOW_DENSITY
 
 	return density
 
@@ -126,13 +128,11 @@ def train( train_legit, train_spam ):
 #		Should implement a threshold for this to avoid false positives
 def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
-	# Number of examples = 60, prob_spam = number of examples which are spam / examples = 20/60
-	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # Number of examples = 60
+	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # The size of the test set
 	P_spam  = len( test_spam )  / TOTAL_DOCS # P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
 	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
-	SPAM = "spam"
-	LEGIT = "nonspam"
-	num_correct = 0
+	
+	num_correct = 0 # Correctly classified documents
 
 	# Test on the known legitimate documents
 	for document in test_legit:
@@ -141,17 +141,12 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			P_X_spam = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_X_legit = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			if P_X_spam != 0.0:
-				P_spam_X  += math.log(P_X_spam)
-			else:
-				P_spam_X += math.log(test_value)
-			if P_X_legit != 0.0:
-				P_legit_X += math.log(P_X_legit)
-			else:
-				P_legit_X += math.log(test_value)
+			P_X_spam  = pdf( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_X_legit = pdf( float(document[x]), mean_legit[x], sd_legit[x] )
+
+			P_spam_X += math.log(P_X_spam)
+			P_legit_X += math.log(P_X_legit)
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X += math.log(P_legit)
@@ -167,17 +162,11 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Calculate P(class|X)=P(X1|class) ... P(X200|class) P(class)
 		for x in range(len(document)):
-			P_X_spam = prob_density( float(document[x]), mean_spam[x] , sd_spam[x]  )
-			P_X_legit = prob_density( float(document[x]), mean_legit[x], sd_legit[x] )
+			P_X_spam  = pdf( float(document[x]), mean_spam[x] , sd_spam[x]  )
+			P_X_legit = pdf( float(document[x]), mean_legit[x], sd_legit[x] )
 
-			if P_X_spam != 0.0:
-				P_spam_X  += math.log(P_X_spam)
-			else:
-				P_spam_X += math.log(test_value)
-			if P_X_legit != 0.0:
-				P_legit_X += math.log(P_X_legit)
-			else:
-				P_legit_X += math.log(test_value)
+			P_spam_X += math.log(P_X_spam)
+			P_legit_X += math.log(P_X_legit)
 
 		# P(class|X) = P(X|class) P(class)
 		P_legit_X += math.log(P_legit)
@@ -245,9 +234,22 @@ def output_accuracy(sp_legit, sp_spam):
 		sum_accuracy += accuracy
 
 	print( "\n\tAverage of accuracies: {}%\n".format( round((sum_accuracy / FOLD) * 100, 2) ) )
+	return sum_accuracy / FOLD * 100
+
+#===| Classify Subject corpus using Naive Bayes |===#
+
+HIGH_DENSITY = 8.0    # P.D. with Laplace correction X U {0.065}
+LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0 
+TINY_DENSITY = 1e-250 # P.D. for extremely unlikely i.e. stdev = 0
 
 print("Accuracy of Classifier on Subject Corpus\n")
-output_accuracy(sp_subj_legit, sp_subj_spam)
+prob = output_accuracy(sp_subj_legit, sp_subj_spam)
+
+#===| Classify Body corpus using Naive Bayes |===#
+
+HIGH_DENSITY = 116.0  # P.D. with Laplace correction X U {0.065}
+LOW_DENSITY	 = 1e-100 # P.D. for when exponential is 0
+TINY_DENSITY = 1e-250 # P.D. for extremely unlikely i.e. stdev = 0
 
 print("Accuracy of Classifier on Body Corpus\n")
 output_accuracy(sp_body_legit, sp_body_spam)
