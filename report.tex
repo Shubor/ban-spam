@@ -212,7 +212,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \subsection{Results}
 
-We ran out preprocessed data against a variety of Weka classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP) tested with their 10 fold cross validation, as well as against our Na\"ive Bayes classifier (MyNB) tested with our 10 fold cross validation method (\autoref{table:results}).
+We ran our preprocessed data against a variety of Weka classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP) tested with their 10 fold cross validation, as well as against our Na\"ive Bayes classifier (MyNB) tested with our 10 fold cross validation method (\autoref{table:results}).
 
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
@@ -249,24 +249,46 @@ MyNB & 80.83 & 95.33 \\
 
 \subsubsection{Comparison of Classifiers}
 
-The ZeroR classifier returns the majority class given from the training data. As a result ZeroR returns ``nonspam'' as there are 400 non-spam and 200 spam cases. Thus ZeroR produces a correct answer for and only for test data of the majority class, ``nonspam'', which is 
-%\begin{align*} \frac{\# nonspam}{\# documents} &=  \frac{360}{540} \\ &= 66.67\% \end{align*}
-as obtained.
+The accuracy of a classifier in comparison to the other classifiers, varies slightly against the two corpora.  Accuracy from lowest to highest for both corpora are shown in \autoref{table:accuracyofclassifiers}. Although there are some discrepancies, in general ZeroR, OneR, 3-NN, DT perform more poorly than 1-NN, NB, MyNB, MLP. 
 
-The multilayer perceptron (MLP) defined as ``consists of multiple layers of simple, two-state, sigmoid processing elements (nodes) or neurons that interact using weighted connections.'' (Pal 1992 p,.684). The Weka multilayer perceptron assigns the features as output neurons with a random weight. Weka's default number of hidden neurons was used, $(attributes + classes)/2 = (200+2)/2 = 101$\cite{WekaMLP}. The network is then trained using back propagation, correcting the weights to minimize the error in the entire output. 
+\begin{table}[H]
+\centering
+\caption{Accuracy of classifiers from lowest to highest for both corpora}
+\begin{tabular}{@{} l llllllll @{}}
+\toprule
+& \multicolumn{8}{c}{\textbf{Accuracy Ranking}} \\
+\midrule
+\textbf{Corpus} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+Subject & ZeroR & DT & 3-NN & NB & OneR & MLP & 1-NN & MyNB\\
+Body & ZeroR & OneR & 3-NN & 1-NN & DT & NB & MyNB & MLP\\
+\bottomrule
+\end{tabular}
+\label{table:accuracyofclassifiers}
+\end{table}
 
+The ZeroR classifier performs poorly for both corpora. It returns the majority class given from the training data. As a result ZeroR returns ``nonspam'' as there are 400 non-spam and 200 spam cases. Thus ZeroR produces a correct answer for and only for test data of the majority class, ``nonspam'', which is 
+\begin{align*} \frac{\# nonspam}{\# documents} &=  \frac{360}{540} \\ &= 66.67\% 
+\end{align*}
+as obtained. 
 
+OneR works similarly to ZeroR, but instead of having no rules, it generates one rule for each item in the dataset. After calculating rules for each, it will select the rule that gives the smallest total error. Although its accuracy isn't high, it is decent for the simplicity and speed of the algorithm.
 
-is a feedforward artificial neural network model that maps sets of input data onto a set of appropriate outputs. A MLP consists of multiple layers of nodes in a directed graph, with each layer fully connected to the next one. Except for the input nodes, each node is a neuron (or processing element) with a nonlinear activation function.
+In contrast to these two classifiers, multilayer perceptron (MLP) is more complex and returns the highest accuracy for body, and the second highest accuracy for subject. MLP is defined as ``consists of multiple layers of simple, two-state, sigmoid processing elements (nodes) or neurons that interact using weighted connections.'' (Pal 1992, p.684). The Weka MLP assigns the features as output neurons with a random weight. Weka's default number of hidden neurons\cite{WekaMLP} was used, 
+\begin{align*} \frac{(attributes + classes)}{2} &= \frac{(200+2)}{2} \\&= 101
+\end{align*}
+As the network is then trained using back propagation, which corrects the weights to minimize the error in the entire output, MLP has a high accuracy. However, although it is very accurate, MLP takes significantly more time to train than the other classifiers. 
 
+% svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayes.java
+Na\"ive Bayes (NB) is based on the Bayes rule of conditional probability. It analyses each attribute individually, by assuming they are all of equal importance and independent of one another. Although it is based on a simple concept, our MyNB classifier outperforms MLP which is a comparatively more complex algorithm for the subject corpus, and performs almost as well as MLP for the body corpus. 
 
+Whilst NB and MyNB are based on the same principle, MyNB outperforms NB. The difference in performance is due to implementation. The major difference between implementations is that NB uses numeric estimator precision values that are chosen by calculating the differences between adjacent values. This allows them to form a kernel density estimation, that estimates a probability density function (PDF), as opposed to using a normal PDF. On the other hand, we simply assume the data has a normal probability distribution function. 
 
+1-NN and 3-NN are both types of the k-nearest neighbour algorithm, where $k = 1$ and $k = 3$ respectively. Although they use similar algorithms, 1-NN performs better than 3-NN. 1-NN takes one neighbour, whereas 3-NN takes three. Therefore, this disparity is probably because in most cases the closest neighbour correctly classifies the new example, but the next two closest do not. Hence 1-NN gets a greater accuracy than 3-NN. These classifiers work moderately well compared to the other classifiers, as each class is characterised by a large number of features, which the nearest neighbour algorithm takes advantage of. In order to increase the accuracy of this algorithm, it should be given a larger training set. Although the benefits of this have to be weighed against the time it takes to find the nearest neighbour in a larger training set. 
 
-In contrast, Multilayer perceptron (MLP) returns the best accuracy in both cases.
+Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree classifier, which relies on using information gain to select attributes that best classifies the data. It performs averagely on the body corpus, and relatively poorly on the subject corpus.
 
-OneR generates one rule for each item in the dataset. After calculating rules for each, it will select the rule that gives the smallest total error. Although it is simple, it only performs slightly worse than more complicated algorithms such as 1-NN or 3-NN.
-
-1-NN and 3-NN are both types of the k-nearest neighbour algorithm, where $k = 1$ and $k = 3$ respectively. Although they use similar algorithms, 1-NN performs better than 3-NN. 1-NN takes one neighbour, whereas 3-NN takes three. Therefore, this disparity is probably because in most cases the closest neighbour correctly classifies the new example, but the next two closest do not. Hence 1-NN gets a greater accuracy than 3-NN.
+%Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree classifier. The decision tree is made by identifying the attribute that discriminates the data most clearly (based on information gain) at each layer, then separating the data using that attribute. It performs this iteratively until there are no more attributes available to discriminate between data items, or we are unable to get an unambiguous result from the information. The branch is then terminated by a target value that defines the majority of the items at the branch. However, it performs averagely on the body corpus, and poorly on the subject corpus. %As J48 implements pruning, we don't believe the low accuracy is due to overfitting. However, the pruning might remove attributes with high information gain for classification. As most values are ``0'', important non-zero values may have been pruned. 
 
 \subsubsection{Comparison of myNB vs Weka's NB}
 
