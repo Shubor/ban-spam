@@ -89,17 +89,17 @@ for file in os.listdir(path):
 
 				for word in l.split():
 					if not clean(word):
-						if word != 'Subject' and "spmsg" in file:						
+						if word != 'Subject' and "spmsg" in file:
 							curr_subj_corpus[word] += 1
 							terms_subj_spam[word]  += 1
-						
-						elif word != 'Subject':						
+
+						elif word != 'Subject':
 							curr_subj_corpus[word] += 1
 							terms_subj_legit[word] += 1
-			
+
 			# Body corpus
 			else:
-				
+
 				for word in l.split():
 					if not clean(word) and "spmsg" in file:
 
@@ -109,7 +109,7 @@ for file in os.listdir(path):
 					elif not clean(word):
 
 						curr_body_corpus[word] += 1
-						terms_body_legit[word] += 1						
+						terms_body_legit[word] += 1
 
 
 		# Update number of documents with term word i.e. #Tr(t_k)
@@ -118,8 +118,8 @@ for file in os.listdir(path):
 		for word in curr_subj_corpus:
 			subj_corpus[word] += 1
 
-		# Add binary occurence of terms to the corpus's term frequency counter 
-		
+		# Add binary occurence of terms to the corpus's term frequency counter
+
 		for term in terms_body_legit:
 			tf_body_legit[term] += 1
 
@@ -129,7 +129,7 @@ for file in os.listdir(path):
 		for term in terms_subj_legit:
 			tf_subj_legit[term] += 1
 
-		for term in terms_subj_spam:			
+		for term in terms_subj_spam:
 			tf_subj_spam[term]	+= 1
 
 		# Counter of ALL the terms of the document
@@ -176,7 +176,7 @@ def TFIDF( term, TF, logTk ):
 #====|| Information Gain ||====#
 
 def Information_Gain( n_category, term_freq, n):
-	
+
 	IG_values = Counter()
 
 	# Probability of category: P(spam) and P(nonspam)
@@ -187,7 +187,8 @@ def Information_Gain( n_category, term_freq, n):
 	# For term of all terms
 	for term in combined:
 
-		print("---------------------------")
+			# Number of documents of category with term
+			A = term_freq[category][term]
 
 		print("P({}) = {}/{} = {}".format(term, combined[term], sum(n_category), combined[term] / sum(n_category) ))
 
@@ -234,7 +235,7 @@ def CPD( n_category, term_freq, n ):
 
 		for term in term_freq[category]:
 
-			# Number of documents of category with term 
+			# Number of documents of category with term
 			A = term_freq[category][term]
 
 			# Number of documents of not category with term
@@ -262,7 +263,7 @@ def chi( n_category, term_freq, n ):
 
 		for term in term_freq[category]:
 
-			# Number of documents of category with term 
+			# Number of documents of category with term
 			A = term_freq[category][term]
 
 			# Number of documents of not category with term
@@ -295,7 +296,7 @@ def Mutual_Information( n_category, term_freq, n ):
 
 		for term in term_freq[category]:
 
-			# Number of documents of category with term 
+			# Number of documents of category with term
 			A = term_freq[category][term]
 
 			# Number of documents of not category with term
@@ -315,7 +316,7 @@ def Mutual_Information( n_category, term_freq, n ):
 
 			print(term,A,N,B,C,MI)
 
-			# Add M.I. value to counter 
+			# Add M.I. value to counter
 			if A > 5 or (A > 2 and B > 3):
 				MI_values[term] = max( MI_values[word], MI )
 
@@ -354,7 +355,7 @@ def cosine_norm( term, TF, logTk ):
 
 	for word in TF:
 		denominator += ( TFIDF( word, TF, logTk ) ** 2 )
-	
+
 	if denominator == 0:
 		return 0
 	else:
@@ -367,7 +368,7 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 	for document in corpus_tfidf:
 
 		# Row containing cosine normailsed values for the selected features
-		doc_cosNorm = [] 
+		doc_cosNorm = []
 
 		# For each feature find the cosine normalised value
 		for feature in corpus_features:
@@ -413,15 +414,17 @@ def write_csv( file_name, legit, spam ):
 write_csv("body.csv"   , cosnorm_body_legit, cosnorm_body_spam)
 write_csv("subject.csv", cosnorm_subj_legit, cosnorm_subj_spam)
 
+print(len(tf_body_spam + tf_body_legit))
+print(len(tf_subj_spam + tf_subj_legit))
 
-def printTable( x ):
-	# x and y are lists of top 100 in sorted order
- 	for i in range(34):
- 		if i == 32 or i == 33:
- 			break
- 		print("{} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( i+1, x[i][0], x[i][1], i+35, x[i+34][0], x[i+34][1], i+69, x[i+68][0], x[i+68][1] ))
- 	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 33, x[32][0], x[32][1], 67, x[66][0], x[66][1] ))
- 	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 34, x[33][0], x[33][1], 68, x[67][0], x[67][1] ))
+# def printTable( x ):
+# 	# x and y are lists of top 100 in sorted order
+#  	for i in range(34):
+#  		if i == 32 or i == 33:
+#  			break
+#  		print("{} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format( i+1, x[i][0], x[i][1], i+35, x[i+34][0], x[i+34][1], i+69, x[i+68][0], x[i+68][1] ))
+#  	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 33, x[32][0], x[32][1], 67, x[66][0], x[66][1] ))
+#  	print("{} & {} & {} & {} & {} & {} &  &  &  \\\\".format( 34, x[33][0], x[33][1], 68, x[67][0], x[67][1] ))
 
-printTable( body_features )
-printTable( subj_features )
+# printTable( body_features )
+# printTable( subj_features )

@@ -72,7 +72,7 @@ def pdf( x, u, s ):
 	exponent = - ((x - u) ** 2.0) / (2.0 * (s ** 2.0))
 
 	density = coefficient * math.exp(exponent)
-	
+
 	if density == 0:
 		return LOW_DENSITY
 
@@ -247,7 +247,7 @@ def output_accuracy(sp_legit, sp_spam):
 #===| Classify Subject corpus using Naive Bayes |===#
 
 HIGH_DENSITY = 8.0    # P.D. with Laplace correction X U {0.065}
-LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0 
+LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0
 TINY_DENSITY = 1e-250 # P.D. for extremely unlikely i.e. stdev = 0
 
 print("Accuracy of Classifier on Subject Corpus\n")
