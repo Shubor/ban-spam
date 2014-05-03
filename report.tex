@@ -212,7 +212,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \subsection{Results}
 
-We ran our preprocessed data against a variety of Weka classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP) tested with their 10 fold cross validation, as well as against our Na\"ive Bayes classifier (MyNB) tested with our 10 fold cross validation method (\autoref{table:results}).
+We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with k=1 (1-NN) and k=3 (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation.
 
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
@@ -236,6 +236,58 @@ MyNB & 80.83 & 95.33 \\
 \bottomrule
 \end{tabular}
 \label{table:results}
+\end{table}
+
+The comparison of the performance (accuracy) of MyNB and NB over the 10 folds was completed in the same execution as the respective results in \autoref{table:results}. MyNB used our 10 fold cross-validation and NB used Weka's 10-fold cross-validation. The items in each fold (given to MyNB and NB) are expected to be different. 
+
+\begin{table}[H]
+\centering
+\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the subject corpus}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
+	& \textbf{Difference} \\
+\midrule
+Fold 1 & 80.00 & 60.00 & 20.00 \\
+Fold 2 & 83.33 & 73.33 & 10.00 \\
+Fold 3 & 71.67 & 63.33 & 8.34 \\
+Fold 4 & 80.00 & 76.67 & 3.33 \\
+Fold 5 & 83.33 & 71.67 & 11.66 \\
+Fold 6 & 76.67 & 70.00 & 6.67 \\
+Fold 7 & 83.33 & 73.33 & 10.00 \\
+Fold 8 & 86.67 & 63.33 & 23.34 \\
+Fold 9 & 81.67 & 73.33 & 8.34 \\
+Fold 10& 81.67 & 60.00 & 21.67 \\
+\bottomrule
+Mean & 80.83 & 68.50 & 12.34 \\
+\bottomrule
+\end{tabular}
+\label{table:diffsubj}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the body corpus}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
+	& \textbf{Difference} \\
+\midrule
+Fold 1 & 98.33 & 98.33& 0.00 \\
+Fold 2 & 98.33 & 93.33 & 5.00 \\
+Fold 3 & 96.67 & 95.00 & 1.67 \\
+Fold 4 & 90.00 & 100.00 & 10.00 \\
+Fold 5 & 91.67 & 95.00 & 3.33 \\
+Fold 6 & 96.67 & 93.33 & 3.33 \\
+Fold 7 & 93.33 & 95.00 & 1.67 \\
+Fold 8 & 95.00 & 91.67 & 3.33 \\
+Fold 9 & 96.67 & 91.67 & 5.00 \\
+Fold 10 & 96.67 & 95.00 & 1.67 \\
+\bottomrule
+Mean & 95.33 & 94.83 & 3.50 \\
+\bottomrule
+\end{tabular}
+\label{table:diffbody}
 \end{table}
 
 \subsection{Discussion}
@@ -309,56 +361,6 @@ for the confidence level $(1-\alpha)=0.95$.
 
 \item If the interval $\text{UCL}_{0.95}$ contains 0 then the difference in accuracy is not statistically significant; otherwise, it is.
 \end{enumerate}
-
-\begin{table}[H]
-\centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the subject corpus}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
-	& \textbf{Difference} \\
-\midrule
-Fold 1 & 71.67 & 58.33 & 13.34 \\
-Fold 2 & 66.67 & 56.67 & 10.00 \\
-Fold 3 & 58.33 & 66.67 & 8.34 \\
-Fold 4 & 53.33 & 71.67 & 18.34 \\
-Fold 5 & 63.33 & 65.00 & 1.67 \\
-Fold 6 & 70.00 & 78.33 & 8.33 \\
-Fold 7 & 66.67 & 80.00 & 13.33 \\
-Fold 8 & 71.67 & 65.00 & 6.67 \\
-Fold 9 & 70.00 & 76.67 & 6.67 \\
-Fold 10 & 70.00 & 78.33 & 8.33 \\
-\bottomrule
-Mean & 66.17 & 69.67 & 9.5 \\
-\bottomrule
-\end{tabular}
-\label{table:diffsubj}
-\end{table}
-
-\begin{table}[H]
-\centering
-\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the body corpus}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
-	& \textbf{Difference} \\
-\midrule
-Fold 1 & 98.33 & 98.33& 0.00 \\
-Fold 2 & 98.33 & 93.33 & 5.00 \\
-Fold 3 & 96.67 & 95.00 & 1.67 \\
-Fold 4 & 90.00 & 100.00 & 10.00 \\
-Fold 5 & 91.67 & 95.00 & 3.33 \\
-Fold 6 & 96.67 & 93.33 & 3.33 \\
-Fold 7 & 93.33 & 95.00 & 1.67 \\
-Fold 8 & 95.00 & 91.67 & 3.33 \\
-Fold 9 & 96.67 & 91.67 & 5.00 \\
-Fold 10 & 96.67 & 95.00 & 1.67 \\
-\bottomrule
-Mean & 95.33 & 94.83 & 3.50 \\
-\bottomrule
-\end{tabular}
-\label{table:diffbody}
-\end{table}
 
 Using the differences calculated in \autoref{table:diffsubj} for the subject corpus we find that:
 \begin{align*}
