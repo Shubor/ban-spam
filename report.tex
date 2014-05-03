@@ -50,7 +50,7 @@ Traditional non-machine learning based techniques are easily fooled by spammers 
 
 % Briefly describe what you did.
 
-Before classification can be performed, we must represent the files in our sample set \emph{Lingpspam-mini600} appropriately. Using the ``bag-of-words'' model, words are extracted from the file and treated as features. There are two main characteristics in an email; the subject and the body. Thus, we will construct two ``bags-of-words'', one for each component. To determine which corpus a feature will belong to, we if the line begins with ``Subject:''. If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+Before classification can be performed, we must represent the files in our sample set \emph{LingSpam-mini600}\cite{lingspam} appropriately. Using the ``bag-of-words'' model, words are extracted from the file and treated as features. There are two main characteristics in an email; the subject and the body. Thus, we will construct two ``bags-of-words'', one for each component. To determine which corpus a feature will belong to, we if the line begins with ``Subject:''. If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
 
 To each file, we performed the following steps:
 
@@ -86,7 +86,7 @@ $$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }}
 
 \begin{table}[H]
 \centering
-\caption{Characteristics of dataset}
+\caption{Characteristics of data set}
 \begin{tabular}{@{}lrr@{}}
 \toprule
 & \textbf{Subject} & \textbf{Body} \\
@@ -272,7 +272,7 @@ The ZeroR classifier performs poorly for both corpora. It returns the majority c
 \end{align*}
 as obtained. 
 
-OneR works similarly to ZeroR, but instead of having no rules, it generates one rule for each item in the dataset. After calculating rules for each, it will select the rule that gives the smallest total error. Although its accuracy isn't high, it is decent for the simplicity and speed of the algorithm.
+OneR works similarly to ZeroR, but instead of having no rules, it generates one rule for each item in the data set. After calculating rules for each, it will select the rule that gives the smallest total error. Although its accuracy isn't high, it is decent for the simplicity and speed of the algorithm.
 
 In contrast to these two classifiers, multilayer perceptron (MLP) is more complex and returns the highest accuracy for body, and the second highest accuracy for subject. MLP is defined as ``consists of multiple layers of simple, two-state, sigmoid processing elements (nodes) or neurons that interact using weighted connections.'' (Pal 1992, p.684). The Weka MLP assigns the features as output neurons with a random weight. Weka's default number of hidden neurons\cite{WekaMLP} was used, 
 \begin{align*} \frac{(attributes + classes)}{2} &= \frac{(200+2)}{2} \\&= 101
@@ -382,26 +382,29 @@ The overall performance of the classifiers regardless of type, perform significa
 \section{Conclusion and Future Work}
 
 % summarize your main findings and, if possible, suggest future work.
-The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails.
 
-By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
+In this report, we apply Na\"ive Bayes for binary classification of the \emph{LingSpam-mini600} data set. In order to reduce the size of the feature space, we use Document Frequency for feature selection. We have shown using accuracy that our classifier performs extremely well compared to a variety of other classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP), with only MLP getting a slightly better accuracy than ours on the body corpus. Therefore, based on our experimental results, Na\"ive Bayes is well suited for email classification to detect spam. 
+
+Our future research work will deal with creating more meaningful features. This includes implementing stemming and creating tokens using more than one word. Currently, the tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails. By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
 
 \section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
 
 \section{Instructions: How to run code}
 
+
 \begin{thebibliography}{9}
+% http://www.ieee.org/documents/ieeecitationref.pdf
 
 \bibitem{sebastiani}
-  Fabrizio Sebastiani,
-  \emph{Machine learning in automated text categorization}.
-  ACM Computing Surveys,
-  34(1):1-47,
-  2002.
+  Fabrizio Sebastiani, \emph{Machine learning in automated text categorization}. ACM Computing Surveys, 34(1):1-47, 2002.
+
+\bibitem{lingspam}
+LingSpam has been collected by Ion Androutsopoulos and is described in the following paper: ``An Evaluation of Naive Bayesian Anti-Spam Filtering'' by I. Androutsopoulos, J. Koutsias, K.V. Chandrinos, George Paliouras, and C.D. Spyropoulos; \textit{In Proceeding of Workshop on Machine Learning in the New Information Age, 11th European Conference on Machine Learning}, Barcelona, Spain, 2000.
 
 \bibitem{WekaMLP}
-  Ware, M n.d., \emph{Class MultilayerPerceptron}, Revision 10169, University of Waikato, New Zealand, viewed 30 April 2014, <http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html>.
+M. Ware. n.d. (2014, April 30) \emph{Class MultilayerPerceptron} (Revision 10169) [Online]. Available: http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
+	%Ware, M n.d., \emph{Class MultilayerPerceptron}, Revision 10169, University of Waikato, New Zealand, viewed 30 April 2014, <http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html>.
 
 \end{thebibliography}
 
