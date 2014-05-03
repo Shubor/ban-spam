@@ -173,44 +173,79 @@ def TFIDF( term, TF, logTk ):
 
 #================|| Feature Selection ||==================#
 
+#====|| Correlation coefficient ||====#
+
+def CC( n_category, term_freq, n ):
+	CC_values = Counter()
+
+	N = sum(n_category)
+	combined = (term_freq[0]+term_freq[1])
+
+	# Probability of category: P(spam) and P(nonspam)
+	P_c = [num/N for num in n_category]
+
+	for term in combined:
+
+		# Probability of term, t, present given class: P(t,c)
+		P_t_c = [ term_freq[0][term] / n_category[0], term_freq[1][term] / n_category[1] ]
+
+		# Probability of term, t, absent given class: P(not t,c)
+		P_not_t_c = [ 1 - P_t_c[0], 1 - P_t_c[1] ]
+
+		# Probability of term present: P(term)
+		P_t = combined[term] / N
+
+		# Probability of term absent: P(not term)
+		P_not_t = 1 - P_t
+
+		numerator = math.sqrt( N ) * (P_t_c[0] * P_not_t_c[1] - P_t_c[1] * P_not_t_c[0])
+
+		denominator = math.sqrt( P_t * P_not_t * P_c[0] * P_c[1] )
+
+		CC_values[term] = numerator / denominator
+
+	return CC_values.most_common( n )
+
 #====|| Information Gain ||====#
 
-def IG_Error( x, y ):
-
-	X_on_top = x / ( x + y )
-	Y_on_top = y / ( x + y )
-
-	return - (X_on_top * math.log2( X_on_top ) + Y_on_top * math.log2( Y_on_top ))
-
-def Information_Gain( n_category, term_freq, n):
+def Information_Gain( n_category, term_freq, n ):
 
 	IG_values = Counter()
 
-	for category in range( len(term_freq) ):
+	# Probability of category: P(spam) and P(nonspam)
+	P = [n/sum(n_category) for n in n_category]
 
-		for term in term_freq[category]:
+	combined = term_freq[0]+term_freq[1]
 
-			# Number of documents
-			N = sum(n_category)
+	# For term of all terms
+	for term in combined:
 
-			# Number of documents of category with term
-			A = term_freq[category][term]
+		IG = 0.0
 
-			# Number of documents of not category with term
-			B = term_freq[category][term]
+		# Probability of term present: P(term)
+		P_t = combined[term] / sum(n_category)
 
-			# Number of category without term
-			C = n_category[category] - A
+		# Probability of term absent: P(not term)
+		P_not_t = 1 - P_t
 
-			# Number of documents of not category without term
-			# D = n_category[-category] - B
-			D = N - A - B - C
+		# For class "spam" and "nonspam"
+		for category in range(len(n_category)):
 
-			POS = A + C
-			NEG = B + D
+			# Probability of term, t, present given class: P(t,c)
+			P_t_c = term_freq[category][term] / n_category[category]
 
-			PW 	= POS / N
-			PNW = 1 - PW
+			# Probability of term, t, absent given class: P(not t,c)
+			P_not_t_c = 1 - P_t_c
+
+			if P_t_c != 0:
+				IG += P_t_c * math.log2( P_t_c / P_t / P[category] )
+
+			if P_not_t_c != 0:
+				IG += P_not_t_c * math.log2( P_not_t_c / P_not_t / P[category] )
+
+		IG_values[term] = IG
+
+	return IG_values.most_common(n)	
 
 #========|| Categorical Proportional Difference ||========#
 
@@ -366,8 +401,8 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 	return corpus_cosNorm
 
-body_features = DFreq( [400,200], [tf_body_legit, tf_body_spam], 200 )
-subj_features = DFreq( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
+body_features = CC( [400,200], [tf_body_legit, tf_body_spam], N )
+subj_features = CC( [400,200], [tf_subj_legit, tf_subj_spam], N )
 
 #print(body_features)
 #print(subj_features)
@@ -400,9 +435,6 @@ def write_csv( file_name, legit, spam ):
 
 write_csv("body.csv"   , cosnorm_body_legit, cosnorm_body_spam)
 write_csv("subject.csv", cosnorm_subj_legit, cosnorm_subj_spam)
-
-print(len(tf_body_spam + tf_body_legit))
-print(len(tf_subj_spam + tf_subj_legit))
 
 # def printTable( x ):
 # 	# x and y are lists of top 100 in sorted order

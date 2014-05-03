@@ -132,7 +132,11 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	P_spam  = len( test_spam )  / TOTAL_DOCS # P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
 	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
 
-	num_correct = 0 # Correctly classified documents
+	true_positive = 0 # Correctly classified as spam
+	true_negative = 0 # Correctly classified as nonspam
+
+	false_positive = 0 # Incorrectly classified as spam
+	false_negative = 0 # Incorrectly classified as nonspam
 
 	# Test on the known legitimate documents
 	for document in test_legit:
@@ -154,7 +158,9 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Classify
 		if P_legit_X >= P_spam_X:
-			num_correct += 1
+			true_negative += 1
+		else:
+			false_positive +=1
 
 	# Test on the known spam documents
 	for document in test_spam:
@@ -174,10 +180,12 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 
 		# Classify
 		if P_legit_X < P_spam_X:
-			num_correct += 1
+			true_positive += 1
+		else:
+			false_negative += 1
 
 	# Accuracy
-	return num_correct / TOTAL_DOCS
+	return (true_negative + true_positive) / (true_negative + true_positive + false_positive + false_negative)
 
 #=========|| 10-FOLD stratified cross validation ||=========#
 
@@ -229,7 +237,7 @@ def output_accuracy(sp_legit, sp_spam):
 		# Checking accuracy of classifier on test data
 		accuracy = classify( sp_legit[test_num], sp_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-		#print( "\tTest on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
+		print( "\tTest on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
 
 		sum_accuracy += accuracy
 
