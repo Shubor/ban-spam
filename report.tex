@@ -405,8 +405,23 @@ Our future research work will deal with creating more meaningful features. This 
 \section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
 
-\section{Instructions: How to run code}
+\section{Instructions}
 
+\subsection*{Prerequisite}
+
+\begin{itemize}
+\item Either python3.3 or python3.4 installed.
+\item \textit{lingspam-mini600} data set placed in the working directory (i.e. same directory as \textit{process.py} and \textit{naivebayes.py}).
+\end{itemize}
+
+\subsection*{Running Scripts}
+
+\begin{enumerate}
+\item Use \verb|python process.py| to run preprocessing script to create \textit{body.csv} and \textit{subject.csv}. These files are then accessible in the same directory. 
+\item Use \verb|python naivebayes.py| to run Na\"ive Bayes classifier on the csv files. Result of accuracy calculation on both subject and body will be output.
+\end{enumerate}
+
+You can customise the preprocessing by changing the function used to create \verb|body_features| and \verb|sub_features| in \textit{process.py}.
 
 \begin{thebibliography}{9}
 % http://www.ieee.org/documents/ieeecitationref.pdf
