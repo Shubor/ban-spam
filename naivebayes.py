@@ -72,7 +72,7 @@ def pdf( x, u, s ):
 	exponent = - ((x - u) ** 2.0) / (2.0 * (s ** 2.0))
 
 	density = coefficient * math.exp(exponent)
-	
+
 	if density == 0:
 		return LOW_DENSITY
 
@@ -131,7 +131,7 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	TOTAL_DOCS = float( len(test_spam) + len(test_legit) ) # The size of the test set
 	P_spam  = len( test_spam )  / TOTAL_DOCS # P(SPAM) is |SPAM|/|EXAMPLES| = 0.33334
 	P_legit = len( test_legit ) / TOTAL_DOCS # P(NONSPAM) is 1-P(SPAM) = 0.6666667
-	
+
 	num_correct = 0 # Correctly classified documents
 
 	# Test on the known legitimate documents
@@ -239,7 +239,7 @@ def output_accuracy(sp_legit, sp_spam):
 #===| Classify Subject corpus using Naive Bayes |===#
 
 HIGH_DENSITY = 8.0    # P.D. with Laplace correction X U {0.065}
-LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0 
+LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0
 TINY_DENSITY = 1e-250 # P.D. for extremely unlikely i.e. stdev = 0
 
 print("Accuracy of Classifier on Subject Corpus\n")
