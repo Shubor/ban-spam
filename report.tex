@@ -212,9 +212,9 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 \subsection{Results}
 
-We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with k=1 (1-NN) and k=3 (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation.
-
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
+
+We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with k=1 (1-NN) and k=3 (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation. We also ran it against our Na\"ive Bayes classifier, tested against our implementation of the 10 fold cross-validation.
 
 \begin{table}[H]
 \centering
@@ -236,6 +236,22 @@ MyNB & 80.83 & 95.33 \\
 \bottomrule
 \end{tabular}
 \label{table:results}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy of classifiers from lowest to highest for both corpora}
+\begin{tabular}{@{} l llllllll @{}}
+\toprule
+& \multicolumn{8}{c}{\textbf{Accuracy Ranking}} \\
+\midrule
+\textbf{Corpus} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+Subject & ZeroR & DT & 3-NN & NB & OneR & MLP & 1-NN & MyNB\\
+Body & ZeroR & OneR & 3-NN & 1-NN & DT & NB & MyNB & MLP\\
+\bottomrule
+\end{tabular}
+\label{table:accuracyofclassifiers}
 \end{table}
 
 The comparison of the performance (accuracy) of MyNB and NB over the 10 folds was completed in the same execution as the respective results in \autoref{table:results}. MyNB used our 10 fold cross-validation and NB used Weka's 10-fold cross-validation. The items in each fold (given to MyNB and NB) are expected to be different. 
@@ -302,22 +318,6 @@ Mean & 95.33 & 94.83 & 3.50 \\
 \subsubsection{Comparison of Classifiers}
 
 The accuracy of a classifier in comparison to the other classifiers, varies slightly against the two corpora.  Accuracy from lowest to highest for both corpora are shown in \autoref{table:accuracyofclassifiers}. Although there are some discrepancies, in general ZeroR, OneR, 3-NN, DT perform more poorly than 1-NN, NB, MyNB, MLP. 
-
-\begin{table}[H]
-\centering
-\caption{Accuracy of classifiers from lowest to highest for both corpora}
-\begin{tabular}{@{} l llllllll @{}}
-\toprule
-& \multicolumn{8}{c}{\textbf{Accuracy Ranking}} \\
-\midrule
-\textbf{Corpus} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
-\midrule
-Subject & ZeroR & DT & 3-NN & NB & OneR & MLP & 1-NN & MyNB\\
-Body & ZeroR & OneR & 3-NN & 1-NN & DT & NB & MyNB & MLP\\
-\bottomrule
-\end{tabular}
-\label{table:accuracyofclassifiers}
-\end{table}
 
 The ZeroR classifier performs poorly for both corpora. It returns the majority class given from the training data. As a result ZeroR returns ``nonspam'' as there are 400 non-spam and 200 spam cases. Thus ZeroR produces a correct answer for and only for test data of the majority class, ``nonspam'', which is 
 \begin{align*} \frac{\# nonspam}{\# documents} &=  \frac{360}{540} \\ &= 66.67\% 
