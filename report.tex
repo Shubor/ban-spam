@@ -80,6 +80,8 @@ Then the scores were normalised, using \emph{cosine normalisation} \cite{sebasti
 
 $$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
 
+In cases where the \textit{tf-idf} weightings for all 200 features for a given document is 0, the denominator of the cosine normalisation will also be 0. This is impossible, so instead we return $w_{kj} = 0$.
+
 \subsection{Data Characteristics}
 
 \setlength\extrarowheight{3pt}
