@@ -396,12 +396,16 @@ The overall performance of the classifiers regardless of type, perform significa
 
 \subsection{Results}
 
+We ran our classifier with a number of feature selection methods; correlation coefficient (CC), information gain (IG), mutual information (MI), chi (CHI), document frequency (DF), categorical proportional difference (CPD) and random (RF).
+
 \begin{table}[H]
 \centering
-\caption{Accuracy of different feature selection methods using our Na\"ive Bayes and 10-fold cross-validation}
-\begin{tabular}{@{}l rrr rrrr@{}}
+\caption{Accuracy of different feature selection methods using our Na\"ive Bayes and 10-fold cross-validation for different features numbers}
+\begin{tabular}{@{}l rrrrrrr@{}}
 \toprule
-\textbf{N} & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} & \textbf{CPD} & \textbf{RF} \\
+& \multicolumn{7}{c}{\textbf{Feature Selection Method}}\\
+\midrule
+\textbf{\# Features} & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} & \textbf{CPD} & \textbf{RF} \\
 \midrule
 10 & 89.17 & \textbf{89.50} & 67.67 & 89.17 & 82.83 & 83.83 & 57.33 \\
 20 & 91.17 & \textbf{95.83} & 36.67 & 91.50 & 90.67 & 88.17 & 65.67 \\
@@ -427,9 +431,7 @@ The overall performance of the classifiers regardless of type, perform significa
 
 % summarize your main findings and, if possible, suggest future work.
 
-In this report, we apply Na\"ive Bayes to classify emails after applying document frequency for feature selection. Our classifier is relatively accurate compared to a variety of other classifiers with an accuracy of $95.33\%$ on body, and $80.83\%$ on subject. We also examined a variety of feature selection methods and their effect on accuracy. We found that information gain gave us the highest accuracy with $97.5\%$ on the body corpus.
-
-Therefore, based on our experimental results, Na\"ive Bayes is well suited for email classification to detect spam, especially when paired with information gain.
+In this report, we apply Na\"ive Bayes to classify emails after applying document frequency for feature selection. Our classifier is relatively accurate compared to a variety of other classifiers with an accuracy of $95.33\%$ on body, and $80.83\%$ on subject. We also examined a variety of feature selection methods and their effect on accuracy. We found that information gain gave us the highest accuracy with $97.5\%$ on the body corpus. Therefore, based on our experimental results, Na\"ive Bayes is well suited for email classification to detect spam, especially when paired with information gain.
 
 Our future research work will deal with creating more meaningful features. This includes implementing stemming and creating tokens using more than one word. Currently, the tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails. By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
 
