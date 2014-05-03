@@ -3,6 +3,7 @@ import re
 import csv
 import gzip
 import math
+import random
 from string import digits, punctuation
 from collections import Counter
 
@@ -208,7 +209,7 @@ def CC( n_category, term_freq, n ):
 
 #====|| Information Gain ||====#
 
-def Information_Gain( n_category, term_freq, n ):
+def information_gain( n_category, term_freq, n ):
 
 	IG_values = Counter()
 
@@ -245,7 +246,7 @@ def Information_Gain( n_category, term_freq, n ):
 
 		IG_values[term] = IG
 
-	return IG_values.most_common(n)	
+	return IG_values.most_common(n)
 
 #========|| Categorical Proportional Difference ||========#
 
@@ -310,7 +311,7 @@ def chi( n_category, term_freq, n ):
 
 	return chi_values.most_common(n)
 
-def Mutual_Information( n_category, term_freq, n ):
+def mutual_information( n_category, term_freq, n ):
 
 	MI_values = Counter()
 
@@ -344,7 +345,6 @@ def Mutual_Information( n_category, term_freq, n ):
 
 	return MI_values.most_common(n)
 
-import random
 def rand_feature( n_category, term_freq, n ):
 
 	RND_values = Counter()
@@ -358,7 +358,7 @@ def rand_feature( n_category, term_freq, n ):
 
 	return RND_values.most_common(n)
 
-def DFreq( n_category, term_freq, n ):
+def doc_freq( n_category, term_freq, n ):
 
 	DFreq_values = Counter()
 
@@ -401,11 +401,11 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 	return corpus_cosNorm
 
-body_features = CC( [400,200], [tf_body_legit, tf_body_spam], N )
-subj_features = CC( [400,200], [tf_subj_legit, tf_subj_spam], N )
+#====|Change this to use different feature selections|====#
 
-#print(body_features)
-#print(subj_features)
+body_features = doc_freq( [400,200], [tf_body_legit, tf_body_spam], N )
+subj_features = doc_freq( [400,200], [tf_subj_legit, tf_subj_spam], N )
+
 #====|Calculate cosine normalised values|====#
 
 # List with column = feature, row = email, and each entry ('term',feature value)

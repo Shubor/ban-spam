@@ -388,6 +388,8 @@ The overall performance of the classifiers regardless of type, perform significa
 
 \section{Challenge Analysis}
 
+% Improving accuracy on body corpus
+
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
 
 \subsection{Results}
@@ -398,7 +400,9 @@ The overall performance of the classifiers regardless of type, perform significa
 
 % summarize your main findings and, if possible, suggest future work.
 
-In this report, we apply Na\"ive Bayes for binary classification of the \emph{LingSpam-mini600} data set. In order to reduce the size of the feature space, we use Document Frequency for feature selection. We have shown using accuracy that our classifier performs extremely well compared to a variety of other classifiers (ZeroR, OneR, 1-NN, 3-NN, NB, DT and MLP), with only MLP getting a slightly better accuracy than ours on the body corpus. Therefore, based on our experimental results, Na\"ive Bayes is well suited for email classification to detect spam. 
+In this report, we apply Na\"ive Bayes to classify emails after applying document frequency for feature selection. Our classifier is relatively accurate compared to a variety of other classifiers with an accuracy of $95.33\%$ on body, and $80.83\%$ on subject. We also examined a variety of feature selection methods and their effect on accuracy. We found that information gain gave us the highest accuracy with $97.5\%$ on the body corpus.
+
+Therefore, based on our experimental results, Na\"ive Bayes is well suited for email classification to detect spam, especially when paired with information gain. 
 
 Our future research work will deal with creating more meaningful features. This includes implementing stemming and creating tokens using more than one word. Currently, the tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails. By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
 

@@ -121,6 +121,7 @@ def train( train_legit, train_spam ):
 	return mean_legit, mean_spam, sd_legit, sd_spam
 
 # Classify:
+#	Naive Bayes classifier
 # 	Get P(spam|document) = P(f1|spam)*.....*P(f200|spam)
 # 	Similarly, calculate P(nonspam|document)
 #	Compare P(spam|document) and P(nonspam|document)
