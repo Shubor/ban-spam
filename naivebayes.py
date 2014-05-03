@@ -237,7 +237,7 @@ def output_accuracy(sp_legit, sp_spam):
 		# Checking accuracy of classifier on test data
 		accuracy = classify( sp_legit[test_num], sp_spam[test_num], mean_legit, mean_spam, sd_legit, sd_spam )
 
-		#print( "\tTest on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
+		print( "\tTest on fold #{}: {}%".format( test_num, round(accuracy * 100, 2) ) )
 
 		sum_accuracy += accuracy
 
