@@ -175,42 +175,54 @@ def TFIDF( term, TF, logTk ):
 
 #====|| Information Gain ||====#
 
-def IG_Error( x, y ):
-
-	X_on_top = x / ( x + y )
-	Y_on_top = y / ( x + y )
-
-	return - (X_on_top * math.log2( X_on_top ) + Y_on_top * math.log2( Y_on_top ))
-
 def Information_Gain( n_category, term_freq, n):
 	
 	IG_values = Counter()
 
-	for category in range( len(term_freq) ):
+	# Probability of category: P(spam) and P(nonspam)
+	P = [n/sum(n_category) for n in n_category]
 
-		for term in term_freq[category]:
+	combined = term_freq[0]+term_freq[1]
 
-			# Number of documents
-			N = sum(n_category)
+	# For term of all terms
+	for term in combined:
 
-			# Number of documents of category with term 
-			A = term_freq[category][term]
+		print("---------------------------")
 
-			# Number of documents of not category with term
-			B = term_freq[category][term]
+		print("P({}) = {}/{} = {}".format(term, combined[term], sum(n_category), combined[term] / sum(n_category) ))
 
-			# Number of category without term
-			C = n_category[category] - A
+		IG = 0.0
 
-			# Number of documents of not category without term
-			# D = n_category[-category] - B
-			D = N - A - B - C
+		# Probability of term present: P(term)
+		P_t = combined[term] / sum(n_category)
 
-			POS = A + C
-			NEG = B + D
+		# Probability of term absent: P(not term)
+		P_not_t = 1 - P_t
 
-			PW 	= POS / N
-			PNW = 1 - PW
+		# For class "spam" and "nonspam"
+		for category in range(len(n_category)):
+
+			# Probability of term, t, present given class: P(t,c)
+			P_t_c = term_freq[category][term] / n_category[category]
+
+			print("P({},{}) \t = {}/{} = {}".format( term, category, term_freq[category][term], n_category[category], P_t_c ))
+			print("P(not {},{}) = {}/{} = {}".format( term, category, n_category[category]-term_freq[category][term], n_category[category], 1-P_t_c ))
+
+
+			# Probability of term, t, absent given class: P(not t,c)
+			P_not_t_c = 1 - P_t_c
+
+			if P_t_c != 0:
+				IG += P_t_c * math.log2( P_t_c / P_t / P[category] )
+
+			if P_not_t_c != 0:
+				IG += P_not_t_c * math.log2( P_not_t_c / P_not_t / P[category] )
+
+		IG_values[term] = IG
+
+		print(IG)
+
+	return IG_values.most_common(n)	
 
 #========|| Categorical Proportional Difference ||========#
 
@@ -366,8 +378,8 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 	return corpus_cosNorm
 
-body_features = DFreq( [400,200], [tf_body_legit, tf_body_spam], 200 )
-subj_features = DFreq( [400,200], [tf_subj_legit, tf_subj_spam], 200 )
+body_features = Information_Gain( [400,200], [tf_body_legit, tf_body_spam], N )
+subj_features = Information_Gain( [400,200], [tf_subj_legit, tf_subj_spam], N )
 
 #print(body_features)
 #print(subj_features)
