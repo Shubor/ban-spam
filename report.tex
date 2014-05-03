@@ -393,15 +393,16 @@ The overall performance of the classifiers regardless of type, perform significa
 % Improving accuracy on body corpus
 
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
+In the extension we implemented seven feature selection metrics in order to the determine which would return the best result. We chose Information gain (IG), Correlation coefficient (CC) and Odds ratio (OR) \cite{IG}, Categorical proportional difference (CPD), Mutual information (MI) \cite{CPD}, Document frequency (DF) and Random feature (RF).
 
 \subsection{Results}
 
 \begin{table}[H]
 \centering
-\caption{Accuracy of different feature selection methods using our Na\"ive Bayes and 10-fold cross-validation}
+\caption{Accuracy of different feature selection methods using our Na\"ive Bayes and 10-fold cross-validation with $|F_i|$ number of features}
 \begin{tabular}{@{}l rrr rrrr@{}}
 \toprule
-\textbf{N} & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} & \textbf{CPD} & \textbf{RF} \\
+$|F_i|$ & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} & \textbf{CPD} & \textbf{RF} \\
 \midrule
 10 & 89.17 & \textbf{89.50} & 67.67 & 89.17 & 82.83 & 83.83 & 57.33 \\
 20 & 91.17 & \textbf{95.83} & 36.67 & 91.50 & 90.67 & 88.17 & 65.67 \\
@@ -464,8 +465,14 @@ You can customise the preprocessing by changing the function used to create \ver
 LingSpam has been collected by Ion Androutsopoulos and is described in the following paper: ``An Evaluation of Naive Bayesian Anti-Spam Filtering'' by I. Androutsopoulos, J. Koutsias, K.V. Chandrinos, George Paliouras, and C.D. Spyropoulos; \textit{In Proceeding of Workshop on Machine Learning in the New Information Age, 11th European Conference on Machine Learning}, Barcelona, Spain, 2000.
 
 \bibitem{WekaMLP}
-M. Ware. n.d. (2014, April 30) \emph{Class MultilayerPerceptron} (Revision 10169) [Online]. Available: http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
+M. Ware. n.d. (2014, April 30). \emph{Class MultilayerPerceptron} (Revision 10169) [Online]. Available: http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
 	%Ware, M n.d., \emph{Class MultilayerPerceptron}, Revision 10169, University of Waikato, New Zealand, viewed 30 April 2014, <http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html>.
+
+\bibitem{IG}
+Zheng, Z., Wu, X., \& Srihari, R. (2004). \emph{Feature selection for text categorization on imbalanced data}. ACM SIGKDD Explorations Newsletter, 6(1), 80-89.
+
+\bibitem{CPD}
+Simeon, M., \& Hilderman, R. (2008, November). \emph{Categorical proportional difference: A feature selection method for text categorization}. In Proceedings of the 7th Australasian Data Mining Conference-Volume 87 (pp. 201-208). Australian Computer Society, Inc..
 
 \end{thebibliography}
 
