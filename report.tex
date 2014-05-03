@@ -214,7 +214,7 @@ A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows 
 
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
-We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with k=1 (1-NN) and k=3 (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation. We also ran it against our Na\"ive Bayes classifier, tested against our implementation of the 10 fold cross-validation.
+We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with $k=1$ (1-NN) and $k=3$ (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation. We also ran it against our Na\"ive Bayes classifier, tested against our implementation of the 10 fold cross-validation.
 
 \begin{table}[H]
 \centering
@@ -240,7 +240,7 @@ MyNB & 80.83 & 95.33 \\
 
 \begin{table}[H]
 \centering
-\caption{Accuracy of classifiers from lowest to highest for both corpora}
+\caption{Accuracy of classifiers from lowest (1) to highest (8) for both corpora}
 \begin{tabular}{@{} l llllllll @{}}
 \toprule
 & \multicolumn{8}{c}{\textbf{Accuracy Ranking}} \\
@@ -407,14 +407,14 @@ Our future research work will deal with creating more meaningful features. This 
 
 \section{Instructions}
 
-\subsection*{Prerequisite}
+\subsection{Prerequisites}
 
 \begin{itemize}
 \item Either python3.3 or python3.4 installed.
 \item \textit{lingspam-mini600} data set placed in the working directory (i.e. same directory as \textit{process.py} and \textit{naivebayes.py}).
 \end{itemize}
 
-\subsection*{Running Scripts}
+\subsection{Running Scripts}
 
 \begin{enumerate}
 \item Use \verb|python process.py| to run preprocessing script to create \textit{body.csv} and \textit{subject.csv}. These files are then accessible in the same directory. 
