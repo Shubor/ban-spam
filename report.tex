@@ -393,7 +393,9 @@ The overall performance of the classifiers regardless of type, perform significa
 % Improving accuracy on body corpus
 
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
-In the extension seven feature selection metrics were implemented in order to the determine which would yield us the highest accuracy. The chosen metrics were Correlation coefficient (CC) \cite{CC}, Information gain (IG), Mutual information (MI) \cite{IG}, Chi-square (CHI), Categorical proportional difference (CPD) as defined in \cite{CPD}, Document frequency (DF) and Random feature (RF).
+In the extension seven feature selection metrics were implemented. We ran experiments to determine which yielded the highest accuracy with our classifier, and how using selecting different numbers of features would affect our results.
+
+The chosen metrics were Correlation coefficient (CC) \cite{CC}, Information gain (IG), Mutual information (MI) \cite{IG}, Chi-square (CHI), Categorical proportional difference (CPD) as defined in \cite{CPD}, Document frequency (DF) and Random feature (RF).
 
 \subsection{Feature Selection Metrics}
 Here we present the seven feature selection metrics used, presented in terms of the following four dependency tuples \cite{IG}:
@@ -462,9 +464,15 @@ We ran our classifier with a number of feature selection methods; correlation co
 \end{table}
 
 \subsection{Discussion}
+
 % which measure performed best at any |F|
-From the results we see that Information gain performs the best for most of the feature set sizes.
 % how does it compare to DF
+
+Information gain yields the highest accuracy for most of the feature set sizes (\autoref{table:diffbody}). It almost always gives us a higher accuracy than using document frequency (DF). DF is simple, has a linear computational complexity and is easily scalable for larger corpora. However, it removes low DF terms that could be more informative than the ones selected. This is largely why it performs more poorly than IG, as IG measures the number of bits of information gained by including a feature.
+
+Mutual information (MI) and random frequency (RF) both perform weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. Therefore, it performs badly when the scores have a wide range of frequencies. It was expected that RF perform poorly, as it randomly chose features.
+
+
 
 \section{Conclusion and Future Work}
 
@@ -508,14 +516,16 @@ LingSpam has been collected by Ion Androutsopoulos and is described in the follo
 M. Ware. n.d. (2014, April 30). \emph{Class MultilayerPerceptron} (Revision 10169) [Online]. Available: http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
 	%Ware, M n.d., \emph{Class MultilayerPerceptron}, Revision 10169, University of Waikato, New Zealand, viewed 30 April 2014, <http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html>.
 
+\bibitem{CC}
+Yang, Y., \& Pedersen, J. O. (1997, July). \emph{A comparative study on feature selection in text categorization}. In ICML (Vol. 97, pp. 412-420).
+
 \bibitem{IG}
 Zheng, Z., Wu, X., \& Srihari, R. (2004). \emph{Feature selection for text categorization on imbalanced data}. ACM SIGKDD Explorations Newsletter, 6(1), 80-89.
 
 \bibitem{CPD}
 Simeon, M., \& Hilderman, R. (2008, November). \emph{Categorical proportional difference: A feature selection method for text categorization}. In Proceedings of the 7th Australasian Data Mining Conference-Volume 87 (pp. 201-208). Australian Computer Society, Inc..
 
-\bibitem{CC}
-Yang, Y., \& Pedersen, J. O. (1997, July). \emph{A comparative study on feature selection in text categorization}. In ICML (Vol. 97, pp. 412-420).
+
 
 \bibitem{Empirical}
 Forman, G. (2003). \emph{An extensive empirical study of feature selection metrics for text classification}. The Journal of machine learning research, 3, 1289-1305.
