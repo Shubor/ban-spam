@@ -1,10 +1,9 @@
 import csv
 import math
 
-N = 50
 FOLD = 10
 
-#======|| Read in csv files ||======#
+#========|| Read in CSV files ||========#
 
 w_body_legit, w_body_spam = [], []
 w_subj_legit, w_subj_spam = [], []
@@ -30,11 +29,13 @@ def read_csv( file_name, legit, spam ):
 read_csv( "body.csv", w_body_legit, w_body_spam )
 read_csv( "subject.csv", w_subj_legit, w_subj_spam )
 
-#############################################################################
-# Calculate Naive Bayes, assuming normal distribution                       #
-#############################################################################
 
-#======|| Calculate Mean ||======#
+
+#===========================================================================#
+# Calculate Naive Bayes, assuming normal distribution                       #
+#===========================================================================#
+
+#========|| Calculate Mean ||========#
 
 # Mean:
 #	Calculates the average value of a set
@@ -43,7 +44,9 @@ def mean( column ):
 
 	return math.fsum( [float(row) for row in column] ) / len( column )
 
-#======|| Calculate Standard Deviation ||======#
+
+
+#========|| Calculate Standard Deviation ||========#
 
 # Standard dev:
 #	Calculates the standard deviation of a set
@@ -53,7 +56,9 @@ def std_dev( column ):
 	u = mean(column)
 	return math.sqrt( math.fsum([((float(x) - u) ** 2) for x in column]) / ( len(column) - 1 ) )
 
-#======|| Probability Density Function ||======#
+
+
+#========|| Calculate Probability Density Function ||========#
 
 # Probability density function
 #	Calculates probability of x assuming normal distribution
@@ -78,7 +83,10 @@ def pdf( x, u, s ):
 
 	return density
 
-#=========|| Naive Bayes ||=========#
+
+
+#========|| Naive Bayes Classifier ||========#
+
 # Given: a vector of cosine normed tdidf values of top200 document set terms
 #
 # Find:	document frequency of top200 terms
@@ -98,6 +106,8 @@ def split( data ):
 		out.append( data[ int(last) : int(last + n) ] )
 		last += n
 	return out
+
+
 
 # Train:
 #	Calculate mean and standard deviation of data based on given training data
@@ -119,6 +129,8 @@ def train( train_legit, train_spam ):
 		sd_spam.append( std_dev( [row[n] for row in train_spam] ) )
 
 	return mean_legit, mean_spam, sd_legit, sd_spam
+
+
 
 # Classify:
 #	Naive Bayes classifier
@@ -188,6 +200,8 @@ def classify( test_legit, test_spam, mean_legit, mean_spam, sd_legit, sd_spam ):
 	# Accuracy
 	return (true_negative + true_positive) / (true_negative + true_positive + false_positive + false_negative)
 
+
+
 #=========|| 10-FOLD stratified cross validation ||=========#
 
 # Split each set into ten parts, 40(/20) nonspam(/spam), in order
@@ -206,6 +220,8 @@ with open( "body-folds.csv", "w" ) as f:
 		writer.writerows( [row + ["spam"] for row in sp_body_spam[n] ] )
 		writer.writerow( [ ] ) # Empty line
 	f.close()
+
+
 
 #========|| Perform over k-groups ||========#
 
@@ -245,7 +261,9 @@ def output_accuracy(sp_legit, sp_spam):
 	print( "\n\tAverage of accuracies: {}%\n".format( round((sum_accuracy / FOLD) * 100, 2) ) )
 	return sum_accuracy / FOLD * 100
 
-#===| Classify Subject corpus using Naive Bayes |===#
+
+
+#========|| Classify Subject Corpus using Naive Bayes ||========#
 
 HIGH_DENSITY = 8.0    # P.D. with Laplace correction X U {0.065}
 LOW_DENSITY	 = 1e-50 # P.D. for when exponential is 0
@@ -254,7 +272,7 @@ TINY_DENSITY = 1e-250 # P.D. for extremely unlikely i.e. stdev = 0
 print("Accuracy of Classifier on Subject Corpus\n")
 prob = output_accuracy(sp_subj_legit, sp_subj_spam)
 
-#===| Classify Body corpus using Naive Bayes |===#
+#========|| Classify Body Corpus using Naive Bayes ||========#
 
 HIGH_DENSITY = 116.0  # P.D. with Laplace correction X U {0.065}
 LOW_DENSITY	 = 1e-100 # P.D. for when exponential is 0
