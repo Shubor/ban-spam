@@ -38,7 +38,9 @@
 \subsection{Aim}
 
 % State aim of study, and write a paragraph about why the problem is important
-To implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
+To implement an accurate Na\"ive Bayes classifier for email spam detection.
+
+% To implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
 
 \subsection{Importance}
 
@@ -483,9 +485,9 @@ As $\text{UCL}_{0.95} = [-0.30, 6.22]$ contains 0 it implies that Information ga
 
 Document frequency and information gain have a linear computational complexity. We expect that DF performed worse than IG since DF only looks at the dependence between the presence of $t$ and $c' \in \{c,\bar{c}\}$ whilst information gain also takes into account the absence of $t$ and $c' \in \{c,\bar{c}\}$. As a result DF selects features that may offer nothing to category prediction (e.g. when $t$ occurs equally in $c$ and $\bar{c}$). Meanwhile DF deselects features that may offer significantly to category predicition because the term $t$ does not meet the document frequency threshod (i.e. either $(t,c)$ or $(t,\bar{c})$ is zero but the other does not occur enough to be selected as a feature). On the otherhand, IG takes into account all four dependency tuples as described above to select the features that give the most bits of information for category prediction.
 
-Mutual information (MI) and random frequency (RF) both performed weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. As a result it performs poorly on our sparse dataset. Random frequency was implemented for our own pleasure and as a \'minimum\' expectation of performance with our Na\"ive Bayes. 
+Mutual information (MI) and random frequency (RF) both performed weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. As a result it performs poorly on our sparse dataset. Random frequency was implemented for our own pleasure and as a `minimum' expectation of performance with our Na\"ive Bayes.
 
- Chi-square (CHI), Categorical proportional difference (CPD) and Correlation coefficient (CC) performed comparably to Document frequency but were not chosen as our feature selection metric. CHI performed similarly for all feature sizes but was outperformed at every size by IG and so was not used. CC underperformed DF for most feature sizes and so was also rejected. CPD performs very well compared to IG and DF, CPD beat DF for all feature sizes greater than 50, even beating IG with a size of 175. However, CPD was rejected because IG returned a better maxiumum accuracy. 
+ Chi-square (CHI), Categorical proportional difference (CPD) and Correlation coefficient (CC) performed comparably to Document frequency but were not chosen as our feature selection metric. CHI performed similarly for all feature sizes but was outperformed at every size by IG and so was not used. CC underperformed DF for most feature sizes and so was also rejected. CPD performs very well compared to IG and DF, CPD beat DF for all feature sizes greater than 50, even beating IG with a size of 175. However, CPD was rejected because IG returned a better maxiumum accuracy.
 
 \section{Conclusion and Future Work}
 
@@ -497,6 +499,8 @@ Our future research work will deal with creating more meaningful features. This 
 
 \section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
+
+This assignment has helped us learn more about how to conduct research as a team. We chose to conduct research on different aspects of text classification, before combining our findings to select the best extension to to carry out. We also learnt how to conduct experiments that were relevant to our aim to increase the accuracy of our classifier algorithm. We appreciate that this task has allowed us gain insight into an interesting and relevant area in computer science.
 
 \section{Instructions}
 
