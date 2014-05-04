@@ -1,13 +1,20 @@
 \documentclass[10pt, a4paper]{article}
 
+\usepackage{array}
+\usepackage{float}
+\usepackage{parskip}
+\usepackage{caption}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
 \usepackage{amssymb,amsmath}
+\usepackage{mathtools}
+\usepackage[showframe=false]{geometry}
+\usepackage[font=small,format=plain,labelfont={bf,up},justification=centering]{caption}
 
-\makeatletter
-\def\@seccntformat#1{%
-  \expandafter\ifx\csname c@#1\endcsname\c@section\else
-  \csname the#1\endcsname\quad
-  \fi}
-\makeatother
+\usepackage[T3,T1]{fontenc}
+\DeclareSymbolFont{tipa}{T3}{cmr}{m}{n}
+\DeclareMathAccent{\invbreve}{\mathalpha}{tipa}{16}
 
 \usepackage{fancyhdr}
 \fancyfoot[C]{\thepage}
@@ -15,307 +22,625 @@
 \rhead{Email Classification}
 \pagestyle{fancy}
 
+\title{Email Classification with Na\"ive Bayes}
+\author{Mitchell Della Marta, Shu Han Bor}
+
 \begin{document}
 
-\section{Email Classification}
+\setlist{nolistsep}
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{\baselineskip}
+\renewcommand\thetable{\Roman{table}}
 
-\subsection*{Aim}
+\maketitle
+
+\section{Introduction}
+
+\subsection{Aim}
+
 % State aim of study, and write a paragraph about why the problem is important
+To implement an accurate Na\"ive Bayes classifier for email spam detection.
 
-% Aim:
-To implement text classification of emails using Naive Bayes classifier.
+% To implement text classification of emails using the Na\"ive Bayes classifier for spam detection.
 
-% Relevance:
-Spam emails are usually sent to derive cash from the user either directly by tricking the user into purchasing something or indirectly by ticking them into parting with information. At the least, classificatino of spam emails aims to save the user the time and hassle of deleting spam. At best the detection of spam emails allows for the protection of unaware users from the malicious intent of these spam emails.
+\subsection{Importance}
 
-\subsection*{Data Preprocessing and Feature Selection}
+As email is one of the main forms of communication, spam detection to remove spam is important. Email spam is an unsolved global issue that negatively affects productivity and uses up valuable resources. Spam emails are usually sent with malicious intent to users for some monetary gain. Email users spend a large amount of time regularly deleting these spam emails, which needlessly occupy storage space and consumes bandwidth. Hence the development of classifiers that are able to separate legitimate from spam emails is required. Classification of emails to separate and remove spam from other emails, aims to save the user from having to spend time and effort sorting through and deleting spam, and protect unaware users from malware.
+
+Traditional non-machine learning based techniques are easily fooled by spammers and require periodic manual updates. Therefore, machine learning based methods are required, which are able to automatically analyse email contents and dynamically update themselves to cope with new spamming techniques.
+
+\section{Data Preprocessing}
+
 % Briefly describe what you did.
-The files in the sample set \emph{Lingpspam-mini600} were read individually and line by line.
-\begin{itemize}
-\item Open a file in the set and read it line by line.
-\item If the line begins with \"Subject:\" assume it is of the subject corpus, otherwise it is of the body corpus.
-\item All punctuation is replaced with whitespace.
-\item The line is split by words (e.g. \'don't\' has now become \'don\',\'t\') and added to a counter of the words in the current document
-\item For each word that belongs to the counter of a single document it is added to the counter for the sub-corpus once.
-\item The words with the top 200 Document Frequency (words which are appeared in the most number of documents) in each corpus was selected for the features of that corpus.
-\item The TD-IDF for each feature was calculated.
-\item TD-IDF values were then normalised using Cosine Normalisation.
-\end{itemize}
+
+Before classification can be performed, we must represent the files in our sample set \emph{LingSpam-mini600}\cite{lingspam} appropriately. Using the ``bag-of-words'' model, words are extracted from the file and treated as features. There are two main characteristics in an email; the subject and the body. Thus, we will construct two ``bags-of-words'', one for each component. To determine which corpus a feature will belong to, we if the line begins with ``Subject:''. If it does the words within the line will be added to the subject corpus, otherwise they will be added to the body corpus.
+
+To each file, we performed the following steps:
+
+\begin{enumerate}
+	\item Replace all punctuation and special symbols with a space.
+	\item Remove stop words, using a list of stop words ``english.stop''.
+	\item Remove numbers or words containing digits.
+\end{enumerate}
+
+The tokenisation schemes used in the example data are different to that used in our stop words list. The data detaches clitics and contraction affices, whereas the stop words list is tokenised based on whitespace and punctuation characters. Therefore, we chose to replace punctuation with a space (e.g. ``n't'' becomes ``n'', ``t'') instead of simply removing them. This meant that the stop word list would remove clitics as it removes single characters, instead of keeping it as a feature as (``nt'' isn't in the stop words list).
+
+The \emph{document frequency} feature selection method was then used to select the 200 words which occured in the most documents, and used to build a classifier for the given documents. The following steps were taken to accomplish this:
+
+\begin{enumerate}
+\item Counter is created for each email, which keeps track of the number of times each word appears in that email.
+\item For each word that appeared in the counter for an email, it is added once to the counter for the corresponding subcorpus.
+\item In each corpus the words with the top 200 document frequency score are selected as features to represent that corpus.
+\end{enumerate}
+
+Note that different runs of our preprocessing script can result in different classifier accuracies. As the counter is stored in a hashmap, words with the same frequency before and after the 200 word cutoff are chosen arbitrarily. Depending on the words chosen, the accuracy of the classifier can be affected.
+
+Each selected feature was then weighted using its \emph{td-idf} score \cite{sebastiani}.
+
+$$ tfidf(t_k, d_j) = \#(t_k, d_j) \times \log \frac{|Tr|}{\#Tr(t_k)} $$
+
+Then the scores were normalised, using \emph{cosine normalisation} \cite{sebastiani}.
+
+$$ w_{kj} = \frac{tfidf(t_k, d_j)}{\sqrt{\sum_{s=1}^{|T|} (tfidf(t_s, d_j))^2 }} $$
+
+In cases where the \textit{tf-idf} weightings for all 200 features for a given document is 0 (i.e. the feature appears in and only in every document in a corpus ), the denominator of the cosine normalisation will also be 0. This is impossible, so instead we return $w_{kj} = 0$.
+
+\subsection{Data Characteristics}
+
+\setlength\extrarowheight{3pt}
+
+\begin{table}[H]
+\centering
+\caption{Characteristics of data set}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \textbf{Subject} & \textbf{Body} \\
+\midrule
+\# Features before removing stop words & 1074 & 19886 \\
+\# Features after removing stop words & 915 & 19386 \\
+\# $Class_{nonspam}$ & 600 & 600 \\
+\# $Class_{spam}$ & 200 & 200 \\
+\bottomrule
+\end{tabular}
+\label{table:datacharacteristics}
+\end{table}
 
 % Show the number of words for each corpus – initially and after removing the stop-words.
-\begin{tabular}{l c l c}
-information & 205 & the & 549 \\
-language & 192 & of & 541 \\
-mail & 183 & and & 533 \\
-university & 179 & a & 530 \\
-time & 178 & to & 530 \\
-list & 171 & in & 514 \\
-address & 165 & for & 477 \\
-english & 159 & is & 459 \\
-linguistics & 156 & on & 420 \\
-http & 156 & this & 410 \\
-send & 146 & be & 410 \\
-people & 146 & or & 380 \\
-free & 144 & are & 368 \\
-make & 140 & with & 366 \\
-email & 133 & that & 358 \\
-work & 128 & i & 351 \\
-number & 128 & s & 348 \\
-www & 122 & have & 345 \\
-languages & 119 & by & 344 \\
-find & 118 & it & 341 \\
-fax & 116 & at & 340 \\
-order & 108 & you & 338 \\
-call & 103 & from & 338 \\
-form & 101 & as & 321 \\
-research & 100 & not & 320 \\
-linguistic & 99 & if & 315 \\
-state & 99 & an & 301 \\
-subject & 98 & can & 297 \\
-world & 98 & will & 270 \\
-years & 98 & all & 262 \\
-contact & 97 & one & 254 \\
-de & 96 & do & 251 \\
-money & 94 & e & 247 \\
-message & 91 & any & 240 \\
-word & 91 & we & 239 \\
-ll & 89 & would & 239 \\
-phone & 88 & but & 238 \\
-check & 88 & which & 233 \\
-receive & 88 & there & 230 \\
-good & 87 & your & 229 \\
-year & 86 & about & 228 \\
-interested & 86 & also & 226 \\
-day & 86 & more & 224 \\
-working & 85 & no & 218 \\
-case & 85 & t & 217 \\
-include & 85 & please & 217 \\
-ve & 84 & has & 211 \\
-based & 84 & like & 211 \\
-made & 83 & other & 208 \\
-home & 83 & only & 206 \\
-part & 83 & information & 205 \\
-note & 83 & some & 204 \\
-mailing & 81 & so & 202 \\
-including & 81 & n & 200 \\
-type & 80 & what & 199 \\
-place & 79 & new & 196 \\
-program & 79 & language & 192 \\
-give & 79 & who & 191 \\
-web & 79 & out & 191 \\
-date & 78 & us & 187 \\
-special & 78 & mail & 183 \\
-line & 78 & me & 182 \\
-days & 77 & my & 181 \\
-internet & 76 & university & 179 \\
-back & 76 & time & 178 \\
-american & 75 & these & 177 \\
-service & 75 & our & 177 \\
-business & 74 & been & 174 \\
-full & 74 & list & 171 \\
-system & 74 & now & 170 \\
-ac & 73 & they & 169 \\
-today & 73 & up & 169 \\
-interest & 72 & was & 165 \\
-remove & 72 & address & 165 \\
-questions & 72 & may & 162 \\
-john & 71 & english & 159 \\
-found & 70 & their & 158 \\
-related & 70 & use & 157 \\
-usa & 69 & get & 156 \\
-linguist & 69 & linguistics & 156 \\
-site & 69 & http & 156 \\
-text & 68 & many & 155 \\
-read & 68 & here & 150 \\
-point & 68 & know & 147 \\
-ago & 67 & following & 147 \\
-week & 67 & than & 146 \\
-book & 67 & how & 146 \\
-dear & 66 & people & 146 \\
-making & 66 & send & 146 \\
-cost & 66 & two & 144 \\
-simply & 65 & free & 144 \\
-question & 65 & most & 143 \\
-general & 63 & edu & 143 \\
-received & 63 & m & 142 \\
-offer & 63 & just & 142 \\
-important & 62 & very & 142 \\
-data & 62 & them & 140 \\
-summary & 61 & am & 140 \\
-ca & 61 & make & 140 \\
-long & 61 & does & 136 \\
-\end{tabular}
+The ``bag-of-words" model produced 19886 and 1074 features in the body and subject corpora respectively. After the removal of stop words, there were 19386 unique words remaining in the body corpus, and 915 words in the subject corpus (see \autoref{table:datacharacteristics}).
 
-\begin{tabular}{l c l c}
-sum & 30 & re & 82 \\
-summary & 26 & in & 49 \\
-english & 24 & and & 49 \\
-language & 21 & for & 34 \\
-free & 20 & sum & 30 \\
-disc & 19 & on & 29 \\
-query & 18 & of & 27 \\
-linguistics & 15 & new & 27 \\
-sex & 13 & the & 27 \\
-comparative & 13 & summary & 26 \\
-opposites & 12 & english & 24 \\
-words & 12 & s & 23 \\
-book & 10 & a & 22 \\
-email & 10 & language & 21 \\
-call & 9 & you & 21 \\
-job & 9 & free & 20 \\
-method & 9 & disc & 19 \\
-japanese & 8 & your & 19 \\
-correction & 8 & query & 18 \\
-million & 7 & to & 16 \\
-chinese & 7 & linguistics & 15 \\
-announcement & 7 & are & 15 \\
-syntax & 7 & that & 14 \\
-qs & 7 & sex & 13 \\
-program & 7 & comparative & 13 \\
-slip & 6 & their & 12 \\
-lang & 6 & opposites & 12 \\
-business & 6 & own & 12 \\
-part & 6 & words & 12 \\
-armey & 6 & is & 11 \\
-dick & 6 & do & 11 \\
-internet & 6 & only & 11 \\
-mail & 6 & book & 10 \\
-german & 6 & this & 10 \\
-workshop & 6 & email & 10 \\
-speaker & 6 & call & 9 \\
-conference & 6 & at & 9 \\
-money & 6 & n & 9 \\
-list & 5 & job & 9 \\
-time & 5 & method & 9 \\
-resources & 5 & q & 8 \\
-linguist & 5 & japanese & 8 \\
-software & 5 & correction & 8 \\
-languages & 5 & million & 7 \\
-word & 5 & help & 7 \\
-native & 5 & chinese & 7 \\
-needed & 5 & announcement & 7 \\
-jobs & 5 & syntax & 7 \\
-grammar & 5 & qs & 7 \\
-spanish & 5 & program & 7 \\
-research & 5 & just & 7 \\
-address & 4 & or & 6 \\
-unlimited & 4 & slip & 6 \\
-american & 4 & lang & 6 \\
-programs & 4 & non & 6 \\
-phonetics & 4 & out & 6 \\
-books & 4 & business & 6 \\
-banning & 4 & part & 6 \\
-systems & 4 & dick & 6 \\
-request & 4 & internet & 6 \\
-fwd & 4 & armey & 6 \\
-intuitions & 4 & t & 6 \\
-web & 4 & mail & 6 \\
-summer & 4 & german & 6 \\
-www & 4 & workshop & 6 \\
-information & 4 & we & 6 \\
-read & 4 & speaker & 6 \\
-great & 4 & conference & 6 \\
-secrets & 4 & money & 6 \\
-pig & 4 & list & 5 \\
-change & 3 & who & 5 \\
-sites & 3 & now & 5 \\
-cd & 3 & time & 5 \\
-names & 3 & please & 5 \\
-site & 3 & best & 5 \\
-people & 3 & resources & 5 \\
-teaching & 3 & linguist & 5 \\
-released & 3 & word & 5 \\
-french & 3 & want & 5 \\
-double & 3 & software & 5 \\
-dialect & 3 & jobs & 5 \\
-make & 3 & know & 5 \\
-synthetic & 3 & languages & 5 \\
-policy & 3 & e & 5 \\
-chomsky & 3 & native & 5 \\
-home & 3 & needed & 5 \\
-decimal & 3 & grammar & 5 \\
-comparison & 3 & spanish & 5 \\
-adjectives & 3 & research & 5 \\
-fall & 3 & better & 5 \\
-line & 3 & unlimited & 4 \\
-latin & 3 & address & 4 \\
-hey & 3 & it & 4 \\
-credit & 3 & i & 4 \\
-ary & 3 & american & 4 \\
-uniformitarianism & 3 & us & 4 \\
-requested & 3 & programs & 4 \\
-verbal & 3 & phonetics & 4 \\
-debt & 3 & hi & 4 \\
-dental & 3 & he & 4 \\
-\end{tabular}
-% List the top 100 words for each corpus and show their DF score. Examine the list. Does the selection make sense to you given the task? Are the two lists similar?
+\section{Feature Selection}
 
-\subsection*{Subject vs Body: Results and Discussion}
+% Does the selection make sense to you given the task? Are the two lists similar?
+Feature selection is performed using document frequency. This method involves computing the number of documents a word occurs in, for every word, and selecting the top 200 words with the highest scores to build a classifier.
+
+Shown in \autoref{table:subjcorpus} and \autoref{table:bodycorpus} are the top 100 words for the subject and body corpora respectively and their document frequency score. Removing stop words filters out extremely common words that have little value in classification. It is beneficial in text processing, as it removes low quality features, allowing more significant features to have precedence. Most resulting words are sensible, although there are some aren't (e.g. ``qs'', ``ll'', ``ca''). However, removing these words results in a lower accuracy. Therefore, we have chosen to retain these as some of them may be help the classifier distinguish between spam and non-spam emails. Thus, given our task to process natural language text, the selection of words shown makes sense as it gives a better representation of the contents of the emails, and helps improve the accuracy of the classifier.
+
+A comparison of \autoref{table:subjcorpus} and \autoref{table:bodycorpus} shows significant disparities in the document frequency of features and word distribution. The frequencies for the subject is significantly lower than that of the body. Whilst some features are shared between subject and body, most features selected are different.
+
+% List the top 100 words for each corpus and show their DF score. Examine the list.
+\begin{table}[H]
+\caption{Top 100 words in subject corpus and corresponding document frequency (DF) scores}
+\hskip-.3cm \begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
+1 & sum & 30 & 35 & speaker & 6 & 69 & intuitions & 4 \\
+2 & summary & 26 & 36 & german & 6 & 70 & banning & 4 \\
+3 & english & 24 & 37 & internet & 6 & 71 & school & 3 \\
+4 & language & 21 & 38 & business & 6 & 72 & resolution & 3 \\
+5 & free & 20 & 39 & list & 5 & 73 & ary & 3 \\
+6 & disc & 19 & 40 & resources & 5 & 74 & adjectives & 3 \\
+7 & query & 18 & 41 & native & 5 & 75 & verbal & 3 \\
+8 & linguistics & 15 & 42 & research & 5 & 76 & teaching & 3 \\
+9 & comparative & 13 & 43 & word & 5 & 77 & future & 3 \\
+10 & sex & 13 & 44 & spanish & 5 & 78 & lists & 3 \\
+11 & opposites & 12 & 45 & linguist & 5 & 79 & background & 3 \\
+12 & words & 12 & 46 & jobs & 5 & 80 & synthetic & 3 \\
+13 & book & 10 & 47 & needed & 5 & 81 & credit & 3 \\
+14 & email & 10 & 48 & grammar & 5 & 82 & home & 3 \\
+15 & call & 9 & 49 & software & 5 & 83 & live & 3 \\
+16 & job & 9 & 50 & languages & 5 & 84 & youthese & 3 \\
+17 & method & 9 & 51 & time & 5 & 85 & uniformitarianism & 3 \\
+18 & japanese & 8 & 52 & fwd & 4 & 86 & released & 3 \\
+19 & correction & 8 & 53 & summer & 4 & 87 & names & 3 \\
+20 & syntax & 7 & 54 & address & 4 & 88 & opportunity & 3 \\
+21 & program & 7 & 55 & books & 4 & 89 & decimal & 3 \\
+22 & qs & 7 & 56 & information & 4 & 90 & world & 3 \\
+23 & chinese & 7 & 57 & request & 4 & 91 & misc & 3 \\
+24 & announcement & 7 & 58 & phonetics & 4 & 92 & sites & 3 \\
+25 & million & 7 & 59 & pig & 4 & 93 & double & 3 \\
+26 & part & 6 & 60 & american & 4 & 94 & acquisition & 3 \\
+27 & slip & 6 & 61 & programs & 4 & 95 & site & 3 \\
+28 & workshop & 6 & 62 & unlimited & 4 & 96 & policy & 3 \\
+29 & armey & 6 & 63 & web & 4 & 97 & fall & 3 \\
+30 & money & 6 & 64 & www & 4 & 98 & teach & 3 \\
+31 & lang & 6 & 65 & secrets & 4 & 99 & hey & 3 \\
+32 & conference & 6 & 66 & great & 4 & 100 & line & 3 \\
+33 & dick & 6 & 67 & read & 4 &  &  &  \\
+34 & mail & 6 & 68 & systems & 4 &  &  &  \\
+\bottomrule
+\end{tabular}
+\label{table:subjcorpus}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Top 100 words in body corpus and corresponding document frequency (DF) scores}
+\begin{tabular}{@{}rlrrlrrlr@{}}
+\toprule
+\textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}
+	& \textbf{Rank} & \multicolumn{1}{c}{\textbf{Word}} & \textbf{Score}\\
+\midrule
+1 & information & 205 & 35 & message & 91 & 69 & full & 74 \\
+2 & language & 192 & 36 & ll & 89 & 70 & system & 74 \\
+3 & mail & 183 & 37 & receive & 88 & 71 & ac & 73 \\
+4 & university & 179 & 38 & check & 88 & 72 & today & 73 \\
+5 & time & 178 & 39 & phone & 88 & 73 & questions & 72 \\
+6 & list & 171 & 40 & good & 87 & 74 & remove & 72 \\
+7 & address & 165 & 41 & day & 86 & 75 & interest & 72 \\
+8 & english & 159 & 42 & interested & 86 & 76 & john & 71 \\
+9 & linguistics & 156 & 43 & year & 86 & 77 & found & 70 \\
+10 & http & 156 & 44 & include & 85 & 78 & related & 70 \\
+11 & people & 146 & 45 & working & 85 & 79 & site & 69 \\
+12 & send & 146 & 46 & case & 85 & 80 & linguist & 69 \\
+13 & free & 144 & 47 & based & 84 & 81 & usa & 69 \\
+14 & make & 140 & 48 & ve & 84 & 82 & text & 68 \\
+15 & email & 133 & 49 & note & 83 & 83 & point & 68 \\
+16 & number & 128 & 50 & home & 83 & 84 & read & 68 \\
+17 & work & 128 & 51 & made & 83 & 85 & ago & 67 \\
+18 & www & 122 & 52 & part & 83 & 86 & book & 67 \\
+19 & languages & 119 & 53 & including & 81 & 87 & week & 67 \\
+20 & find & 118 & 54 & mailing & 81 & 88 & making & 66 \\
+21 & fax & 116 & 55 & type & 80 & 89 & dear & 66 \\
+22 & order & 108 & 56 & give & 79 & 90 & cost & 66 \\
+23 & call & 103 & 57 & program & 79 & 91 & question & 65 \\
+24 & form & 101 & 58 & web & 79 & 92 & simply & 65 \\
+25 & research & 100 & 59 & place & 79 & 93 & received & 63 \\
+26 & state & 99 & 60 & special & 78 & 94 & offer & 63 \\
+27 & linguistic & 99 & 61 & line & 78 & 95 & general & 63 \\
+28 & subject & 98 & 62 & date & 78 & 96 & important & 62 \\
+29 & years & 98 & 63 & days & 77 & 97 & data & 62 \\
+30 & world & 98 & 64 & back & 76 & 98 & ca & 61 \\
+31 & contact & 97 & 65 & internet & 76 & 99 & long & 61 \\
+32 & de & 96 & 66 & american & 75 & 100 & summary & 61 \\
+33 & money & 94 & 67 & service & 75 &  &  &  \\
+34 & word & 91 & 68 & business & 74 &  &  &  \\
+\bottomrule
+\end{tabular}
+\label{table:bodycorpus}
+\end{table}
+
+\section{Subject vs Body Analysis}
+
+\subsection{Results}
+
 % Results - Fill in the following tables where ZeroR, OneR, NB, DT and MLP are the Weka’s classifiers tested with Weka’s 10 fold cross validation; MyNB is your NB tested with your 10-fold cross validation.
 
-\begin{tabular}{|l|l|}
-\hline
-\multicolumn{2}{|l|}{Corpus: Subject} \\
-\hline
-• & Accuracy [\%] \\
-\hline
-ZeroR & • \\
-\hline
-OneR & • \\
-\hline
-1-NN & • \\
-\hline
-3-NN & • \\
-\hline
-NB & • \\
-\hline
-DT & • \\
-\hline
-MLP & • \\
-\hline
-MyNB & • \\
-\hline
-\end{tabular}
+We ran our preprocessed data against a variety of Weka classifiers; ZeroR, OneR, IBk with $k=1$ (1-NN) and $k=3$ (3-NN), NaiveBayes (NB), J48 (DT) and MultilayerPerceptron (MLP). We tested these with Weka's 10 fold cross-validation. We also ran it against our Na\"ive Bayes classifier, tested against our implementation of the 10 fold cross-validation.
 
-\begin{tabular}{|l|l|}
-\hline
-\multicolumn{2}{|l|}{Corpus: Body} \\
-\hline
-• & Accuracy [\%] \\
-\hline
-ZeroR & • \\
-\hline
-OneR & • \\
-\hline
-1-NN & • \\
-\hline
-3-NN & • \\
-\hline
-NB & • \\
-\hline
-DT & • \\
-\hline
-MLP & • \\
-\hline
-MyNB & • \\
-\hline
+\begin{table}[H]
+\centering
+\caption{Various classifiers tested with 10 fold cross validation for both the subject and body corpora}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Accuracy (\%)}} \\
+\midrule
+\textbf{Classifier} & \textbf{Subject} & \textbf{Body} \\
+\midrule
+ZeroR & 66.67 & 66.67 \\
+OneR & 70.00 & 82.00 \\
+1-NN & 79.00 & 87.17 \\
+3-NN & 68.17 & 85.00 \\
+NB & 68.50 & 94.83 \\
+DT & 66.67 & 92.50 \\
+MLP & 76.17 & 96.67 \\
+MyNB & 80.83 & 95.33 \\
+\bottomrule
 \end{tabular}
+\label{table:results}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Accuracy of classifiers from lowest (1) to highest (8) for both corpora}
+\begin{tabular}{@{} l llllllll @{}}
+\toprule
+& \multicolumn{8}{c}{\textbf{Accuracy Ranking}} \\
+\midrule
+\textbf{Corpus} & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+Subject & ZeroR & DT & 3-NN & NB & OneR & MLP & 1-NN & MyNB\\
+Body & ZeroR & OneR & 3-NN & 1-NN & DT & NB & MyNB & MLP\\
+\bottomrule
+\end{tabular}
+\label{table:accuracyofclassifiers}
+\end{table}
+
+The comparison of the performance (accuracy) of MyNB and NB over the 10 folds was completed in the same execution as the respective results in \autoref{table:results}. MyNB used our 10 fold cross-validation and NB used Weka's 10-fold cross-validation. The items in each fold (given to MyNB and NB) are expected to be different.
+
+\begin{table}[H]
+\centering
+\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the subject corpus}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
+	& \textbf{Difference} \\
+\midrule
+Fold 1 & 80.00 & 60.00 & 20.00 \\
+Fold 2 & 83.33 & 73.33 & 10.00 \\
+Fold 3 & 71.67 & 63.33 & 8.34 \\
+Fold 4 & 80.00 & 76.67 & 3.33 \\
+Fold 5 & 83.33 & 71.67 & 11.66 \\
+Fold 6 & 76.67 & 70.00 & 6.67 \\
+Fold 7 & 83.33 & 73.33 & 10.00 \\
+Fold 8 & 86.67 & 63.33 & 23.34 \\
+Fold 9 & 81.67 & 73.33 & 8.34 \\
+Fold 10& 81.67 & 60.00 & 21.67 \\
+\bottomrule
+Mean & 80.83 & 68.50 & 12.34 \\
+\bottomrule
+\end{tabular}
+\label{table:diffsubj}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Comparison of fold accuracy between our Na\"ive Bayes classifier ($C_1$) and Weka's ($C_2$) for the body corpus}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)}
+	& \textbf{Difference} \\
+\midrule
+Fold 1 & 98.33 & 98.33& 0.00 \\
+Fold 2 & 98.33 & 93.33 & 5.00 \\
+Fold 3 & 96.67 & 95.00 & 1.67 \\
+Fold 4 & 90.00 & 100.00 & 10.00 \\
+Fold 5 & 91.67 & 95.00 & 3.33 \\
+Fold 6 & 96.67 & 93.33 & 3.33 \\
+Fold 7 & 93.33 & 95.00 & 1.67 \\
+Fold 8 & 95.00 & 91.67 & 3.33 \\
+Fold 9 & 96.67 & 91.67 & 5.00 \\
+Fold 10 & 96.67 & 95.00 & 1.67 \\
+\bottomrule
+Mean & 95.33 & 94.83 & 3.50 \\
+\bottomrule
+\end{tabular}
+\label{table:diffbody}
+\end{table}
+
+\subsection{Discussion}
 
 % Discussion – compare the performance of the classifiers on the 2 corpora, compare your NB with the Weka’s NB, anything else you consider important.
+%
+% -correct and deep discussion of the results
+% ----comparison between the classifiers (accuracy, training time, other advantages)
+% ----myNB vs Weka’s NB
+% ----comparison between the 2 corpora
 
-\subsection*{Challenge Results and Discussion}
+\subsubsection{Comparison of Classifiers}
+
+The accuracy of a classifier in comparison to the other classifiers, varies slightly against the two corpora.  Accuracy from lowest to highest for both corpora are shown in \autoref{table:accuracyofclassifiers}. Although there are some discrepancies, in general ZeroR, OneR, 3-NN, DT perform more poorly than 1-NN, NB, MyNB, MLP.
+
+The ZeroR classifier performs poorly for both corpora. It returns the majority class given from the training data. As a result ZeroR returns ``nonspam'' as there are 400 non-spam and 200 spam cases. Thus ZeroR produces a correct answer for and only for test data of the majority class, ``nonspam'', which is
+\begin{align*} \frac{\# nonspam}{\# documents} &=  \frac{360}{540} \\ &= 66.67\%
+\end{align*}
+as obtained.
+
+OneR works similarly to ZeroR, but instead of having no rules, it generates one rule for each item in the data set. After calculating rules for each, it will select the rule that gives the smallest total error. Although its accuracy isn't high, it is decent for the simplicity and speed of the algorithm.
+
+In contrast to these two classifiers, multilayer perceptron (MLP) is more complex and returns the highest accuracy for body, and the second highest accuracy for subject. MLP is defined as ``consists of multiple layers of simple, two-state, sigmoid processing elements (nodes) or neurons that interact using weighted connections.'' (Pal 1992, p.684). The Weka MLP assigns the features as output neurons with a random weight. Weka's default number of hidden neurons\cite{WekaMLP} was used,
+\begin{align*} \frac{(attributes + classes)}{2} &= \frac{(200+2)}{2} \\&= 101
+\end{align*}
+As the network is then trained using back propagation, which corrects the weights to minimize the error in the entire output, MLP has a high accuracy. However, although it is very accurate, MLP takes significantly more time to train than the other classifiers.
+
+% svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka/src/main/java/weka/classifiers/bayes/NaiveBayes.java
+Na\"ive Bayes (NB) is based on the Bayes rule of conditional probability. It analyses each attribute individually, by assuming they are all of equal importance and independent of one another. Although it is based on a simple concept, our MyNB classifier outperforms MLP which is a comparatively more complex algorithm for the subject corpus, and performs almost as well as MLP for the body corpus.
+
+Whilst NB and MyNB are based on the same principle, MyNB outperforms NB. The difference in performance is due to implementation. The major difference between implementations is that NB uses numeric estimator precision values that are chosen by calculating the differences between adjacent values. This allows them to form a kernel density estimation, that estimates a probability density function (PDF), as opposed to using a normal PDF. On the other hand, we simply assume the data has a normal probability distribution function.
+
+1-NN and 3-NN are both types of the k-nearest neighbour algorithm, where $k = 1$ and $k = 3$ respectively. Although they use similar algorithms, 1-NN performs better than 3-NN. 1-NN takes one neighbour, whereas 3-NN takes three. Therefore, this disparity is probably because in most cases the closest neighbour correctly classifies the new example, but the next two closest do not. Hence 1-NN gets a greater accuracy than 3-NN. These classifiers work moderately well compared to the other classifiers, as each class is characterised by a large number of features, which the nearest neighbour algorithm takes advantage of. In order to increase the accuracy of this algorithm, it should be given a larger training set. Although the benefits of this have to be weighed against the time it takes to find the nearest neighbour in a larger training set.
+
+Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree classifier, which relies on using information gain to select attributes that best classifies the data. It performs averagely on the body corpus, and relatively poorly on the subject corpus.
+
+%Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree classifier. The decision tree is made by identifying the attribute that discriminates the data most clearly (based on information gain) at each layer, then separating the data using that attribute. It performs this iteratively until there are no more attributes available to discriminate between data items, or we are unable to get an unambiguous result from the information. The branch is then terminated by a target value that defines the majority of the items at the branch. However, it performs averagely on the body corpus, and poorly on the subject corpus. %As J48 implements pruning, we don't believe the low accuracy is due to overfitting. However, the pruning might remove attributes with high information gain for classification. As most values are ``0'', important non-zero values may have been pruned.
+
+\subsubsection{Comparison of myNB vs Weka's NB}\label{sec:t-test}
+
+We conduct a paired t-test in our comparison to determine whether the differences in accuracy between our and Weka's Na\"ive Bayes was statistically significant, with a confidence level of 95\%. To carry out the paired t-test:
+
+\begin{enumerate}
+\item Calculate the difference between the two classifiers in each fold
+$$ | c_{1_i} - c_{2_i} | \; \text{ for } i \in [1,\dots,N] $$
+where $c_{1_i} \in C_1$ and $c_{2_i} \in C_2$ for all $i$.
+
+\item Calculate the sample standard deviation of the differences:
+$$ s_{N-1} = \sqrt{ \frac{1}{N-1} \sum_{i=1}^N (x_i-\bar{x})^2 } $$
+where $X=\{ x_1,\dots,x_N \}$ are the observed differences.
+
+\item Calculate the $(1-\alpha)$-upper confidence interval (UCL) of the mean:
+$$ \text{UCL}_{1-\alpha} = \bar{X} \pm t_{(1-\alpha)(k-1)} s_{N-1} $$
+for the confidence level $(1-\alpha)=0.95$.
+
+\item If the interval $\text{UCL}_{0.95}$ contains 0 then the difference in accuracy is not statistically significant; otherwise, it is.
+\end{enumerate}
+
+Using the differences calculated in \autoref{table:diffsubj} for the subject corpus we find that:
+\begin{align*}
+s_{N-1} &= 6.86 \\
+\text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
+  &= 12.34 \pm 2.262 \times 6.86 \\
+  &= 12.34 \pm 15.52 \\
+  &= [-3.18, 27.85]
+\end{align*}
+
+Similarly, given the differences calculated in \autoref{table:diffbody}, we obtain for body corpus:
+\begin{align*}
+s_{N-1} &= 2.77 \\
+\text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
+  &= 3.50 \pm 2.262 \times 2.77 \\
+  &= 3.50 \pm 6.27 \\
+  &= [-2.77, 9.77]
+\end{align*}
+
+For the subject corpus $\text{UCL}_{0.95} = [-3.18, 27.85]$ and for body corpus $\text{UCL}_{0.95} = [-2.77, 9.77]$. In both cases the interval $\text{UCL}_{0.95}$ contains 0. Therefore, the difference between the two Na\"ive Bayes classifiers for both subject and body are not statistically significant.
+
+\subsubsection{Comparison Between Subject and Body Corpora}
+
+The overall performance of the classifiers regardless of type, perform significantly better on the body than the subject corpus. This suggests that the email body is a better indicator of content.
+
+\section{Challenge Analysis}
+
+% Improving accuracy on body corpus
+
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
+In the extension seven feature selection metrics were implemented. We compared the accuracies of the metrics when used as the features for our Na\"ive Bayes to empirically determine the best feature selection metric and number of features for classifying \cite{lingspam}.
 
-\subsection*{Conclusions}
+The chosen metrics were Correlation coefficient (CC) \cite{CC}, Information gain (IG) \cite{IG}, Chi-square (CHI), Categorical proportional difference (CPD), Mutual information (MI) as defined in \cite{CPD}, Document frequency (DF) and Random feature (RF).
+
+\subsection{Feature Selection Metrics}
+Here we present the seven feature selection metrics used, presented in terms of the following four dependency tuples \cite{IG}:
+\begin{enumerate}
+\item $(t,c)$: presence of $t$ and membership in $c$
+\item $(t,\bar{c})$: presence of $t$ and membership in $\bar{c}$
+\item $(\bar{t},c)$: absence of $t$ and membership in $c$
+\item $(\bar{t},\bar{c})$: absence of $t$ and membership in $\bar{c}$
+\end{enumerate}
+where $t$ represents a term and $c$ and $\bar{c}$ represent the two classes.
+
+
+\textbf{Correlation coefficient (CC).} Correlation coefficient of a word $t$ with a category $c_i \in \{c,\bar{c}\}$ was used as:
+
+$$ CC(t) = \sqrt{N} \frac{| P(t,c)P(\bar{t},\bar{c}) - P(t,\bar{c})P(\bar{t},c) |}
+				{\sqrt{P(t)P(\bar{t})P(c)P(\bar{c})}}
+$$
+it is a simplification of the Correlation coefficient given in \cite{IG} due to having two classes such that the complement of a classs is simply the other class.
+
+\textbf{Information gain (IG).} Information gain measures the decrease in entropy or the number of bits of information obtained when the feature is given vs. absent \cite{Empirical},\cite{IG}. Defined in \cite{IG} for a term $t$ present in category $c_i$ as:
+
+$$ IG(t,c_i) = \sum\limits_{c'\in\{ c,\bar{c} \}} \sum\limits_{t'\in\{ t,\bar{t} \}} P(t',c') \cdot \log \frac{P(t',c')}{P(t')P(c')} $$
+given that we have two classes:
+
+$$ IG(t,c_i) = IG(t,c) = IG(t,\bar{c}) $$
+
+so the IG value of a term $t$ is independent of the class.
+
+For the remaining metrics we define them in the following terms used in \cite{CPD}:
+\begin{enumerate}
+\item $A \vcentcolon =\#(t,c)$, is the number of times term $t$ and category $c$ occur together.
+\item $B \vcentcolon =\#(t,\bar{c})$, is the number of times term $t$ occurs with $\bar{c}$.
+\item $C \vcentcolon =\#(\bar{t},c)$, is the number of times category $c$ occurs without term $t$.
+\item $D \vcentcolon =\#(\bar{t},\bar{c})$, is the number of times category $\bar{c}$ occurs without term $t$.
+\end{enumerate}
+
+\textbf{Chi-square (CHI).} Chi-square measures the lack of independence between a term $t$ and a category $c'$. For a term $t'$ and a category $c'$ it is defined as:
+
+$$\chi^2 (t,c') = \frac{N(AD-BC)^2}{(A+C)(B+D)(A+B)(C+D)}$$
+
+we then take take the maximum $\chi^2$ value for the term:
+
+$$\chi^2 (t) = \max\{\chi^2(t,c),\chi^2(t,\bar{c})\} $$
+
+selecting the highest values as our features.
+
+\textbf{Categorical Proportional Difference (CPD).} CPD is a feature selection method proposed by Simeon, M. and Hilderman, R. in \cite{CPD}. CPD measures the degree to which a word contributes to differentiating a particular category from other categories in a text corpus. It is defined as:
+
+$$\text{CPD}(t,c) = \frac{A-B}{A+B}$$
+
+using a Laplace correction the CPD became:
+
+$$\text{CPD}(t,c) = \frac{A-B}{A+B+2}$$
+
+we then take take the maximum CPD value for each term:
+
+$$CPD (t) = \max\{\text{CPD}(t,c),\text{CPD}(t,\bar{c})\} $$
+
+selecting the highest CPD values as our features.
+
+\textbf{Mutual Information (MI).} MI measures the mutual dependence between a term $t$ and a category $c'$. It is defined as \cite{CPD}:
+$$ \text{MI}(t,c') = \log_2 \frac{AN}{(A+B)(A+C)} $$
+
+we then take the maximum of the MI values for each term:
+$$MI (t) = \max\{\text{MI}(t,c),\text{MI}(t,\bar{c})\} $$
+
+selecting the highest MI values as our features.
+
+\textbf{Document frequency (DF).} DF measures the number of documents in which term $t$ occurs, independent of category:
+$$ \text{DF}(t) = A+B $$
+selecting the highest DF values as our features.
+
+\textbf{Random feature (RF).} RF randomly selects terms $t$ independently of category:
+$$ \text{RF}(t) = random() $$
+selecting the highest RF values as our features.
+
+\subsection{Results}
+
+Our Na\"ive Bayes classifier was run with feature selection performed with correlation coefficient (CC), information gain (IG), mutual information (MI), chi (CHI), document frequency (DF), categorical proportional difference (CPD) and random feature (RF) metrics.
+
+\begin{table}[H]
+\centering
+\caption{Accuracy of different feature selection methods using our Na\"ive Bayes and 10-fold cross-validation for different numbers of features}
+\begin{tabular}{@{}l rrrrrrr@{}}
+\toprule
+& \multicolumn{7}{c}{\textbf{Feature Selection Metric}}\\
+\midrule
+\textbf{\# Features} & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} & \textbf{CPD} & \textbf{RF} \\
+\midrule
+10 & 89.17 & \textbf{89.50} & 67.67 & 89.17 & 82.83 & 83.83 & 57.33 \\
+20 & 91.17 & \textbf{95.83} & 36.67 & 91.50 & 90.67 & 88.17 & 65.67 \\
+30 & 90.67 & \textbf{96.33} & 70.67 & 91.33 & 92.33 & 90.33 & 42.83 \\
+40 & 91.00 & \textbf{96.50} & 59.83 & 90.83 & 94.17 & 91.50 & 37.17 \\
+50 & 90.33 & \textbf{96.17} & 76.83 & 91.50 & 94.00 & 92.33 & 43.17 \\
+75 & 90.83 & \textbf{96.17} & 79.67 & 91.83 & 94.17 & 94.50 & 75.17 \\
+100 & 91.67 & \textbf{97.17} & 79.00 & 92.17 & 94.67 & 96.17 & 51.33 \\
+125 & 91.50 & \textbf{97.17} & 81.00 & 93.00 & 94.67 & 96.50 & 41.67 \\
+150 & 92.50 & \textbf{97.00} & 82.50 & 94.00 & 94.50 & 96.67 & 50.17 \\
+175 & 92.33 & 96.83 & 83.17 & 94.83 & 94.83 & \textbf{97.00} & 52.50 \\
+200 & 91.67 & \textbf{97.50} & 84.67 & 95.83 & 95.33 & 97.17 & 54.83 \\
+225 & 91.33 & \textbf{97.83} & 84.00 & 95.67 & 95.33 & 97.17 & 73.83 \\
+250 & 90.83 & \textbf{97.33} & 86.00 & 95.83 & 95.33 & 97.17 & 52.83 \\
+\bottomrule
+\end{tabular}
+\label{table:Ediffbody}
+\end{table}
+
+We further compared DF and IG for large numbers of features as presented in \autoref{table:featurenum}:
+\begin{table}[H]
+\centering
+\caption{Accuracy of information gain (IG) and document frequency (DF) with the Na\"ive Bayes classifier using different numbers of features}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{\# Features} & \textbf{Accuracy of IG (\%)} & \textbf{Accuracy of DF (\%)} \\
+\midrule
+500 & 98.17 & 95.17 \\
+1000 & 98.67 & 97.00 \\
+2500 & 99.83 & 96.00 \\
+5000 & 98.83 & 95.50 \\
+\bottomrule
+\end{tabular}
+\label{table:featurenum}
+\end{table}
+
+With a breakdown of the folds for the most accurate results from \autoref{table:featurenum} :
+\begin{table}[H]
+\centering
+\caption{Comparison of fold accuracy at $N=2500$ between information gain (IG) and document frequency (DF) with our Na\"ive Bayes Classifier}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Fold Number} & \textbf{C1 (\%)} & \textbf{C2 (\%)} \\
+\midrule
+Fold 1 & 100.0 & 100.0 \\
+Fold 2 & 100.0 & 98.33 \\
+Fold 3 & 100.0 & 98.33 \\
+Fold 4 & 100.0 & 95.00 \\
+Fold 5 & 100.0 & 91.67 \\
+Fold 6 & 100.0 & 98.33 \\
+Fold 7 & 100.0 & 95.00 \\
+Fold 8 & 98.33 & 93.33 \\
+Fold 9 & 100.0 & 95.00 \\
+Fold 10 & 100.0 & 95.00 \\
+\bottomrule
+Mean & 99.83 & 96.00 \\
+\bottomrule
+\end{tabular}
+\label{table:foldsn2500}
+\end{table} 
+
+
+\subsection{Discussion}
+% which measure performed best at any |F|
+% how does it compare to DF
+
+Information gain yielded the highest accuracy for most of the feature set sizes (\autoref{table:diffbody}). IG performed best for 12 of the 13 feature set sizes, always beating our original feature selection method of document frequency. We used a paired t-test as described in \ref{sec:t-test}.
+
+The mean of the differences, $\bar{X}$, over the feature selection sizes was determined as $\bar{X} = 2.96$ and the sample standard deviation as $s_{N-1} = 1.44$. Calculating the UCL:
+
+\begin{align*}
+\text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
+  &= 2.96 \pm 2.262 \times 1.44 \\
+  &= 2.96 \pm 3.26 \\
+  &= [-0.30, 6.22]
+\end{align*}
+
+As $\text{UCL}_{0.95} = [-0.30, 6.22]$ contains 0 information gain and document frequency did not produce significantly different results for different numbers of features. Hence we cannot assume that IG always outperforms DF as a feature selection method for our data. 
+
+Next we compare IG and DF for the large feature set sizes in  using a paired t-test where IG produced the most accurate results, from \autoref{table:foldsn2500} this was when we selected 2500 features. The mean of the differences, $\bar{X}$, over the 10-folds was $\bar{X} = 2.96$ and the sample standard deviation was $s_{N-1} = 1.44$. Calculating the UCL:
+\begin{align*}
+\text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
+  &= 3.83 \pm 2.262 \times 2.49 \\
+  &= 2.96 \pm 5.63 \\
+  &= [-1.80, 9.46]
+\end{align*}
+As $\text{UCL}_{0.95} = [-1.80, 9.46]$ contains 0 Information gain and document frequency did not produce statistically significantly different results on each fold. 
+
+Document frequency and information gain have a linear computational complexity. We expect that DF performed worse than IG since DF only looks at the dependence between the presence of $t$ and $c' \in \{c,\bar{c}\}$ whilst information gain also takes into account the absence of $t$ and $c' \in \{c,\bar{c}\}$. As a result DF selects features that may offer nothing to category prediction (e.g. when $t$ occurs equally in $c$ and $\bar{c}$). Meanwhile DF deselects features that may offer significantly to category prediction because the term $t$ does not meet the document frequency threshold (i.e. either $(t,c)$ or $(t,\bar{c})$ is zero but the other does not occur enough to be selected as a feature). On the other hand, IG takes into account all four dependency tuples as described above to select the features that give the most bits of information for category prediction.
+
+Mutual information (MI) and random frequency (RF) both performed weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. As a result it performs poorly on our sparse data set. Random frequency was implemented for our own pleasure and as a `minimum' expectation of performance with our Na\"ive Bayes.
+
+ Chi-square (CHI), categorical proportional difference (CPD) and correlation coefficient (CC) performed comparably to document frequency but were not chosen as our feature selection metric. CHI performed similarly for all feature sizes but was outperformed at every size by IG and so was not used. CC underperformed DF for most feature sizes and so was also rejected. CPD performs very well compared to IG and DF, CPD beat DF for all feature sizes greater than 50, even beating IG with a size of 175. However, CPD was rejected because IG returned a better maximum accuracy.
+
+\section{Conclusion and Future Work}
+
 % summarize your main findings and, if possible, suggest future work.
 
-The tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails, leading to the failure of our classifier from detecting these emails.
+We implemented a Na\"ive Bayes classifier using document frequency as our feature selection method with 200 features selected. Our Na\"ive Bayes produced an accuracy of $95.33\%$ on body, and $80.83\%$ on subject, these were both more accurate than Weka's classification accuracy of $94.83\%$ on body, and $68.50\%$.
 
-By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
+From our extension we found the information gain feature selection metric was most accurate. At a feature set size of 2500 it produced the highest accuracy of $99.83\%$ and $97.50\%$ with 200 features. This yielded an improvement in accuracy of $3.83\%$ and $2.16\%$ respectively.
 
-\subsection*{Reflection}
+Our future research work will deal with creating more meaningful features. This includes implementing stemming and creating tokens using more than one word. Currently, the tokens used in our classifier are formed from single words. Therefore, it will not analyse common consecutive words that are found in spam emails. By taking into account permutations of consecutive words, or words that appear within a specified distance of each other, the accuracy of our Bayesian classifier could be increased.
+
+\section{Reflection}
 % what was the most important thing you learned from this assignment? (1-2 paragraphs).
 
-\subsection*{Instructions: How to run code}
+This assignment has helped us learn more about how to conduct research as a team. We chose to conduct research on different aspects of text classification, before combining our findings to select the best extension to to carry out. We also learnt how to conduct experiments that were relevant to our aim to increase the accuracy of our classifier algorithm. We appreciate that this task has allowed us gain insight into an interesting and relevant area in computer science.
+
+\section{Instructions}
+
+\subsection{Prerequisites}
+
+\begin{itemize}
+\item Either python3.3 or python3.4 installed.
+\item \textit{lingspam-mini600} data set placed in the working directory (i.e. same directory as \textit{process.py} and \textit{naivebayes.py}).
+\end{itemize}
+
+\subsection{Running Scripts}
+
+\begin{enumerate}
+\item Use \verb|python process.py| to run preprocessing script to create \textit{body.csv} and \textit{subject.csv}. These files are then accessible in the same directory.
+\item Use \verb|python naivebayes.py| to run Na\"ive Bayes classifier on the csv files. Result of accuracy calculation on both subject and body will be output.
+\end{enumerate}
+
+You can change the feature selection metric in the preprocessing by changing the function used to create \verb|body_features| and \verb|sub_features| in \textit{process.py}.
+
+\begin{thebibliography}{9}
+% http://www.ieee.org/documents/ieeecitationref.pdf
+
+\bibitem{sebastiani}
+  Fabrizio Sebastiani, \emph{Machine learning in automated text categorization}. ACM Computing Surveys, 34(1):1-47, 2002.
+
+\bibitem{lingspam}
+LingSpam has been collected by Ion Androutsopoulos and is described in the following paper: ``An Evaluation of Naive Bayesian Anti-Spam Filtering'' by I. Androutsopoulos, J. Koutsias, K.V. Chandrinos, George Paliouras, and C.D. Spyropoulos; \textit{In Proceeding of Workshop on Machine Learning in the New Information Age, 11th European Conference on Machine Learning}, Barcelona, Spain, 2000.
+
+\bibitem{WekaMLP}
+M. Ware. n.d. (2014, April 30). \emph{Class MultilayerPerceptron} (Revision 10169) [Online]. Available: http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html
+	%Ware, M n.d., \emph{Class MultilayerPerceptron}, Revision 10169, University of Waikato, New Zealand, viewed 30 April 2014, <http://weka.sourceforge.net/doc.dev/weka/classifiers/functions/MultilayerPerceptron.html>.
+
+\bibitem{CC}
+Yang, Y., \& Pedersen, J. O. (1997, July). \emph{A comparative study on feature selection in text categorization}. In ICML (Vol. 97, pp. 412-420).
+
+\bibitem{IG}
+Zheng, Z., Wu, X., \& Srihari, R. (2004). \emph{Feature selection for text categorization on imbalanced data}. ACM SIGKDD Explorations Newsletter, 6(1), 80-89.
+
+\bibitem{CPD}
+Simeon, M., \& Hilderman, R. (2008, November). \emph{Categorical proportional difference: A feature selection method for text categorization}. In Proceedings of the 7th Australasian Data Mining Conference-Volume 87 (pp. 201-208). Australian Computer Society, Inc..
+
+
+
+\bibitem{Empirical}
+Forman, G. (2003). \emph{An extensive empirical study of feature selection metrics for text classification}. The Journal of machine learning research, 3, 1289-1305.
+
+\end{thebibliography}
 
 \end{document}
