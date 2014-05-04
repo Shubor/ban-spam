@@ -10,7 +10,7 @@ from collections import Counter
 path = 'lingspam-mini600'
 
 # Select only top N words
-N = 200
+N = 50
 
 # Total number of files, |T|, in the document set
 num_files = 0
@@ -403,7 +403,7 @@ def cosine_normalisation( corpus_tfidf, corpus_features, logTk ):
 
 #====|Change this to use different feature selections|====#
 
-body_features = doc_freq( [400,200], [tf_body_legit, tf_body_spam], N )
+body_features = information_gain( [400,200], [tf_body_legit, tf_body_spam], N )
 subj_features = doc_freq( [400,200], [tf_subj_legit, tf_subj_spam], N )
 
 #====|Calculate cosine normalised values|====#

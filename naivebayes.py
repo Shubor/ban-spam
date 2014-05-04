@@ -1,7 +1,7 @@
 import csv
 import math
 
-N = 200
+N = 50
 FOLD = 10
 
 #======|| Read in csv files ||======#

@@ -344,7 +344,7 @@ Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree 
 
 %Weka uses J48 (implementation of Quinlan's C4.5) to construct the decision tree classifier. The decision tree is made by identifying the attribute that discriminates the data most clearly (based on information gain) at each layer, then separating the data using that attribute. It performs this iteratively until there are no more attributes available to discriminate between data items, or we are unable to get an unambiguous result from the information. The branch is then terminated by a target value that defines the majority of the items at the branch. However, it performs averagely on the body corpus, and poorly on the subject corpus. %As J48 implements pruning, we don't believe the low accuracy is due to overfitting. However, the pruning might remove attributes with high information gain for classification. As most values are ``0'', important non-zero values may have been pruned.
 
-\subsubsection{Comparison of myNB vs Weka's NB}
+\subsubsection{Comparison of myNB vs Weka's NB}\label{sec:t-test}
 
 We conduct a paired t-test in our comparison to determine whether the differences in accuracy between our and Weka's Na\"ive Bayes was statistically significant, with a confidence level of 95\%. To carry out the paired t-test:
 
@@ -434,7 +434,7 @@ $$\chi^2 (t) = \max\{\chi^2(t,c),\chi^2(t,\bar{c})\} $$
 
 \subsection{Results}
 
-We ran our classifier with a number of feature selection methods; correlation coefficient (CC), information gain (IG), mutual information (MI), chi (CHI), document frequency (DF), categorical proportional difference (CPD) and random (RF).
+Our Na\"ive Bayes classifier was run with feature selection performed with correlation coefficient (CC), information gain (IG), mutual information (MI), chi (CHI), document frequency (DF), categorical proportional difference (CPD) and random feature (RF) metrics.
 
 \begin{table}[H]
 \centering
@@ -449,7 +449,7 @@ We ran our classifier with a number of feature selection methods; correlation co
 20 & 91.17 & \textbf{95.83} & 36.67 & 91.50 & 90.67 & 88.17 & 65.67 \\
 30 & 90.67 & \textbf{96.33} & 70.67 & 91.33 & 92.33 & 90.33 & 42.83 \\
 40 & 91.00 & \textbf{96.50} & 59.83 & 90.83 & 94.17 & 91.50 & 37.17 \\
-50 & 90.33 & 91.17 & 76.83 & 91.50 & \textbf{94.00} & 92.33 & 43.17 \\
+50 & 90.33 & \textbf{96.17} & 76.83 & 91.50 & 94.00 & 92.33 & 43.17 \\
 75 & 90.83 & \textbf{96.17} & 79.67 & 91.83 & 94.17 & 94.50 & 75.17 \\
 100 & 91.67 & \textbf{97.17} & 79.00 & 92.17 & 94.67 & 96.17 & 51.33 \\
 125 & 91.50 & \textbf{97.17} & 81.00 & 93.00 & 94.67 & 96.50 & 41.67 \\
@@ -468,11 +468,24 @@ We ran our classifier with a number of feature selection methods; correlation co
 % which measure performed best at any |F|
 % how does it compare to DF
 
-Information gain yields the highest accuracy for most of the feature set sizes (\autoref{table:diffbody}). It almost always gives us a higher accuracy than using document frequency (DF). DF is simple, has a linear computational complexity and is easily scalable for larger corpora. However, it removes low DF terms that could be more informative than the ones selected. This is largely why it performs more poorly than IG, as IG measures the number of bits of information gained by including a feature.
+Information gain yielded the highest accuracy for most of the feature set sizes (\autoref{table:diffbody}). IG performed best for 12 of the 13 feature set sizes, always beating our original feature selection method of Document frequency. We used a paired t-test as described in \ref{sec:t-test}.
 
-Mutual information (MI) and random frequency (RF) both perform weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. Therefore, it performs badly when the scores have a wide range of frequencies. It was expected that RF perform poorly, as it randomly chose features.
+The mean of the differences, $\bar{X}$, over the feature selection sizes was determined as $\bar{X} = 2.96$ and the sample standard deviation as $s_{N-1} = 1.44$. Calculating the UCL:
 
+\begin{align*}
+\text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
+  &= 2.96 \pm 2.262 \times 1.44 \\
+  &= 2.96 \pm 3.26 \\
+  &= [-0.30, 6.22]
+\end{align*}
 
+As $\text{UCL}_{0.95} = [-0.30, 6.22]$ contains 0 it implies that Information gain and Document frequency did not produce significantly different results. Hence we cannot assume that IG always outperforms DF as a feature selection method for our data. However, we can select IG as our feature selection method with 225 features as it produced the best accuracy of any feature set sizes for our data set.
+
+Document frequency and information gain have a linear computational complexity. We expect that DF performed worse than IG since DF only looks at the dependence between the presence of $t$ and $c' \in \{c,\bar{c}\}$ whilst information gain also takes into account the absence of $t$ and $c' \in \{c,\bar{c}\}$. As a result DF selects features that may offer nothing to category prediction (e.g. when $t$ occurs equally in $c$ and $\bar{c}$). Meanwhile DF deselects features that may offer significantly to category predicition because the term $t$ does not meet the document frequency threshod (i.e. either $(t,c)$ or $(t,\bar{c})$ is zero but the other does not occur enough to be selected as a feature). On the otherhand, IG takes into account all four dependency tuples as described above to select the features that give the most bits of information for category prediction.
+
+Mutual information (MI) and random frequency (RF) both performed weakly. The low accuracy produced by MI is because the score of each term is strongly influenced by marginal probabilities. As a result it performs poorly on our sparse dataset. Random frequency was implemented for our own pleasure and as a \'minimum\' expectation of performance with our Na\"ive Bayes. 
+
+ Chi-square (CHI), Categorical proportional difference (CPD) and Correlation coefficient (CC) performed comparably to Document frequency but were not chosen as our feature selection metric. CHI performed similarly for all feature sizes but was outperformed at every size by IG and so was not used. CC underperformed DF for most feature sizes and so was also rejected. CPD performs very well compared to IG and DF, CPD beat DF for all feature sizes greater than 50, even beating IG with a size of 175. However, CPD was rejected because IG returned a better maxiumum accuracy. 
 
 \section{Conclusion and Future Work}
 
