@@ -354,7 +354,7 @@ $$ | c_{1_i} - c_{2_i} | \; \text{ for } i \in [1,\dots,N] $$
 where $c_{1_i} \in C_1$ and $c_{2_i} \in C_2$ for all $i$.
 
 \item Calculate the sample standard deviation of the differences:
-$$ s = \sqrt{ \frac{1}{N-1} \sum_{i=1}^N (x_i-\bar{x})^2 } $$
+$$ s_{N-1} = \sqrt{ \frac{1}{N-1} \sum_{i=1}^N (x_i-\bar{x})^2 } $$
 where $X=\{ x_1,\dots,x_N \}$ are the observed differences.
 
 \item Calculate the $(1-\alpha)$-upper confidence interval (UCL) of the mean:
@@ -366,7 +366,7 @@ for the confidence level $(1-\alpha)=0.95$.
 
 Using the differences calculated in \autoref{table:diffsubj} for the subject corpus we find that:
 \begin{align*}
-s &= 6.86 \\
+s_{N-1} &= 6.86 \\
 \text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
   &= 12.34 \pm 2.262 \times 6.86 \\ 
   &= 12.34 \pm 15.52 \\
@@ -375,7 +375,7 @@ s &= 6.86 \\
 
 Similarly, given the differences calculated in \autoref{table:diffbody}, we obtain for body corpus:
 \begin{align*}
-s &= 2.77 \\
+s_{N-1} &= 2.77 \\
 \text{UCL}_{0.95} &= \bar{X} \pm t_{0.95,9} \cdot s_{N-1} \\
   &= 3.50 \pm 2.262 \times 2.77 \\ 
   &= 3.50 \pm 6.27 \\
@@ -393,7 +393,42 @@ The overall performance of the classifiers regardless of type, perform significa
 % Improving accuracy on body corpus
 
 % describe what you did and what your results are (accuracy using 10-fold cross validation as above) and discuss the results
-In the extension we implemented seven feature selection metrics in order to the determine which would return the best result. We chose Information gain (IG), Correlation coefficient (CC) and Odds ratio (OR) \cite{IG}, Categorical proportional difference (CPD), Mutual information (MI) \cite{CPD}, Document frequency (DF) and Random feature (RF).
+In the extension seven feature selection metrics were implemented in order to the determine which would yield us the highest accuracy. The chosen metrics were Correlation coefficient (CC) \cite{CC}, Information gain (IG), Mutual information (MI) \cite{IG}, Chi-square (CHI), Categorical proportional difference (CPD) as defined in \cite{CPD}, Document frequency (DF) and Random feature (RF).
+
+\subsection{Feature Selection Metrics}
+Here we present the seven feature selection metrics used, presented in terms of the following four dependency tuples \cite{IG}:
+\begin{enumerate}
+\item $(t,c)$: presence of $t$ and membership in $c$
+\item $(t,\bar{c})$: presence of $t$ and membership in $\bar{c}$
+\item $(\bar{t},c)$: absence of $t$ and membership in $c$
+\item $(\bar{t},\bar{c})$: absence of $t$ and membership in $\bar{c}$
+\end{enumerate}
+where $t$ represents a term and $c$ and $\bar{c}$ represent the two classes.
+
+
+\textbf{Correlation coefficient (CC).} Correlation coefficient of a word $t$ with a category $c_i \in \{c,\bar{c}\}$ was used as:
+
+$$ CC(t) = \sqrt{N} \frac{| P(t,c)P(\bar{t},\bar{c}) - P(t,\bar{c})P(\bar{t},c) |}
+				{\sqrt{P(t)P(\bar{t})P(c)P(\bar{c})}}
+$$
+it is a simplification of the Correlation coefficient given in \cite{IG} due to having two classes such that the complement of a classs is simply the other class.
+
+\textbf{Information gain (IG).} Information gain measures the decrease in entropy or the number of bits of information obtained when the feature is given vs. absent \cite{Empirical},\cite{IG}. Defined in \cite{IG} for a term $t$ present in category $c_i$ as:
+
+$$ IG(t,c_i) = \sum\limits_{c'\in\{ c,\bar{c} \}} \sum\limits_{t'\in\{ t,\bar{t} \}} P(t',c') \cdot \log \frac{P(t',c')}{P(t')P(c')} $$
+given that we have two classes:
+
+$$ IG(t,c_i) = IG(t,c) = IG(t,\bar{c}) $$
+
+so the IG value of a term $t$ is independent of the class.
+
+\textbf{Chi-square (CHI).} Chi-square measures the lack of independence between a term $t$ and a category $c'$. For a term $t'$ and a category $c'$ it is defined as:
+
+$$\chi^2 (t,c') = \frac{N(AD-BC)^2}{(A+C)(B+D)(A+B)(C+D)}$$
+
+we then take take the maximum $\chi^2$ value for the term:
+
+$$\chi^2 (t) = \max\{\chi^2(t,c),\chi^2(t,\bar{c})\} $$
 
 \subsection{Results}
 
@@ -423,6 +458,9 @@ $|F_i|$ & \textbf{CC} & \textbf{IG} & \textbf{MI} & \textbf{CHI} & \textbf{DF} &
 \end{table}
 
 \subsection{Discussion}
+% which measure performed best at any |F|
+From the results we see that Information gain performs the best for most of the feature set sizes.
+% how does it compare to DF
 
 \section{Conclusion and Future Work}
 
@@ -473,6 +511,12 @@ Zheng, Z., Wu, X., \& Srihari, R. (2004). \emph{Feature selection for text categ
 
 \bibitem{CPD}
 Simeon, M., \& Hilderman, R. (2008, November). \emph{Categorical proportional difference: A feature selection method for text categorization}. In Proceedings of the 7th Australasian Data Mining Conference-Volume 87 (pp. 201-208). Australian Computer Society, Inc..
+
+\bibitem{CC}
+Yang, Y., \& Pedersen, J. O. (1997, July). \emph{A comparative study on feature selection in text categorization}. In ICML (Vol. 97, pp. 412-420).
+
+\bibitem{Empirical}
+Forman, G. (2003). \emph{An extensive empirical study of feature selection metrics for text classification}. The Journal of machine learning research, 3, 1289-1305.
 
 \end{thebibliography}
 
